@@ -29,7 +29,9 @@ const MyBooksPage: React.FC = () => {
                 <CardMedia
                   component="img"
                   height="120"
-                  image={`data:image/jpeg;base64,${book.cover}`}
+                  image={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
+                         `http://localhost:8088/api/v1/books/cover/${book.id}` : 
+                         `data:image/jpeg;base64,${book.cover}`}
                   alt={book.title}
                   sx={{ objectFit: 'contain' }}
                 />

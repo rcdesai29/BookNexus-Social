@@ -22,5 +22,5 @@ public class BorrowedBookResponse {
     private boolean returnApproved;
     private boolean read;
     private int readCount;
-    private byte[] cover;
+    private Object cover; // Can be byte[] for local files or String for URLs
 }

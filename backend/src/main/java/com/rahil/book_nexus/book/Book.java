@@ -25,10 +25,15 @@ import java.util.List;
 @Entity
 public class Book extends BaseEntity {
 
+    @Column(length = 1000)
     private String title;
+    @Column(length = 500)
     private String authorName;
+    @Column(length = 20)
     private String isbn;
+    @Column(length = 2000)
     private String synopsis;
+    @Column(length = 500)
     private String bookCover;
     private boolean archived;
     private boolean shareable;

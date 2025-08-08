@@ -18,4 +18,6 @@ public interface BookRepository extends JpaRepository<Book, Integer>, JpaSpecifi
             AND book.shareable = true
             """)
     Page<Book> findAllDisplayableBooks(Pageable pageable);
+
+    boolean existsByIsbn(String isbn);
 }

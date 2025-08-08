@@ -16,6 +16,7 @@ public class BookMapper {
                 .synopsis(request.synopsis())
                 .archived(false)
                 .shareable(request.shareable())
+                .bookCover(request.bookCover())
                 .build();
     }
 
@@ -30,7 +31,8 @@ public class BookMapper {
                 .archived(book.isArchived())
                 .shareable(book.isShareable())
                 .owner(book.getOwner().fullName())
-                .cover(FileUtils.readFileFromLocation(book.getBookCover()))
+                .cover(book.getBookCover() != null && book.getBookCover().startsWith("http") ? book.getBookCover()
+                        : FileUtils.readFileFromLocation(book.getBookCover()))
                 .build();
     }
 
@@ -45,7 +47,9 @@ public class BookMapper {
                 .returnApproved(history.isReturnApproved())
                 .read(history.isRead())
                 .readCount(history.getReadCount() != null ? history.getReadCount() : 0)
-                .cover(FileUtils.readFileFromLocation(history.getBook().getBookCover()))
+                .cover(history.getBook().getBookCover() != null && history.getBook().getBookCover().startsWith("http")
+                        ? history.getBook().getBookCover()
+                        : FileUtils.readFileFromLocation(history.getBook().getBookCover()))
                 .build();
     }
 }

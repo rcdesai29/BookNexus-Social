@@ -17,6 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +37,13 @@ public class BookService {
         private final BookMapper bookMapper;
         private final BookTransactionHistoryRepository transactionHistoryRepository;
         private final FileStorageService fileStorageService;
+        private final RestTemplate restTemplate;
+
+        @Value("${application.external.googlebooks.enabled:false}")
+        private boolean googleBooksEnabled;
+
+        @Value("${application.external.googlebooks.api-key:}")
+        private String googleBooksApiKey;
 
         /**
          * Saves a new book and automatically marks it as read for the owner
@@ -58,6 +68,7 @@ public class BookService {
                                 .returnApproved(true)
                                 .read(true)
                                 .readCount(1)
+                                .createdBy(user.getId())
                                 .build();
                 BookTransactionHistory savedTransaction = transactionHistoryRepository.save(transactionHistory);
                 log.info("Transaction history created with ID: {} for book: {} (read: {})",
@@ -89,6 +100,100 @@ public class BookService {
                                 books.getTotalPages(),
                                 books.isFirst(),
                                 books.isLast());
+        }
+
+        public int importFromGoogle(String query, int max, Authentication connectedUser) {
+                if (!googleBooksEnabled) {
+                        log.warn("Google Books import is disabled");
+                        return 0;
+                }
+                try {
+                        String apiKeyParam = (googleBooksApiKey != null && !googleBooksApiKey.isBlank())
+                                        ? "&key=" + googleBooksApiKey
+                                        : "";
+                        String url = "https://www.googleapis.com/books/v1/volumes?q="
+                                        + java.net.URLEncoder.encode(query, java.nio.charset.StandardCharsets.UTF_8)
+                                        + "&maxResults=" + max + apiKeyParam;
+                        ResponseEntity<java.util.Map> response = restTemplate.getForEntity(url, java.util.Map.class);
+                        Object items = response.getBody() != null ? response.getBody().get("items") : null;
+                        if (!(items instanceof java.util.List<?> list))
+                                return 0;
+
+                        int createdCount = 0;
+                        for (Object o : list) {
+                                if (!(o instanceof java.util.Map<?, ?> m))
+                                        continue;
+                                Object volumeInfoObj = m.get("volumeInfo");
+                                if (!(volumeInfoObj instanceof java.util.Map<?, ?> v))
+                                        continue;
+                                Object titleObj = v.get("title");
+                                String title = titleObj == null ? "" : String.valueOf(titleObj);
+                                if (title.isBlank())
+                                        continue;
+                                // Truncate title to fit database constraint
+                                if (title.length() > 1000) {
+                                        title = title.substring(0, 997) + "...";
+                                }
+                                String authors = "";
+                                Object authorsObj = v.get("authors");
+                                if (authorsObj instanceof java.util.List<?> al && !al.isEmpty()) {
+                                        authors = String.valueOf(al.get(0));
+                                        // Truncate author name to fit database constraint
+                                        if (authors.length() > 500) {
+                                                authors = authors.substring(0, 497) + "...";
+                                        }
+                                }
+                                Object descObj = v.get("description");
+                                String description = descObj == null ? "" : String.valueOf(descObj);
+                                // Truncate description to fit database constraint
+                                if (description.length() > 2000) {
+                                        description = description.substring(0, 1997) + "...";
+                                }
+
+                                // Extract cover image URL
+                                String coverUrl = null;
+                                Object imageLinks = v.get("imageLinks");
+                                if (imageLinks instanceof java.util.Map<?, ?> imgMap) {
+                                        Object thumbnail = imgMap.get("thumbnail");
+                                        if (thumbnail != null) {
+                                                coverUrl = String.valueOf(thumbnail);
+                                        }
+                                }
+
+                                String isbn13 = null;
+                                Object industryIds = v.get("industryIdentifiers");
+                                if (industryIds instanceof java.util.List<?> ids) {
+                                        for (Object idObj : ids) {
+                                                if (idObj instanceof java.util.Map<?, ?> idMap) {
+                                                        String type = String.valueOf(idMap.get("type"));
+                                                        String identifier = String.valueOf(idMap.get("identifier"));
+                                                        if ("ISBN_13".equalsIgnoreCase(type)) {
+                                                                isbn13 = identifier;
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                }
+                                // Skip if duplicate ISBN
+                                if (isbn13 != null && bookRepository.existsByIsbn(isbn13)) {
+                                        continue;
+                                }
+
+                                BookRequest req = new BookRequest(null, title, authors, isbn13, description, true,
+                                                coverUrl);
+                                try {
+                                        this.save(req, connectedUser);
+                                        createdCount++;
+                                } catch (Exception e) {
+                                        log.warn("Failed to import '{}': {}", title, e.getMessage());
+                                }
+                        }
+                        log.info("Imported {} books from Google for query '{}'", createdCount, query);
+                        return createdCount;
+                } catch (Exception e) {
+                        log.error("Google Books import failed: {}", e.getMessage());
+                        return 0;
+                }
         }
 
         public PageResponse<BookResponse> findAllBooksByOwner(int page, int size, Authentication connectedUser) {
@@ -311,7 +416,7 @@ public class BookService {
                         // For non-owners, find any existing transaction history for this user/book
                         List<BookTransactionHistory> histories = transactionHistoryRepository
                                         .findAllByBookIdAndUserIdOrderByCreatedDateDesc(bookId, user.getId());
-                        
+
                         if (histories.isEmpty()) {
                                 // No existing transaction, create a new one (user is "borrowing" to read)
                                 log.info("No existing transaction found, creating new one for user to read");
@@ -378,7 +483,7 @@ public class BookService {
                         // For non-owners, find any existing transaction history for this user/book
                         List<BookTransactionHistory> histories = transactionHistoryRepository
                                         .findAllByBookIdAndUserIdOrderByCreatedDateDesc(bookId, user.getId());
-                        
+
                         if (histories.isEmpty()) {
                                 throw new OperationNotPermittedException("You have not read this book yet");
                         } else {
@@ -455,5 +560,14 @@ public class BookService {
                 BookTransactionHistory savedTransaction = transactionHistoryRepository.save(transactionHistory);
                 log.info("Test transaction created with ID: {} for book: {} (read: {})",
                                 savedTransaction.getId(), book.getTitle(), savedTransaction.isRead());
+        }
+
+        public void deleteAllBooks() {
+                log.info("Deleting all books from database");
+                // Delete transaction history first due to foreign key constraints
+                transactionHistoryRepository.deleteAll();
+                // Then delete books
+                bookRepository.deleteAll();
+                log.info("All books deleted successfully");
         }
 }

@@ -25,7 +25,7 @@ public class BookResponse {
 
     private String owner;
 
-    private byte[] cover;
+    private Object cover; // Can be byte[] for local files or String for URLs
 
     private double rate;
 

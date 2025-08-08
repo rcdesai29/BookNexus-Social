@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: booknexus_social_postgres
+    environment:
+      POSTGRES_DB: booknexus_social
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432" # host:container
+    volumes:
+      - pgdata_social:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U username -d booknexus_social"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: booknexus_social_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata_social:/data
+
+  maildev:
+    image: maildev/maildev:latest
+    container_name: booknexus_social_maildev
+    ports:
+      - "1081:1080" # Web UI
+      - "1026:1025" # SMTP
+    environment:
+      - MAILDEV_MAIL_DIRECTORY=/tmp
+    volumes:
+      - maildata_social:/tmp
+
+volumes:
+  pgdata_social:
+  redisdata_social:
+  maildata_social:

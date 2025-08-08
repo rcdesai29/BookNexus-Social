@@ -17,6 +17,10 @@ BookNexus-Social transforms the traditional library model into a modern social r
 | Transaction-based borrowing | Reading verification      |
 | Library management focus    | Social interaction focus  |
 
+## 🗺️ Roadmap
+
+See `docs/ROADMAP.md` for phases, features, and rollout plan (including Redis, WebSockets, production email, guest browsing, and external book APIs).
+
 ## 🚀 Planned Features
 
 ### 📖 Reading Management
