@@ -1,4 +1,4 @@
-import CssBaseline from '@mui/material/CssBaseline';
+// Removed Material-UI CssBaseline - using Tailwind base styles
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -15,11 +15,12 @@ import RegisterPage from './pages/RegisterPage';
 import TBRPage from './pages/TBRPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
+import GoogleBookDetailPage from './pages/GoogleBookDetailPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <CssBaseline />
+
       <Navbar />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -33,6 +34,11 @@ function App() {
         <Route path="/books/:id" element={
           <ProtectedRoute>
             <BookDetailPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/google-books/:googleId" element={
+          <ProtectedRoute>
+            <GoogleBookDetailPage />
           </ProtectedRoute>
         } />
         <Route path="/my-books" element={

@@ -1,6 +1,7 @@
 package com.rahil.book_nexus.book;
 
 import com.rahil.book_nexus.common.PageResponse;
+import com.rahil.book_nexus.external.GoogleBookSearchResult;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -52,6 +53,15 @@ public class BookController {
         return ResponseEntity.ok(service.findAllBooks(page, size, connectedUser));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<UnifiedSearchResponse> searchBooks(
+            @RequestParam("q") String query,
+            @RequestParam(name = "maxLocal", defaultValue = "10") int maxLocal,
+            @RequestParam(name = "maxGoogle", defaultValue = "20") int maxGoogle,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(service.searchBooks(query, maxLocal, maxGoogle, connectedUser));
+    }
+
     @GetMapping("/import/google")
     public ResponseEntity<Integer> importFromGoogle(
             @RequestParam("q") String query,
@@ -59,6 +69,20 @@ public class BookController {
             Authentication connectedUser) {
         int imported = service.importFromGoogle(query, Math.min(Math.max(max, 1), 40), connectedUser);
         return ResponseEntity.ok(imported);
+    }
+
+    @PostMapping("/add-from-google")
+    public ResponseEntity<Integer> addBookFromGoogle(
+            @RequestParam("googleId") String googleId,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(service.addBookFromGoogle(googleId, connectedUser));
+    }
+
+    @GetMapping("/google/{googleId}")
+    public ResponseEntity<GoogleBookSearchResult> getGoogleBookById(
+            @PathVariable("googleId") String googleId,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(service.getGoogleBookById(googleId));
     }
 
     @GetMapping("/owner")
@@ -163,11 +187,11 @@ public class BookController {
         }
     }
 
-        @GetMapping("/cover/{book-id}")
+    @GetMapping("/cover/{book-id}")
     public ResponseEntity<byte[]> getBookCover(@PathVariable("book-id") Integer bookId) {
         try {
             BookResponse book = service.findById(bookId);
-            
+
             if (book.getCover() != null && book.getCover() instanceof String
                     && ((String) book.getCover()).startsWith("http")) {
                 // Proxy Google Books image
@@ -177,7 +201,7 @@ public class BookController {
                         .contentType(MediaType.IMAGE_JPEG)
                         .body(response.getBody());
             }
-            
+
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

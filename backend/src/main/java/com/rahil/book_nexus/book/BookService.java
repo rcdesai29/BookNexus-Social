@@ -2,6 +2,8 @@ package com.rahil.book_nexus.book;
 
 import com.rahil.book_nexus.common.PageResponse;
 import com.rahil.book_nexus.exception.OperationNotPermittedException;
+import com.rahil.book_nexus.external.GoogleBooksService;
+import com.rahil.book_nexus.external.GoogleBookSearchResult;
 import com.rahil.book_nexus.file.FileStorageService;
 import com.rahil.book_nexus.history.BookTransactionHistory;
 import com.rahil.book_nexus.history.BookTransactionHistoryRepository;
@@ -38,6 +40,7 @@ public class BookService {
         private final BookTransactionHistoryRepository transactionHistoryRepository;
         private final FileStorageService fileStorageService;
         private final RestTemplate restTemplate;
+        private final GoogleBooksService googleBooksService;
 
         @Value("${application.external.googlebooks.enabled:false}")
         private boolean googleBooksEnabled;
@@ -193,6 +196,115 @@ public class BookService {
                 } catch (Exception e) {
                         log.error("Google Books import failed: {}", e.getMessage());
                         return 0;
+                }
+        }
+
+        public UnifiedSearchResponse searchBooks(String query, int maxLocal, int maxGoogle,
+                        Authentication connectedUser) {
+                log.info("Searching for books with query: '{}', maxLocal: {}, maxGoogle: {}", query, maxLocal,
+                                maxGoogle);
+
+                // Search local books
+                List<BookResponse> localBooks = searchLocalBooks(query, maxLocal);
+
+                // Search Google Books
+                List<GoogleBookSearchResult> googleBooks = googleBooksService.searchBooks(query, maxGoogle)
+                                .stream()
+                                .filter(GoogleBookSearchResult::isValid)
+                                .toList();
+
+                return UnifiedSearchResponse.builder()
+                                .localBooks(localBooks)
+                                .googleBooks(googleBooks)
+                                .query(query)
+                                .totalLocalResults(localBooks.size())
+                                .totalGoogleResults(googleBooks.size())
+                                .build();
+        }
+
+        private List<BookResponse> searchLocalBooks(String query, int maxResults) {
+                try {
+                        // Create a simple search specification for title and author
+                        Page<Book> books = bookRepository.findAllDisplayableBooks(PageRequest.of(0, maxResults));
+
+                        return books.stream()
+                                        .filter(book -> {
+                                                String searchQuery = query.toLowerCase();
+                                                return (book.getTitle() != null
+                                                                && book.getTitle().toLowerCase().contains(searchQuery))
+                                                                ||
+                                                                (book.getAuthorName() != null && book.getAuthorName()
+                                                                                .toLowerCase().contains(searchQuery));
+                                        })
+                                        .map(bookMapper::toBookResponse)
+                                        .limit(maxResults)
+                                        .toList();
+                } catch (Exception e) {
+                        log.error("Error searching local books: {}", e.getMessage());
+                        return List.of();
+                }
+        }
+
+        public Integer addBookFromGoogle(String googleId, Authentication connectedUser) {
+                log.info("Adding book from Google Books with ID: {}", googleId);
+
+                try {
+                        GoogleBookSearchResult googleBook = googleBooksService.getBookById(googleId);
+
+                        if (googleBook == null || !googleBook.isValid()) {
+                                log.warn("Invalid or not found Google Book with ID: {}", googleId);
+                                throw new EntityNotFoundException(
+                                                "Book not found in Google Books with ID: " + googleId);
+                        }
+
+                        // Check if book already exists by ISBN
+                        if (googleBook.getIsbn() != null && bookRepository.existsByIsbn(googleBook.getIsbn())) {
+                                log.warn("Book with ISBN {} already exists", googleBook.getIsbn());
+                                throw new OperationNotPermittedException("Book already exists in the library");
+                        }
+
+                        // Convert to BookRequest and save
+                        BookRequest bookRequest = new BookRequest(
+                                        null, // id
+                                        googleBook.getTitle(),
+                                        googleBook.getAuthorName(),
+                                        googleBook.getIsbn() != null ? googleBook.getIsbn() : "", // ISBN cannot be null
+                                                                                                  // based on validation
+                                        googleBook.getDescription() != null ? googleBook.getDescription()
+                                                        : "No description available", // synopsis cannot be null
+                                        true, // shareable
+                                        googleBook.getThumbnailUrl() // bookCover
+                        );
+
+                        return save(bookRequest, connectedUser);
+
+                } catch (EntityNotFoundException | OperationNotPermittedException e) {
+                        throw e;
+                } catch (Exception e) {
+                        log.error("Error adding book from Google Books: {}", e.getMessage());
+                        throw new RuntimeException("Failed to add book from Google Books", e);
+                }
+        }
+
+        public GoogleBookSearchResult getGoogleBookById(String googleId) {
+                log.info("Fetching Google Book details for ID: {}", googleId);
+
+                try {
+                        GoogleBookSearchResult googleBook = googleBooksService.getBookById(googleId);
+
+                        if (googleBook == null || !googleBook.isValid()) {
+                                log.warn("Invalid or not found Google Book with ID: {}", googleId);
+                                throw new EntityNotFoundException(
+                                                "Book not found in Google Books with ID: " + googleId);
+                        }
+
+                        return googleBook;
+
+                } catch (EntityNotFoundException e) {
+                        throw e;
+                } catch (Exception e) {
+                        log.error("Error fetching Google Book details: {}", e.getMessage());
+                        throw new RuntimeException("Failed to fetch Google Book details", e);
                 }
         }
 

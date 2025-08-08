@@ -1,168 +1,115 @@
-import { Box, FormControl, InputLabel, MenuItem, Pagination, Select, Typography } from '@mui/material';
 import React from 'react';
+import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
-  pageSize: number;
-  totalElements: number;
   onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-  pageSizeOptions?: number[];
-  loading?: boolean;
+  onSizeChange: (size: number) => void;
 }
 
 const PaginationControls: React.FC<PaginationControlsProps> = ({
   currentPage,
   totalPages,
-  pageSize,
-  totalElements,
   onPageChange,
-  onPageSizeChange,
-  pageSizeOptions = [12, 16, 24, 48],
-  loading = false
+  onSizeChange
 }) => {
-  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
-    onPageChange(value - 1); // Material UI Pagination is 1 based! backend is 0 based!
+  const handlePrevious = () => {
+    if (currentPage > 0) {
+      onPageChange(currentPage - 1);
+    }
   };
 
-  const handlePageSizeChange = (event: any) => {
-    onPageSizeChange(event.target.value);
+  const handleNext = () => {
+    if (currentPage < totalPages - 1) {
+      onPageChange(currentPage + 1);
+    }
   };
 
-  if (totalPages <= 1 || totalElements === 0) {
+  const handlePageClick = (page: number) => {
+    onPageChange(page);
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+    // Adjust start page if we're near the end
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageClick(i)}
+          className={`px-3 py-2 mx-1 rounded-lg transition-colors duration-200 ${
+            i === currentPage
+              ? 'bg-orange-600 text-white'
+              : 'bg-white text-amber-800 border border-amber-300 hover:bg-amber-50'
+          }`}
+        >
+          {i + 1}
+        </button>
+      );
+    }
+
+    return pages;
+  };
+
+  if (totalPages <= 1) {
     return null;
   }
 
-  const startItem = currentPage * pageSize + 1;
-  const endItem = Math.min((currentPage + 1) * pageSize, totalElements);
-
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      mt: 4,
-      flexWrap: 'wrap',
-      gap: 2,
-      flexDirection: { xs: 'column', sm: 'row' },
-      p: 3,
-      backgroundColor: 'var(--card-background)',
-      borderRadius: 'var(--radius-md)',
-      border: '1px solid var(--border-color)',
-      boxShadow: 'var(--shadow-light)'
-    }}>
-      <Typography 
-        variant="body2" 
-        sx={{ 
-          color: 'var(--text-muted)',
-          fontFamily: 'var(--font-body)'
-        }}
-      >
-        Showing {startItem}-{endItem} of {totalElements} items
-      </Typography>
+    <div className="flex items-center justify-between mt-8 p-4 bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-xl">
       
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 2,
-        flexDirection: { xs: 'column', sm: 'row' },
-        width: { xs: '100%', sm: 'auto' }
-      }}>
-        <FormControl size="small" sx={{ minWidth: 80 }}>
-          <InputLabel sx={{ 
-            color: 'var(--text-muted)',
-            fontFamily: 'var(--font-body)'
-          }}>
-            Size
-          </InputLabel>
-          <Select
-            value={pageSize}
-            label="Size"
-            onChange={handlePageSizeChange}
-            disabled={loading}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: 'var(--background-secondary)',
-                borderColor: 'var(--border-color)',
-                '& fieldset': {
-                  borderColor: 'var(--border-color)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'var(--text-secondary)',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'var(--accent-orange)',
-                },
-              },
-              '& .MuiSelect-select': {
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-body)',
-              },
-              '& .MuiSvgIcon-root': {
-                color: 'var(--text-muted)',
-              }
-            }}
-          >
-            {pageSizeOptions.map(size => (
-              <MenuItem 
-                key={size} 
-                value={size}
-                sx={{
-                  fontFamily: 'var(--font-body)',
-                  color: 'var(--text-primary)',
-                  '&:hover': {
-                    backgroundColor: 'var(--background-secondary)',
-                  },
-                  '&.Mui-selected': {
-                    backgroundColor: 'var(--accent-orange)',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: '#B85A1A',
-                    }
-                  }
-                }}
-              >
-                {size}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        
-        <Pagination
-          count={totalPages}
-          page={currentPage + 1}
-          onChange={handlePageChange}
-          color="primary"
-          showFirstButton
-          showLastButton
-          size="small"
-          disabled={loading}
-          sx={{
-            '& .MuiPaginationItem-root': {
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-              fontFamily: 'var(--font-body)',
-              color: 'var(--text-primary)',
-              borderColor: 'var(--border-color)',
-              '&:hover': {
-                backgroundColor: 'var(--background-secondary)',
-                color: 'var(--accent-orange)',
-              },
-              '&.Mui-selected': {
-                backgroundColor: 'var(--accent-orange)',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: '#B85A1A',
-                }
-              }
-            },
-            '& .MuiPaginationItem-icon': {
-              color: 'var(--text-muted)',
-            }
-          }}
-        />
-      </Box>
-    </Box>
+      {/* Left side - Page size selector */}
+      <div className="flex items-center gap-3">
+        <span className="text-amber-800 text-sm font-medium">Items per page:</span>
+        <select
+          onChange={(e) => onSizeChange(Number(e.target.value))}
+          className="px-3 py-1 border border-amber-300 rounded-lg bg-white text-amber-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          defaultValue={10}
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+        </select>
+      </div>
+
+      {/* Center - Page navigation */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handlePrevious}
+          disabled={currentPage === 0}
+          className="flex items-center gap-1 px-3 py-2 bg-white text-amber-800 border border-amber-300 rounded-lg hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+        >
+          <IoChevronBack className="w-4 h-4" />
+          Previous
+        </button>
+
+        {renderPageNumbers()}
+
+        <button
+          onClick={handleNext}
+          disabled={currentPage >= totalPages - 1}
+          className="flex items-center gap-1 px-3 py-2 bg-white text-amber-800 border border-amber-300 rounded-lg hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+        >
+          Next
+          <IoChevronForward className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Right side - Page info */}
+      <div className="text-amber-700 text-sm">
+        Page {currentPage + 1} of {totalPages}
+      </div>
+    </div>
   );
 };
 

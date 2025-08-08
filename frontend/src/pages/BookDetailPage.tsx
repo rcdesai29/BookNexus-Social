@@ -1,94 +1,173 @@
-import { Alert, Box, CircularProgress, Container, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { IoBook, IoArrowBack } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 import type { BookResponse } from '../app/services/models/BookResponse';
-import type { BorrowedBookResponse } from '../app/services/models/BorrowedBookResponse';
 import { BookService } from '../app/services/services/BookService';
 import BookActions from '../components/BookActions';
 import BookFeedback from '../components/BookFeedback';
-import { tokenService } from '../services/tokenService';
 
 const BookDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { bookId } = useParams<{ bookId: string }>();
+  const navigate = useNavigate();
   const [book, setBook] = useState<BookResponse | null>(null);
-  const [borrowedBook, setBorrowedBook] = useState<BorrowedBookResponse | null>(null);
-  const [readBook, setReadBook] = useState<BorrowedBookResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
-
-  // Get current user info
-  const currentUser = tokenService.getUser();
-  const isOwner = !!(book && currentUser && book.owner === currentUser.name);
-  
-  // Check if book is borrowed by current user
-  const isBorrowed = !!borrowedBook;
-  const canApproveReturn = !!(isOwner && borrowedBook && !borrowedBook.returned);
-  const isRead = !!readBook;
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    
-    const fetchBookData = async () => {
-      try {
-        // Fetch book details
-        const bookData = await BookService.findBookById(Number(id));
-        setBook(bookData);
-        
-        // Check if user is logged in before fetching status
-        if (tokenService.isLoggedIn()) {
-          try {
-            // Check if book is borrowed by current user
-            const borrowedBooks = await BookService.findAllBorrowedBooks(0, 1000);
-            const borrowed = borrowedBooks.content?.find(b => b.id === Number(id));
-            if (borrowed) {
-              setBorrowedBook(borrowed);
-            }
-            
-            // Check if book is in read list
-            const readBooks = await BookService.findAllReadBooks(0, 1000);
-            const read = readBooks.content?.find(b => b.id === Number(id));
-            if (read) {
-              setReadBook(read);
-            }
-          } catch (statusError) {
-            // Ignore status errors - book might not be borrowed/read
-            console.log('Could not fetch book status:', statusError);
-          }
-        }
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchBookData();
-  }, [id]);
+    if (bookId) {
+      fetchBook();
+    }
+  }, [bookId]);
 
-  if (loading) return <Container sx={{ mt: 4 }}><CircularProgress /></Container>;
-  if (error) return <Container sx={{ mt: 4 }}><Alert severity="error">{error.message || String(error)}</Alert></Container>;
-  if (!book) return <Container sx={{ mt: 4 }}><Alert severity="info">Book not found.</Alert></Container>;
+  const fetchBook = async () => {
+    try {
+      setLoading(true);
+      const response = await BookService.findBookById(parseInt(bookId!));
+      setBook(response);
+    } catch (err: any) {
+      setError(err?.body?.message || 'Failed to fetch book details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-vintage-cream flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
+
+  if (error || !book) {
+    return (
+      <div className="min-h-screen bg-vintage-cream p-12">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">{error || 'Book not found'}</p>
+          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 bg-white border border-amber-300 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-50 transition-colors duration-200"
+          >
+            <IoArrowBack />
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>{book.title}</Typography>
-      <Typography variant="subtitle1" gutterBottom>by {book.authorName}</Typography>
-      <Typography variant="body1" gutterBottom>ISBN: {book.isbn}</Typography>
-      <Typography variant="body2" gutterBottom>{book.synopsis}</Typography>
-      <Box sx={{ mt: 2 }}>
-        <BookActions 
-          bookId={book.id!} 
-          bookTitle={book.title!}
-          isBorrowed={isBorrowed} 
-          canApproveReturn={canApproveReturn}
-          isOwner={isOwner}
-          isRead={isRead}
-        />
-      </Box>
-      <BookFeedback bookId={book.id!} />
-    </Container>
+    <div className="min-h-screen bg-vintage-cream">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-amber-800 to-orange-700 text-white py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/30 transition-colors duration-200 mb-6"
+          >
+            <IoArrowBack />
+            Back
+          </button>
+          <h1 className="font-playfair text-4xl font-bold mb-2">
+            {book.title}
+          </h1>
+          <p className="text-white/90 text-xl">
+            by {book.authorName}
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          
+          {/* Left Column - Book Cover and Actions */}
+          <div className="lg:col-span-1">
+            {/* Book Cover */}
+            {book.cover ? (
+              <img
+                src={typeof book.cover === 'string' && book.cover.startsWith('http')
+                  ? `http://localhost:8088/api/v1/books/cover/${book.id}`
+                  : `data:image/jpeg;base64,${book.cover}`}
+                alt={book.title}
+                className="w-full max-w-sm mx-auto rounded-xl shadow-lg shadow-amber-900/20 mb-6"
+              />
+            ) : (
+              <div className="w-full max-w-sm mx-auto aspect-[3/4] bg-amber-100 rounded-xl shadow-lg shadow-amber-900/20 mb-6 flex flex-col items-center justify-center">
+                <IoBook className="text-amber-600 text-6xl mb-2" />
+                <span className="text-amber-700">No Cover Available</span>
+              </div>
+            )}
+
+            {/* Book Actions */}
+            <BookActions
+              bookId={book.id!}
+              onBorrow={fetchBook}
+              onReturn={fetchBook}
+              onReview={fetchBook}
+            />
+          </div>
+
+          {/* Right Column - Book Details */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Book Information */}
+            <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-8">
+              <h2 className="font-playfair text-2xl font-semibold text-amber-900 mb-6">
+                Book Information
+              </h2>
+
+              <div className="grid gap-4">
+                <div>
+                  <p className="text-amber-700 text-sm">Author</p>
+                  <p className="text-amber-900 font-medium">{book.authorName}</p>
+                </div>
+                
+                {book.isbn && (
+                  <div>
+                    <p className="text-amber-700 text-sm">ISBN</p>
+                    <p className="text-amber-900 font-medium">{book.isbn}</p>
+                  </div>
+                )}
+                
+                <div>
+                  <p className="text-amber-700 text-sm">Available</p>
+                  <p className="text-amber-900 font-medium">
+                    {book.shareable ? 'Yes' : 'No'}
+                  </p>
+                </div>
+                
+                {book.rate && (
+                  <div>
+                    <p className="text-amber-700 text-sm">Rating</p>
+                    <p className="text-amber-900 font-medium">{book.rate}/5</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Synopsis */}
+            {book.synopsis && (
+              <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-8">
+                <h2 className="font-playfair text-2xl font-semibold text-amber-900 mb-6">
+                  Synopsis
+                </h2>
+                <p className="text-amber-800 leading-relaxed">
+                  {book.synopsis}
+                </p>
+              </div>
+            )}
+
+            {/* Book Feedback */}
+            <BookFeedback bookId={book.id!} />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default BookDetailPage; 
+export default BookDetailPage;

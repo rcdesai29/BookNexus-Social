@@ -13,6 +13,7 @@
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/book/BookService.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/book/BookSpecification.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/book/BorrowedBookResponse.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/book/UnifiedSearchResponse.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/common/BaseEntity.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/common/PageResponse.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/config/ApplicationAuditAware.java
@@ -24,6 +25,8 @@
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/email/EmailTemplateName.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/exception/ActivationTokenException.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/exception/OperationNotPermittedException.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/external/GoogleBookSearchResult.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/external/GoogleBooksService.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/feedback/Feedback.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/feedback/FeedbackController.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/feedback/FeedbackMapper.java

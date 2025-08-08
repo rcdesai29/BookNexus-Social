@@ -1,157 +1,146 @@
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Alert, Button, Card, CardActions, CardContent, CardMedia, CircularProgress, Container, Typography } from '@mui/material';
 import React, { useState } from 'react';
+import { IoCheckmarkCircle, IoBook } from 'react-icons/io5';
 import type { BorrowedBookResponse } from '../app/services/models/BorrowedBookResponse';
 import { BookService } from '../app/services/services/BookService';
 import PaginationControls from '../components/PaginationControls';
 import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 
-// Note: This page shows books currently borrowed by the user
-// UI shows as "Currently Reading" tab but internally still called "BorrowedBooksPage"
-
 const BorrowedBooksPage: React.FC = () => {
   const { data, loading, error, page, setPage, size, setSize } = useBorrowedBooks();
-  const [readBooks, setReadBooks] = useState<Set<number>>(new Set());
-  const books = data?.content || [];
-
-  const handleMarkAsRead = async (bookId: number) => {
-    try {
-      console.log('Marking book as read:', bookId);
-      await BookService.markBookAsRead(bookId);
-      console.log('Book marked as read successfully');
-      // Add to read books set instead of removing from borrowed books
-      setReadBooks(prev => new Set(prev).add(bookId));
-      // Reload books to get updated read status from backend
-      setPage(page); // This will trigger a reload
-    } catch (error) {
-      console.error('Error marking book as read:', error);
-    }
-  };
-
-  const handleUnmarkAsRead = async (bookId: number) => {
-    try {
-      console.log('Unmarking book as read:', bookId);
-      await BookService.unmarkBookAsRead(bookId);
-      console.log('Book unmarked as read successfully');
-      // Remove from read books set
-      setReadBooks(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(bookId);
-        return newSet;
-      });
-      // Reload books to get updated read status from backend
-      setPage(page); // This will trigger a reload
-    } catch (error) {
-      console.error('Error unmarking book as read:', error);
-    }
-  };
+  const [returningBookId, setReturningBookId] = useState<number | null>(null);
 
   const handleReturnBook = async (bookId: number) => {
+    setReturningBookId(bookId);
     try {
-      console.log('Returning book:', bookId);
-      console.log('Calling BookService.returnBorrowBook...');
-      const result = await BookService.returnBorrowBook(bookId);
-      console.log('Book returned successfully, result:', result);
-      console.log('Reloading borrowed books...');
-      // Reload books to get updated data from backend
-      setPage(page); // This will trigger a reload
-      console.log('Borrowed books reloaded');
-    } catch (error) {
-      console.error('Error returning book:', error);
+      await BookService.returnBorrowBook(bookId);
+      // The hook will automatically refresh data
+    } catch (err: any) {
+      console.error('Error returning book:', err);
+    } finally {
+      setReturningBookId(null);
     }
   };
 
-  const isBookRead = (book: BorrowedBookResponse) => book.read || readBooks.has(book.id!);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-vintage-cream flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Currently Reading</Typography>
-      {loading && <CircularProgress />}
-      {error && <Alert severity="error">{error.message || String(error)}</Alert>}
-      
-      {books.length === 0 && !loading && (
-        <Typography variant="body1" color="text.secondary">
-          You haven't borrowed any books yet.
-        </Typography>
-      )}
+    <div className="min-h-screen bg-vintage-cream py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-playfair text-4xl font-bold text-amber-900 mb-2 flex items-center gap-3">
+            <IoBook className="text-orange-600" />
+            Currently Reading
+          </h1>
+          <p className="text-amber-700">Books you have borrowed</p>
+        </div>
 
-      <div className="book-list-grid">
-        {books.map(book => (
-          <div className="book-list-card" key={book.id}>
-            <Card sx={{ 
-              height: '100%', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              width: '100%',
-              maxWidth: 280,
-              border: isBookRead(book) ? '2px solid #4caf50' : 'none'
-            }}>
-              {book.cover ? (
-                <CardMedia
-                  component="img"
-                  height="120"
-                  image={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
-                         `http://localhost:8088/api/v1/books/cover/${book.id}` : 
-                         `data:image/jpeg;base64,${book.cover}`}
-                  alt={book.title}
-                  sx={{ objectFit: 'contain' }}
-                />
-              ) : (
-                <CardMedia
-                  component="div"
-                  sx={{ height: 120, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    No Cover
-                  </Typography>
-                </CardMedia>
-              )}
-              <CardContent sx={{ flexGrow: 1, p: 1.5 }}>
-                <Typography variant="subtitle1" component="div" sx={{ fontWeight: 'bold', mb: 0.5, lineHeight: 1.2 }}>
-                  {book.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  by {book.authorName}
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ p: 1.5, pt: 0 }}>
-                <Button 
-                  size="small" 
-                  variant={isBookRead(book) ? "contained" : "outlined"}
-                  color={isBookRead(book) ? "success" : "primary"}
-                  startIcon={isBookRead(book) ? <CheckCircleIcon /> : undefined}
-                  onClick={() => book.id && (isBookRead(book) ? handleUnmarkAsRead(book.id) : handleMarkAsRead(book.id))}
-                  sx={{ flex: 1, mr: 1 }}
-                >
-                  {isBookRead(book) ? "Read ✓" : "Mark as Read"}
-                </Button>
-                <Button 
-                  size="small" 
-                  variant="outlined" 
-                  color="secondary"
-                  onClick={() => book.id && handleReturnBook(book.id)}
-                  sx={{ flex: 1 }}
-                >
-                  Return
-                </Button>
-              </CardActions>
-            </Card>
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">Error loading borrowed books: {error.message}</p>
           </div>
-        ))}
+        )}
+
+        {/* Empty State */}
+        {!data?.content?.length ? (
+          <div className="text-center py-16">
+            <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-12 max-w-md mx-auto">
+              <IoBook className="text-orange-600 text-6xl mx-auto mb-6" />
+              <h3 className="font-playfair text-2xl font-semibold text-amber-900 mb-4">
+                No Books Currently Borrowed
+              </h3>
+              <p className="text-amber-700 mb-6">
+                Browse the library and borrow books to see them here.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Books Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+              {data.content.map((borrowedBook) => (
+                <div
+                  key={borrowedBook.id}
+                  className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-xl shadow-lg shadow-amber-900/10 p-4 transition-all duration-300 hover:shadow-xl hover:shadow-amber-900/20 hover:-translate-y-1"
+                >
+                  {/* Book Cover */}
+                  <div className="mb-4">
+                    {borrowedBook.cover ? (
+                      <img
+                        src={typeof borrowedBook.cover === 'string' && borrowedBook.cover.startsWith('http')
+                          ? `http://localhost:8088/api/v1/books/cover/${borrowedBook.id}`
+                          : `data:image/jpeg;base64,${borrowedBook.cover}`}
+                        alt={borrowedBook.title}
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <IoBook className="text-amber-600 text-4xl" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Borrowed Badge */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <IoCheckmarkCircle className="text-green-600 w-5 h-5" />
+                    <span className="text-green-700 text-sm font-medium">Borrowed</span>
+                  </div>
+
+                  {/* Book Info */}
+                  <div className="mb-4">
+                    <h3 className="font-playfair text-lg font-semibold text-amber-900 mb-2 line-clamp-2">
+                      {borrowedBook.title}
+                    </h3>
+                    <p className="text-amber-700 text-sm mb-2">
+                      by {borrowedBook.authorName}
+                    </p>
+                    
+                    {/* Borrowed Status */}
+                    <p className="text-amber-600 text-xs">
+                      Currently reading
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleReturnBook(borrowedBook.id!)}
+                      disabled={returningBookId === borrowedBook.id}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-lg text-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {returningBookId === borrowedBook.id ? 'Returning...' : 'Return Book'}
+                    </button>
+                    <button
+                      onClick={() => {/* TODO: Navigate to book details */}}
+                      className="w-full bg-white border border-amber-300 text-amber-800 hover:bg-amber-50 font-medium py-2 px-3 rounded-lg text-sm transition-colors duration-200"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <PaginationControls
+              currentPage={page}
+              totalPages={data.totalPages || 0}
+              onPageChange={setPage}
+              onSizeChange={setSize}
+            />
+          </>
+        )}
       </div>
-      {data && (
-        <PaginationControls
-          currentPage={page}
-          totalPages={data.totalPages || 0}
-          pageSize={size}
-          totalElements={data.totalElements || 0}
-          onPageChange={setPage}
-          onPageSizeChange={setSize}
-          loading={loading}
-        />
-      )}
-    </Container>
+    </div>
   );
 };
 
-export default BorrowedBooksPage; 
+export default BorrowedBooksPage;

@@ -1,39 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Container,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography,
-  Alert,
-  CircularProgress,
-  Divider
-} from '@mui/material';
-import { Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { IoSave, IoClose } from 'react-icons/io5';
 import { UserProfileService, UserProfileRequest } from '../app/services/services/UserProfileService';
+import { tokenService } from '../services/tokenService';
 
 type LocalUserProfileRequest = UserProfileRequest;
 
 const EditProfilePage: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
+  const [success, setSuccess] = useState(false);
+  
   const [formData, setFormData] = useState<LocalUserProfileRequest>({
     displayName: '',
     bio: '',
@@ -42,46 +20,30 @@ const EditProfilePage: React.FC = () => {
     twitterHandle: '',
     instagramHandle: '',
     goodreadsHandle: '',
-    profileVisibility: 'PUBLIC',
-    activityVisibility: 'PUBLIC',
-    reviewsVisibility: 'PUBLIC',
     annualReadingGoal: undefined,
     preferredFormat: '',
-    readingSpeed: ''
+    readingSpeed: '',
+    profileVisibility: 'PUBLIC',
+    activityVisibility: 'PUBLIC',
+    reviewsVisibility: 'PUBLIC'
   });
 
   useEffect(() => {
-    if (!userId) return;
-    
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const profileData = await UserProfileService.getUserProfile(parseInt(userId));
-        
-        setFormData({
-          displayName: profileData.displayName || '',
-          bio: profileData.bio || '',
-          location: profileData.location || '',
-          website: profileData.website || '',
-          twitterHandle: profileData.twitterHandle || '',
-          instagramHandle: profileData.instagramHandle || '',
-          goodreadsHandle: profileData.goodreadsHandle || '',
-          profileVisibility: profileData.profileVisibility as 'PUBLIC' | 'PRIVATE' | 'FOLLOWERS_ONLY',
-          activityVisibility: profileData.activityVisibility as 'PUBLIC' | 'PRIVATE' | 'FOLLOWERS_ONLY',
-          reviewsVisibility: profileData.reviewsVisibility as 'PUBLIC' | 'PRIVATE' | 'FOLLOWERS_ONLY',
-          annualReadingGoal: profileData.annualReadingGoal || undefined,
-          preferredFormat: profileData.preferredFormat || '',
-          readingSpeed: profileData.readingSpeed || ''
-        });
-      } catch (err: any) {
-        setError(err?.body?.message || 'Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
+    loadCurrentProfile();
+  }, []);
 
-    fetchProfile();
-  }, [userId]);
+  const loadCurrentProfile = async () => {
+    try {
+      setLoading(true);
+      // TODO: Load current user profile if endpoint exists
+      // const profile = await UserProfileService.getCurrentProfile();
+      // setFormData(profile);
+    } catch (err: any) {
+      setError('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (field: keyof LocalUserProfileRequest, value: any) => {
     setFormData(prev => ({
@@ -92,265 +54,258 @@ const EditProfilePage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
     try {
-      setSaving(true);
-      setError(null);
-      
-      await UserProfileService.updateUserProfile(parseInt(userId), formData);
-      setSuccess('Profile updated successfully!');
-      
-      // Redirect to profile page after a short delay
-      setTimeout(() => {
-        navigate(`/profile/${userId}`);
-      }, 1500);
+      const currentUser = tokenService.getUser();
+      await UserProfileService.updateUserProfile(currentUser?.id || 1, formData);
+      setSuccess(true);
+      setTimeout(() => navigate('/profile'), 2000);
     } catch (err: any) {
       setError(err?.body?.message || 'Failed to update profile');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate(`/profile/${userId}`);
-  };
-
-  if (loading) {
+  if (loading && !formData.displayName) {
     return (
-      <Container sx={{ mt: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="min-h-screen bg-vintage-cream flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Edit Profile
-        </Typography>
+    <div className="min-h-screen bg-vintage-cream py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="font-playfair text-4xl font-bold text-amber-900 mb-2">
+            Edit Profile
+          </h1>
+          <p className="text-amber-700">Update your profile information</p>
+        </div>
+
+        {/* Error Alert */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">{error}</p>
+          </div>
         )}
-        
+
+        {/* Success Alert */}
         {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
-          </Alert>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <p className="text-green-800">Profile updated successfully! Redirecting...</p>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <Box sx={{ display: 'grid', gap: 3 }}>
-            {/* Basic Information */}
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Basic Information
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Box>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          
+          {/* Basic Information */}
+          <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-8">
+            <h2 className="font-playfair text-2xl font-semibold text-amber-900 mb-6">
+              Basic Information
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="displayName" className="block text-sm font-medium text-amber-900 mb-1">
+                  Display Name
+                </label>
+                <input
+                  id="displayName"
+                  type="text"
+                  value={formData.displayName}
+                  onChange={(e) => handleInputChange('displayName', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="How others will see your name"
+                />
+              </div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Display Name"
-                value={formData.displayName}
-                onChange={(e) => handleInputChange('displayName', e.target.value)}
-                helperText="How others will see your name"
-              />
-            </Box>
+              <div>
+                <label htmlFor="location" className="block text-sm font-medium text-amber-900 mb-1">
+                  Location
+                </label>
+                <input
+                  id="location"
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="City, Country"
+                />
+              </div>
+            </div>
 
-            <Box>
-              <TextField
-                fullWidth
-                label="Bio"
+            <div className="mt-6">
+              <label htmlFor="bio" className="block text-sm font-medium text-amber-900 mb-1">
+                Bio
+              </label>
+              <textarea
+                id="bio"
+                rows={3}
+                maxLength={500}
                 value={formData.bio}
                 onChange={(e) => handleInputChange('bio', e.target.value)}
-                multiline
-                rows={3}
-                helperText="Tell others about yourself (max 500 characters)"
-                inputProps={{ maxLength: 500 }}
+                className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 resize-none"
+                placeholder="Tell others about yourself (max 500 characters)"
               />
-            </Box>
+              <p className="text-xs text-amber-600 mt-1">
+                {formData.bio?.length || 0}/500 characters
+              </p>
+            </div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Location"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                helperText="City, Country"
-              />
-
-              <TextField
-                fullWidth
-                label="Website"
+            <div className="mt-6">
+              <label htmlFor="website" className="block text-sm font-medium text-amber-900 mb-1">
+                Website
+              </label>
+              <input
+                id="website"
+                type="url"
                 value={formData.website}
                 onChange={(e) => handleInputChange('website', e.target.value)}
-                helperText="Your personal website or blog"
+                className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                placeholder="Your personal website or blog"
               />
-            </Box>
+            </div>
+          </div>
 
-            {/* Social Links */}
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Social Links
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Box>
+          {/* Social Media */}
+          <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-8">
+            <h2 className="font-playfair text-2xl font-semibold text-amber-900 mb-6">
+              Social Media
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label htmlFor="twitterHandle" className="block text-sm font-medium text-amber-900 mb-1">
+                  Twitter Handle
+                </label>
+                <input
+                  id="twitterHandle"
+                  type="text"
+                  value={formData.twitterHandle}
+                  onChange={(e) => handleInputChange('twitterHandle', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="@username"
+                />
+              </div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Twitter Handle"
-                value={formData.twitterHandle}
-                onChange={(e) => handleInputChange('twitterHandle', e.target.value)}
-                helperText="@username"
-              />
+              <div>
+                <label htmlFor="instagramHandle" className="block text-sm font-medium text-amber-900 mb-1">
+                  Instagram Handle
+                </label>
+                <input
+                  id="instagramHandle"
+                  type="text"
+                  value={formData.instagramHandle}
+                  onChange={(e) => handleInputChange('instagramHandle', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="@username"
+                />
+              </div>
 
-              <TextField
-                fullWidth
-                label="Instagram Handle"
-                value={formData.instagramHandle}
-                onChange={(e) => handleInputChange('instagramHandle', e.target.value)}
-                helperText="@username"
-              />
+              <div>
+                <label htmlFor="goodreadsHandle" className="block text-sm font-medium text-amber-900 mb-1">
+                  Goodreads Handle
+                </label>
+                <input
+                  id="goodreadsHandle"
+                  type="text"
+                  value={formData.goodreadsHandle}
+                  onChange={(e) => handleInputChange('goodreadsHandle', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="Goodreads username"
+                />
+              </div>
+            </div>
+          </div>
 
-              <TextField
-                fullWidth
-                label="Goodreads Handle"
-                value={formData.goodreadsHandle}
-                onChange={(e) => handleInputChange('goodreadsHandle', e.target.value)}
-                helperText="Goodreads username"
-              />
-            </Box>
+          {/* Reading Preferences */}
+          <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-8">
+            <h2 className="font-playfair text-2xl font-semibold text-amber-900 mb-6">
+              Reading Preferences
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label htmlFor="annualReadingGoal" className="block text-sm font-medium text-amber-900 mb-1">
+                  Annual Reading Goal
+                </label>
+                <input
+                  id="annualReadingGoal"
+                  type="number"
+                  min="0"
+                  value={formData.annualReadingGoal || ''}
+                  onChange={(e) => handleInputChange('annualReadingGoal', e.target.value ? parseInt(e.target.value) : undefined)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 placeholder-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                  placeholder="Number of books per year"
+                />
+              </div>
 
-            {/* Reading Preferences */}
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Reading Preferences
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Box>
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Annual Reading Goal"
-                value={formData.annualReadingGoal || ''}
-                onChange={(e) => handleInputChange('annualReadingGoal', e.target.value ? parseInt(e.target.value) : undefined)}
-                helperText="Number of books you want to read this year"
-              />
-
-              <FormControl fullWidth>
-                <InputLabel>Preferred Format</InputLabel>
-                <Select
+              <div>
+                <label htmlFor="preferredFormat" className="block text-sm font-medium text-amber-900 mb-1">
+                  Preferred Format
+                </label>
+                <select
+                  id="preferredFormat"
                   value={formData.preferredFormat}
-                  label="Preferred Format"
                   onChange={(e) => handleInputChange('preferredFormat', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
                 >
-                  <MenuItem value="">None</MenuItem>
-                  <MenuItem value="PHYSICAL">Physical Books</MenuItem>
-                  <MenuItem value="EBOOK">E-Books</MenuItem>
-                  <MenuItem value="AUDIOBOOK">Audiobooks</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                  <option value="">None</option>
+                  <option value="PHYSICAL">Physical Books</option>
+                  <option value="EBOOK">E-books</option>
+                  <option value="AUDIOBOOK">Audiobooks</option>
+                </select>
+              </div>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr' }, gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel>Reading Speed</InputLabel>
-                <Select
+              <div>
+                <label htmlFor="readingSpeed" className="block text-sm font-medium text-amber-900 mb-1">
+                  Reading Speed
+                </label>
+                <select
+                  id="readingSpeed"
                   value={formData.readingSpeed}
-                  label="Reading Speed"
                   onChange={(e) => handleInputChange('readingSpeed', e.target.value)}
+                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white/80 text-amber-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
                 >
-                  <MenuItem value="">None</MenuItem>
-                  <MenuItem value="FAST">Fast Reader</MenuItem>
-                  <MenuItem value="AVERAGE">Average Reader</MenuItem>
-                  <MenuItem value="SLOW">Slow Reader</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                  <option value="">None</option>
+                  <option value="FAST">Fast Reader</option>
+                  <option value="AVERAGE">Average Reader</option>
+                  <option value="SLOW">Slow Reader</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-            {/* Privacy Settings */}
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Privacy Settings
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Box>
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel>Profile Visibility</InputLabel>
-                <Select
-                  value={formData.profileVisibility}
-                  label="Profile Visibility"
-                  onChange={(e) => handleInputChange('profileVisibility', e.target.value)}
-                >
-                  <MenuItem value="PUBLIC">Public</MenuItem>
-                  <MenuItem value="PRIVATE">Private</MenuItem>
-                  <MenuItem value="FOLLOWERS_ONLY">Followers Only</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth>
-                <InputLabel>Activity Visibility</InputLabel>
-                <Select
-                  value={formData.activityVisibility}
-                  label="Activity Visibility"
-                  onChange={(e) => handleInputChange('activityVisibility', e.target.value)}
-                >
-                  <MenuItem value="PUBLIC">Public</MenuItem>
-                  <MenuItem value="PRIVATE">Private</MenuItem>
-                  <MenuItem value="FOLLOWERS_ONLY">Followers Only</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth>
-                <InputLabel>Reviews Visibility</InputLabel>
-                <Select
-                  value={formData.reviewsVisibility}
-                  label="Reviews Visibility"
-                  onChange={(e) => handleInputChange('reviewsVisibility', e.target.value)}
-                >
-                  <MenuItem value="PUBLIC">Public</MenuItem>
-                  <MenuItem value="PRIVATE">Private</MenuItem>
-                  <MenuItem value="FOLLOWERS_ONLY">Followers Only</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* Action Buttons */}
-            <Box>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<CancelIcon />}
-                  onClick={handleCancel}
-                  disabled={saving}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  disabled={saving}
-                >
-                  {saving ? <CircularProgress size={20} /> : 'Save Changes'}
-                </Button>
-              </Box>
-            </Box>
-          </Box>
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-1 bg-white border border-amber-300 text-amber-800 font-medium py-3 px-6 rounded-lg hover:bg-amber-50 transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <IoClose className="w-5 h-5" />
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 text-white font-medium py-3 px-6 rounded-lg hover:from-orange-700 hover:to-orange-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <IoSave className="w-5 h-5" />
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </form>
-      </Paper>
-    </Container>
+      </div>
+    </div>
   );
 };
 

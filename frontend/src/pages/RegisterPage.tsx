@@ -1,4 +1,3 @@
-import { Alert, Box, Button, Container, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthenticationService } from '../app/services/services/AuthenticationService';
@@ -41,72 +40,173 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xs" sx={{ mt: 8 }}>
-      <Typography variant="h4" gutterBottom>Register</Typography>
-      {validationErrors.length > 0 && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
-            {validationErrors.map((err, idx) => <li key={idx}>{err}</li>)}
-          </ul>
-        </Alert>
-      )}
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>Registration successful! Please check your email to activate your account.</Alert>}
-      <Box component="form" onSubmit={handleSubmit}>
-        <TextField
-          label="First Name"
-          type="text"
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Last Name"
-          type="text"
-          value={lastName}
-          onChange={e => setLastName(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label="Confirm Password"
-          type="password"
-          value={confirmPassword}
-          onChange={e => setConfirmPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading} sx={{ mt: 2 }}>
-          {loading ? 'Registering...' : 'Register'}
-        </Button>
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        Already have an account? <Link to="/login">Login here</Link>
-      </Box>
-    </Container>
+    <div className="min-h-screen bg-vintage-cream flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-playfair font-bold text-amber-900">
+            Join BookNexus
+          </h2>
+          <p className="mt-2 text-center text-sm text-amber-700">
+            Create your account to start your reading journey
+          </p>
+        </div>
+
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <ul className="text-red-800 text-sm space-y-1">
+              {validationErrors.map((error, index) => (
+                <li key={index} className="flex items-center">
+                  <span className="w-1 h-1 bg-red-600 rounded-full mr-2"></span>
+                  {error}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Error Alert */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Success Alert */}
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-800 text-sm">
+              Registration successful! Please check your email to activate your account.
+            </p>
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {/* Name Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-amber-900 mb-1">
+                  First Name
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="appearance-none relative block w-full px-3 py-2 border border-amber-300 placeholder-amber-500 text-amber-900 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:z-10 transition-all duration-200"
+                  placeholder="First name"
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-amber-900 mb-1">
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="appearance-none relative block w-full px-3 py-2 border border-amber-300 placeholder-amber-500 text-amber-900 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:z-10 transition-all duration-200"
+                  placeholder="Last name"
+                />
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-amber-900 mb-1">
+                Email Address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-amber-300 placeholder-amber-500 text-amber-900 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:z-10 transition-all duration-200"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            {/* Password Fields */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-amber-900 mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-amber-300 placeholder-amber-500 text-amber-900 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:z-10 transition-all duration-200"
+                placeholder="Create a password"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-amber-900 mb-1">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-amber-300 placeholder-amber-500 text-amber-900 rounded-lg bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:z-10 transition-all duration-200"
+                placeholder="Confirm your password"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Creating account...
+                </div>
+              ) : (
+                'Create Account'
+              )}
+            </button>
+          </div>
+
+          {/* Login Link */}
+          <div className="text-center">
+            <p className="text-sm text-amber-700">
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                className="font-medium text-orange-600 hover:text-orange-700 transition-colors duration-200"
+              >
+                Sign in here
+              </Link>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;

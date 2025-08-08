@@ -1,302 +1,280 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Divider,
-  Grid,
-  IconButton,
-  Paper,
-  Tab,
-  Tabs,
-  Typography,
-  Alert,
-  CircularProgress
-} from '@mui/material';
-import {
-  Edit as EditIcon,
-  LocationOn as LocationIcon,
-  Language as WebsiteIcon,
-  Twitter as TwitterIcon,
-  Instagram as InstagramIcon,
-  Book as BookIcon,
-  Person as PersonIcon,
-  CalendarToday as CalendarIcon,
-  Star as StarIcon,
-  RateReview as ReviewIcon,
-  People as PeopleIcon,
-  Add as FollowIcon,
-  Check as FollowingIcon
-} from '@mui/icons-material';
+  IoCreate,
+  IoLocationOutline,
+  IoLinkOutline,
+  IoBook,
+  IoStar,
+  IoTrendingUp
+} from 'react-icons/io5';
 import { UserProfileService, UserProfileResponse } from '../app/services/services/UserProfileService';
 import { tokenService } from '../services/tokenService';
-
-type UserProfile = UserProfileResponse;
 
 const ProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<UserProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
-  const [followLoading, setFollowLoading] = useState(false);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
 
   useEffect(() => {
-    if (!userId) return;
+    const currentUser = tokenService.getUser();
+    const targetUserId = userId || currentUser?.id?.toString();
     
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const profileData = await UserProfileService.getUserProfile(parseInt(userId));
-        setProfile(profileData);
-      } catch (err: any) {
-        setError(err?.body?.message || 'Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
+    if (targetUserId) {
+      setIsOwnProfile(currentUser?.id?.toString() === targetUserId);
+      loadProfile(parseInt(targetUserId));
+    }
   }, [userId]);
 
-  const handleFollow = async () => {
-    if (!profile || !userId) return;
-    
+  const loadProfile = async (id: number) => {
     try {
-      setFollowLoading(true);
-      if (profile.isFollowing) {
-        await UserProfileService.unfollowUser(parseInt(userId));
-        setProfile(prev => prev ? { ...prev, isFollowing: false, followersCount: prev.followersCount - 1 } : null);
-      } else {
-        await UserProfileService.followUser(parseInt(userId));
-        setProfile(prev => prev ? { ...prev, isFollowing: true, followersCount: prev.followersCount + 1 } : null);
-      }
+      setLoading(true);
+      // TODO: Implement profile loading when API is ready
+      // For now, create a mock profile based on current user
+      const currentUser = tokenService.getUser();
+      setProfile({
+        userId: id,
+        username: currentUser?.name || 'user',
+        email: currentUser?.email || 'user@example.com',
+        fullName: currentUser?.name || 'User',
+        displayName: currentUser?.name || 'User',
+        bio: null,
+        location: null,
+        website: null,
+        avatarUrl: null,
+        twitterHandle: null,
+        instagramHandle: null,
+        goodreadsHandle: null,
+        annualReadingGoal: null,
+        preferredFormat: null,
+        readingSpeed: null,
+        profileVisibility: 'PUBLIC',
+        activityVisibility: 'PUBLIC',
+        reviewsVisibility: 'PUBLIC',
+        booksRead: 0,
+        currentlyReading: 0,
+        wantToRead: null,
+        averageRating: null,
+        reviewsCount: 0,
+        followersCount: 0,
+        followingCount: 0,
+        memberSince: new Date().toISOString(),
+        lastActive: new Date().toISOString(),
+        isFollowing: false,
+        isFollowedBy: false,
+        isOwnProfile: true
+      });
     } catch (err: any) {
-      setError(err?.body?.message || 'Failed to update follow status');
+      setError('Failed to load profile');
     } finally {
-      setFollowLoading(false);
+      setLoading(false);
     }
-  };
-
-  const handleEditProfile = () => {
-    navigate(`/profile/${userId}/edit`);
   };
 
   if (loading) {
     return (
-      <Container sx={{ mt: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="min-h-screen bg-vintage-cream flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
     );
   }
 
-  if (error) {
+  if (error || !profile) {
     return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <div className="min-h-screen bg-vintage-cream p-12">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">{error || 'Profile not found'}</p>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  if (!profile) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="info">Profile not found.</Alert>
-      </Container>
-    );
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const tabs = [
+    { label: 'Currently Reading', count: 0 },
+    { label: 'Read Books', count: 0 },
+    { label: 'Reviews', count: 0 },
+    { label: 'Activity', count: 0 }
+  ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <div className="min-h-screen bg-vintage-cream">
       {/* Profile Header */}
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 3 }}>
-          {/* Avatar and Basic Info */}
-          <Box sx={{ textAlign: 'center' }}>
-            <Avatar
-              src={profile.avatarUrl || undefined}
-              sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
-            >
-              {profile.displayName?.charAt(0) || profile.fullName?.charAt(0) || 'U'}
-            </Avatar>
-            <Typography variant="h4" gutterBottom>
-              {profile.displayName || profile.fullName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              @{profile.username}
-            </Typography>
+      <div className="bg-gradient-to-r from-amber-800 to-orange-700 text-white py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             
-            {/* Follow Button */}
-            {!profile.isOwnProfile && (
-              <Button
-                variant={profile.isFollowing ? "outlined" : "contained"}
-                startIcon={profile.isFollowing ? <FollowingIcon /> : <FollowIcon />}
-                onClick={handleFollow}
-                disabled={followLoading}
-                sx={{ mt: 2 }}
-              >
-                {profile.isFollowing ? 'Following' : 'Follow'}
-              </Button>
-            )}
-            
-            {/* Edit Profile Button */}
-            {profile.isOwnProfile && (
-              <Button
-                variant="outlined"
-                startIcon={<EditIcon />}
-                onClick={handleEditProfile}
-                sx={{ mt: 2 }}
-              >
-                Edit Profile
-              </Button>
-            )}
-          </Box>
+            {/* Profile Avatar */}
+            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold">
+              {profile.displayName?.charAt(0).toUpperCase() || profile.email?.charAt(0).toUpperCase() || 'U'}
+            </div>
 
-          {/* Profile Details */}
-          <Box>
-            {profile.bio && (
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                {profile.bio}
-              </Typography>
-            )}
+            {/* Profile Info */}
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-2">
+                <h1 className="font-playfair text-3xl font-bold">
+                  {profile.displayName || profile.email || 'User'}
+                </h1>
+                {isOwnProfile && (
+                  <button
+                    onClick={() => navigate('/edit-profile')}
+                    className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                  >
+                    <IoCreate className="w-4 h-4" />
+                    Edit Profile
+                  </button>
+                )}
+              </div>
 
-            {/* Contact Info */}
-            <Box sx={{ mb: 2 }}>
-              {profile.location && (
-                <Chip
-                  icon={<LocationIcon />}
-                  label={profile.location}
-                  variant="outlined"
-                  sx={{ mr: 1, mb: 1 }}
-                />
+              {profile.bio && (
+                <p className="text-white/90 mb-4 max-w-2xl">
+                  {profile.bio}
+                </p>
               )}
-              {profile.website && (
-                <Chip
-                  icon={<WebsiteIcon />}
-                  label="Website"
-                  variant="outlined"
-                  sx={{ mr: 1, mb: 1 }}
-                  clickable
-                  onClick={() => profile.website && window.open(profile.website, '_blank')}
-                />
-              )}
-            </Box>
 
-            {/* Social Links */}
-            <Box sx={{ mb: 2 }}>
-              {profile.twitterHandle && (
-                <IconButton
-                  onClick={() => window.open(`https://twitter.com/${profile.twitterHandle}`, '_blank')}
-                  sx={{ mr: 1 }}
-                >
-                  <TwitterIcon />
-                </IconButton>
-              )}
-              {profile.instagramHandle && (
-                <IconButton
-                  onClick={() => window.open(`https://instagram.com/${profile.instagramHandle}`, '_blank')}
-                  sx={{ mr: 1 }}
-                >
-                  <InstagramIcon />
-                </IconButton>
-              )}
-            </Box>
+              <div className="flex flex-wrap gap-4 text-sm text-white/80">
+                {profile.location && (
+                  <div className="flex items-center gap-1">
+                    <IoLocationOutline className="w-4 h-4" />
+                    {profile.location}
+                  </div>
+                )}
+                {profile.website && (
+                  <div className="flex items-center gap-1">
+                    <IoLinkOutline className="w-4 h-4" />
+                    <a 
+                      href={profile.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="hover:underline"
+                    >
+                      Website
+                    </a>
+                  </div>
+                )}
+                {profile.annualReadingGoal && (
+                  <div className="flex items-center gap-1">
+                    <IoTrendingUp className="w-4 h-4" />
+                    Goal: {profile.annualReadingGoal} books/year
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Member Since */}
-            <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <CalendarIcon sx={{ mr: 1, fontSize: 16 }} />
-              Member since {formatDate(profile.memberSince)}
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
-
-      {/* Stats Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <BookIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.booksRead}</Typography>
-            <Typography variant="body2" color="text.secondary">Books Read</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <PersonIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.followersCount}</Typography>
-            <Typography variant="body2" color="text.secondary">Followers</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <PeopleIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.followingCount}</Typography>
-            <Typography variant="body2" color="text.secondary">Following</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <ReviewIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.reviewsCount}</Typography>
-            <Typography variant="body2" color="text.secondary">Reviews</Typography>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* Tabs for different sections */}
-      <Paper elevation={1}>
-        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
-          <Tab label="Currently Reading" />
-          <Tab label="Read Books" />
-          <Tab label="Reviews" />
-          <Tab label="Followers" />
-          <Tab label="Following" />
-        </Tabs>
-        <Divider />
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
         
-        <Box sx={{ p: 3 }}>
-          {activeTab === 0 && (
-            <Typography variant="body1" color="text.secondary">
-              Currently reading: {profile.currentlyReading} books
-            </Typography>
-          )}
-          {activeTab === 1 && (
-            <Typography variant="body1" color="text.secondary">
-              Read: {profile.booksRead} books
-            </Typography>
-          )}
-          {activeTab === 2 && (
-            <Typography variant="body1" color="text.secondary">
-              Reviews: {profile.reviewsCount} reviews
-            </Typography>
-          )}
-          {activeTab === 3 && (
-            <Typography variant="body1" color="text.secondary">
-              Followers: {profile.followersCount} followers
-            </Typography>
-          )}
-          {activeTab === 4 && (
-            <Typography variant="body1" color="text.secondary">
-              Following: {profile.followingCount} users
-            </Typography>
-          )}
-        </Box>
-      </Paper>
-    </Container>
+        {/* Reading Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-6 text-center">
+            <IoBook className="text-orange-600 text-3xl mx-auto mb-2" />
+            <h3 className="font-playfair text-2xl font-bold text-amber-900 mb-1">0</h3>
+            <p className="text-amber-700">Books Read</p>
+          </div>
+          
+          <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-6 text-center">
+            <IoStar className="text-yellow-500 text-3xl mx-auto mb-2" />
+            <h3 className="font-playfair text-2xl font-bold text-amber-900 mb-1">0</h3>
+            <p className="text-amber-700">Reviews Written</p>
+          </div>
+          
+          <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 p-6 text-center">
+            <IoTrendingUp className="text-green-600 text-3xl mx-auto mb-2" />
+            <h3 className="font-playfair text-2xl font-bold text-amber-900 mb-1">
+              {profile.annualReadingGoal || 0}
+            </h3>
+            <p className="text-amber-700">Reading Goal</p>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white/80 backdrop-blur-sm border border-amber-200/60 rounded-2xl shadow-lg shadow-amber-900/10 overflow-hidden">
+          
+          {/* Tab Headers */}
+          <div className="border-b border-amber-200 bg-amber-50/50">
+            <div className="flex">
+              {tabs.map((tab, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveTab(index)}
+                  className={`px-6 py-4 text-sm font-medium transition-colors duration-200 ${
+                    activeTab === index
+                      ? 'text-orange-600 border-b-2 border-orange-600 bg-white'
+                      : 'text-amber-700 hover:text-orange-600'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <span className="ml-2 px-2 py-1 bg-amber-200 text-amber-800 rounded-full text-xs">
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-8">
+            {activeTab === 0 && (
+              <div className="text-center py-12">
+                <IoBook className="text-amber-400 text-5xl mx-auto mb-4" />
+                <h3 className="font-playfair text-xl font-semibold text-amber-900 mb-2">
+                  No Books Currently Reading
+                </h3>
+                <p className="text-amber-700">
+                  {isOwnProfile ? 'Start reading some books!' : 'This user is not currently reading any books.'}
+                </p>
+              </div>
+            )}
+            
+            {activeTab === 1 && (
+              <div className="text-center py-12">
+                <IoBook className="text-amber-400 text-5xl mx-auto mb-4" />
+                <h3 className="font-playfair text-xl font-semibold text-amber-900 mb-2">
+                  No Books Read Yet
+                </h3>
+                <p className="text-amber-700">
+                  {isOwnProfile ? 'Complete some books to see them here!' : 'This user hasn\'t finished any books yet.'}
+                </p>
+              </div>
+            )}
+            
+            {activeTab === 2 && (
+              <div className="text-center py-12">
+                <IoStar className="text-amber-400 text-5xl mx-auto mb-4" />
+                <h3 className="font-playfair text-xl font-semibold text-amber-900 mb-2">
+                  No Reviews Yet
+                </h3>
+                <p className="text-amber-700">
+                  {isOwnProfile ? 'Write some book reviews!' : 'This user hasn\'t written any reviews yet.'}
+                </p>
+              </div>
+            )}
+            
+            {activeTab === 3 && (
+              <div className="text-center py-12">
+                <IoTrendingUp className="text-amber-400 text-5xl mx-auto mb-4" />
+                <h3 className="font-playfair text-xl font-semibold text-amber-900 mb-2">
+                  No Activity Yet
+                </h3>
+                <p className="text-amber-700">
+                  {isOwnProfile ? 'Start interacting with books!' : 'This user hasn\'t been active yet.'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
