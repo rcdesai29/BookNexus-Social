@@ -13,6 +13,8 @@ import MyBooksPage from './pages/MyBooksPage';
 import ReadPage from './pages/ReadPage';
 import RegisterPage from './pages/RegisterPage';
 import TBRPage from './pages/TBRPage';
+import ProfilePage from './pages/ProfilePage';
+import EditProfilePage from './pages/EditProfilePage';
 
 function App() {
   return (
@@ -50,6 +52,12 @@ function App() {
         } />
         <Route path="/tbr" element={<ProtectedRoute><TBRPage /></ProtectedRoute>} />
         <Route path="/read" element={<ProtectedRoute><ReadPage /></ProtectedRoute>} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
+        <Route path="/profile/:userId/edit" element={
+          <ProtectedRoute>
+            <EditProfilePage />
+          </ProtectedRoute>
+        } />
         <Route path="/" element={<Navigate to="/books" replace />} />
         <Route path="*" element={<Navigate to="/books" replace />} />
       </Routes>

@@ -1,88 +1,493 @@
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import CircularProgress from '@mui/material/CircularProgress';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  CircularProgress,
+  Alert
+} from '@mui/material';
+import {
+  TrendingUp,
+  Coffee,
+  AutoStories,
+  Favorite,
+  Star,
+  MenuBook
+} from '@mui/icons-material';
 import PaginationControls from '../components/PaginationControls';
 import { useBooks } from '../hooks/useBooks';
-
-// Note: This page displays ALL books (Home page) - not just user's books
-// UI shows as "Home" tab but internally still called "BookListPage"
+import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
+import { useMyBooks } from '../hooks/useMyBooks';
+import { useReadBooks } from '../hooks/useReadBooks';
 
 const BookListPage: React.FC = () => {
-  const { data, loading, error, page, setPage, size, setSize } = useBooks();
+  const { data: allBooks, loading: allBooksLoading, error: allBooksError, page, setPage, size, setSize } = useBooks();
+  const { data: borrowedBooks, loading: borrowedLoading } = useBorrowedBooks();
+  const { data: myBooks, loading: myBooksLoading } = useMyBooks();
+  const { data: readBooks, loading: readBooksLoading } = useReadBooks();
   const navigate = useNavigate();
 
-  return (
-    <Container maxWidth="xl" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>All Books</Typography>
-      {loading && <CircularProgress />}
-      {error && <Alert severity="error">{error.message || String(error)}</Alert>}
-      <div className="book-list-grid">
-        {data?.content?.map(book => (
-          <div className="book-list-card" key={book.id}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', cursor: 'pointer', width: '100%', maxWidth: 280, minWidth: 200 }} onClick={() => navigate(`/books/${book.id}`)}>
-              {book.cover ? (
-                <CardMedia
-                  component="img"
-                  height="120"
-                  image={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
-                         `http://localhost:8088/api/v1/books/cover/${book.id}` : 
-                         `data:image/jpeg;base64,${book.cover}`}
-                  alt={book.title}
-                  sx={{ objectFit: 'contain' }}
-                />
-              ) : (
-                <CardMedia
-                  component="div"
-                  sx={{ height: 120, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    No Cover
-                  </Typography>
-                </CardMedia>
-              )}
-              <CardContent sx={{ flexGrow: 1, p: 1.5 }}>
-                <Typography variant="subtitle1" component="div" sx={{ fontWeight: 'bold', mb: 0.5, lineHeight: 1.2 }}>
-                  {book.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  by {book.authorName}
-                </Typography>
-                <Button 
-                  variant="outlined" 
-                  size="small" 
-                  fullWidth
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/books/${book.id}`);
-                  }}
-                >
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        ))}
-      </div>
-      {data && (
-        <PaginationControls
-          currentPage={page}
-          totalPages={data.totalPages || 0}
-          pageSize={size}
-          totalElements={data.totalElements || 0}
-          onPageChange={setPage}
-          onPageSizeChange={setSize}
-          loading={loading}
+  // Get currently reading book (first borrowed book)
+  const currentlyReading = borrowedBooks?.content?.[0];
+
+  // Get trending books (first 5 from all books)
+  const trendingBooks = allBooks?.content?.slice(0, 5) || [];
+
+  // Get to-read books (my books that aren't borrowed or read)
+  const toReadBooks = myBooks?.content?.filter(book => 
+    !borrowedBooks?.content?.some(borrowed => borrowed.id === book.id) &&
+    !readBooks?.content?.some(read => read.id === book.id)
+  ).slice(0, 4) || [];
+
+  // Get favorite books (read books, first 4)
+  const favoriteBooks = readBooks?.content?.slice(0, 4) || [];
+
+  const renderBookCover = (book: any, style: React.CSSProperties = {}) => {
+    if (book.cover) {
+      return (
+        <img
+          src={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
+               `http://localhost:8088/api/v1/books/cover/${book.id}` : 
+               `data:image/jpeg;base64,${book.cover}`}
+          alt={book.title}
+          style={{
+            objectFit: 'cover',
+            borderRadius: '8px',
+            ...style
+          }}
         />
-      )}
-    </Container>
+      );
+    }
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '8px',
+        ...style
+      }}>
+        <MenuBook style={{ color: '#8B7355', fontSize: '24px' }} />
+      </div>
+    );
+  };
+
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(10px)',
+    padding: '16px',
+    borderRadius: '12px',
+    border: '1px solid #E6D7C3',
+    boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
+    marginBottom: '24px'
+  };
+
+  const headingStyle: React.CSSProperties = {
+    fontFamily: 'Playfair Display, serif',
+    fontSize: '20px',
+    fontWeight: 600,
+    color: '#4B3F30',
+    marginBottom: '24px'
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: '#D2691E',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'background-color 0.2s'
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#FAF3E3' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(90deg, #4B3F30, #5D4A33, #4B3F30)',
+        color: 'white',
+        padding: '64px 0',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <h1 style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: '48px',
+            fontWeight: 700,
+            marginBottom: '16px'
+          }}>
+            Welcome to Your Literary Haven
+          </h1>
+          <p style={{
+            fontSize: '20px',
+            color: 'rgba(255, 255, 255, 0.9)',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Discover, track, and share your reading journey in our cozy digital bookstore
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+        {/* 3-Column Layout */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '24px',
+          marginBottom: '48px'
+        }}>
+          
+          {/* LEFT COLUMN — Currently Reading */}
+          <div>
+            <h2 style={headingStyle}>Currently Reading</h2>
+            
+            {currentlyReading ? (
+              <div style={cardStyle}>
+                <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                  {renderBookCover(currentlyReading, { width: '100px', height: '150px' })}
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{
+                      fontFamily: 'Playfair Display, serif',
+                      fontSize: '18px',
+                      fontWeight: 600,
+                      color: '#4B3F30',
+                      marginBottom: '8px',
+                      lineHeight: 1.3
+                    }}>
+                      {currentlyReading.title}
+                    </h3>
+                    <p style={{
+                      color: '#6A5E4D',
+                      marginBottom: '16px',
+                      fontSize: '14px'
+                    }}>
+                      by {currentlyReading.authorName}
+                    </p>
+                    
+                    {/* Progress Bar */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '8px'
+                      }}>
+                        <span style={{ color: '#6A5E4D', fontSize: '14px' }}>Progress</span>
+                        <span style={{ color: '#4B3F30', fontSize: '14px', fontWeight: 500 }}>0%</span>
+                      </div>
+                      <div style={{
+                        width: '100%',
+                        backgroundColor: '#F4E3C1',
+                        borderRadius: '9999px',
+                        height: '8px'
+                      }}>
+                        <div style={{
+                          backgroundColor: '#D2691E',
+                          height: '8px',
+                          borderRadius: '9999px',
+                          width: '0%',
+                          transition: 'width 0.3s'
+                        }}></div>
+                      </div>
+                    </div>
+                    
+                    <button
+                      style={buttonStyle}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+                      onClick={() => {/* Add progress update logic */}}
+                    >
+                      Update Progress
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ ...cardStyle, textAlign: 'center' }}>
+                <Coffee style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+                <p style={{ color: '#6A5E4D' }}>
+                  {borrowedLoading ? 'Loading...' : 'Add your first book!'}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* CENTER COLUMN — Trending Today + From Friends */}
+          <div>
+            {/* Trending Today Section */}
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={headingStyle}>Trending Today</h2>
+              
+              {allBooksLoading ? (
+                <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
+                  <CircularProgress sx={{ color: '#D2691E' }} />
+                </div>
+              ) : trendingBooks.length > 0 ? (
+                <div style={cardStyle}>
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    overflowX: 'auto',
+                    paddingBottom: '8px'
+                  }}>
+                    {trendingBooks.map((book) => (
+                      <div 
+                        key={book.id}
+                        style={{
+                          minWidth: '110px',
+                          width: '110px',
+                          height: '170px',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          cursor: 'pointer',
+                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                          padding: '8px',
+                          transition: 'transform 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        onClick={() => navigate(`/books/${book.id}`)}
+                      >
+                        {renderBookCover(book, { width: '100%', height: '120px', marginBottom: '8px' })}
+                        <h4 style={{
+                          fontFamily: 'Playfair Display, serif',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: '#4B3F30',
+                          lineHeight: 1.2,
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical'
+                        }}>
+                          {book.title}
+                        </h4>
+                        <p style={{
+                          color: '#6A5E4D',
+                          fontSize: '10px',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {book.authorName}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ ...cardStyle, textAlign: 'center' }}>
+                  <TrendingUp style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+                  <p style={{ color: '#6A5E4D' }}>No trending books available</p>
+                </div>
+              )}
+            </div>
+
+            {/* From Friends Section */}
+            <div>
+              <h2 style={headingStyle}>From Friends</h2>
+              <div style={{ ...cardStyle, textAlign: 'center' }}>
+                <Favorite style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+                <p style={{ color: '#6A5E4D', marginBottom: '8px' }}>
+                  Join a book club to connect with others
+                </p>
+                <p style={{ color: '#8B7355', fontSize: '14px' }}>
+                  Social features coming soon!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN — To Read & Favorites */}
+          <div>
+            {/* To Read Section */}
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={headingStyle}>To Read</h2>
+              {myBooksLoading ? (
+                <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
+                  <CircularProgress sx={{ color: '#D2691E' }} size={24} />
+                </div>
+              ) : toReadBooks.length > 0 ? (
+                <div style={cardStyle}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px'
+                  }}>
+                    {toReadBooks.map((book) => (
+                      <div 
+                        key={book.id}
+                        style={{
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        onClick={() => navigate(`/books/${book.id}`)}
+                      >
+                        {renderBookCover(book, { width: '100%', height: '135px' })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ ...cardStyle, textAlign: 'center' }}>
+                  <AutoStories style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+                  <p style={{ color: '#6A5E4D' }}>Build your reading list</p>
+                </div>
+              )}
+            </div>
+
+            {/* Favorites Section */}
+            <div>
+              <h2 style={headingStyle}>Favorites</h2>
+              {readBooksLoading ? (
+                <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
+                  <CircularProgress sx={{ color: '#D2691E' }} size={24} />
+                </div>
+              ) : favoriteBooks.length > 0 ? (
+                <div style={cardStyle}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px'
+                  }}>
+                    {favoriteBooks.map((book) => (
+                      <div 
+                        key={book.id}
+                        style={{
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                        onClick={() => navigate(`/books/${book.id}`)}
+                      >
+                        {renderBookCover(book, { width: '100%', height: '135px' })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ ...cardStyle, textAlign: 'center' }}>
+                  <Star style={{ color: '#FFD700', fontSize: '48px', marginBottom: '12px' }} />
+                  <p style={{ color: '#6A5E4D' }}>No favorites yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* All Books Section */}
+        {allBooksLoading && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+            <CircularProgress sx={{ color: '#D2691E' }} size={48} />
+          </div>
+        )}
+
+        {allBooksError && (
+          <Alert severity="error" style={{ marginBottom: '32px' }}>
+            {allBooksError.message || String(allBooksError)}
+          </Alert>
+        )}
+
+        {allBooks?.content && allBooks.content.length > 0 && (
+          <div>
+            <h2 style={headingStyle}>Discover Books</h2>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: '24px'
+            }}>
+              {allBooks.content.map(book => (
+                <div key={book.id}>
+                  <div 
+                    style={{
+                      ...cardStyle,
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      height: '100%'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(75, 63, 48, 0.15)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
+                    }}
+                    onClick={() => navigate(`/books/${book.id}`)}
+                  >
+                    {renderBookCover(book, { width: '100%', height: '192px', marginBottom: '16px' })}
+                    <div>
+                      <h4 style={{
+                        fontFamily: 'Playfair Display, serif',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#4B3F30',
+                        marginBottom: '8px',
+                        lineHeight: 1.3,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
+                        {book.title}
+                      </h4>
+                      <p style={{
+                        color: '#6A5E4D',
+                        marginBottom: '12px',
+                        fontSize: '12px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        by {book.authorName}
+                      </p>
+                      <button 
+                        style={{
+                          ...buttonStyle,
+                          width: '100%',
+                          fontSize: '12px'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/books/${book.id}`);
+                        }}
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {allBooks && (
+              <div style={{ marginTop: '48px' }}>
+                <PaginationControls
+                  currentPage={page}
+                  totalPages={allBooks.totalPages || 0}
+                  pageSize={size}
+                  totalElements={allBooks.totalElements || 0}
+                  onPageChange={setPage}
+                  onPageSizeChange={setSize}
+                  loading={allBooksLoading}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
-export default BookListPage; 
+export default BookListPage;

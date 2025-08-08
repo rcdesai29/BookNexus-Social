@@ -13,6 +13,7 @@ export const tokenService = {
       const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
       // Common JWT fields: 'fullName', 'email', 'sub', etc.
       return {
+        id: decoded.userId || decoded.id || 1, // Default to 1 if not found
         name: decoded.fullName || decoded.name,
         email: decoded.email || decoded.sub,
       };

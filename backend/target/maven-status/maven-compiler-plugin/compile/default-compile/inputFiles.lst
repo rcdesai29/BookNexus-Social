@@ -44,7 +44,15 @@
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/security/JwtService.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/security/SecurityConfig.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/security/UserDetailsServiceImpl.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/Follow.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/FollowRepository.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/Token.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/TokenRepository.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/User.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserProfile.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileController.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileRepository.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileRequest.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileResponse.java
+/Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileService.java
 /Users/rahildesai/Projects/BookNexus-Social/backend/src/main/java/com/rahil/book_nexus/user/UserRepository.java

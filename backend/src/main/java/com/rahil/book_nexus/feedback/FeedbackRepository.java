@@ -13,4 +13,10 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
                         WHERE feedback.book.id = :bookId
             """)
     Page<Feedback> findAllByBookId(@Param("bookId") Integer bookId, Pageable pageable);
+
+    @Query("SELECT COUNT(f) FROM Feedback f WHERE f.user.id = :userId")
+    long countByUserId(@Param("userId") Integer userId);
+
+    @Query("SELECT AVG(f.rating) FROM Feedback f WHERE f.user.id = :userId")
+    Double findAverageRatingByUserId(@Param("userId") Integer userId);
 }

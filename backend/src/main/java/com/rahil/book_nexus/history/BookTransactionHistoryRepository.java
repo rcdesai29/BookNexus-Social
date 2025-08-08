@@ -94,4 +94,10 @@ public interface BookTransactionHistoryRepository extends JpaRepository<BookTran
                         """)
         List<BookTransactionHistory> findAllByBookIdAndUserIdOrderByCreatedDateDesc(@Param("bookId") Integer bookId,
                         @Param("userId") Integer userId);
+
+        @Query("SELECT COUNT(t) FROM BookTransactionHistory t WHERE t.user.id = :userId AND t.read = true")
+        long countByUserIdAndReadTrue(@Param("userId") Integer userId);
+
+        @Query("SELECT COUNT(t) FROM BookTransactionHistory t WHERE t.user.id = :userId AND t.returned = false")
+        long countByUserIdAndReturnedFalse(@Param("userId") Integer userId);
 }

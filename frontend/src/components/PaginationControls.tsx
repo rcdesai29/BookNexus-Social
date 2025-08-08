@@ -45,9 +45,20 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
       mt: 4,
       flexWrap: 'wrap',
       gap: 2,
-      flexDirection: { xs: 'column', sm: 'row' }
+      flexDirection: { xs: 'column', sm: 'row' },
+      p: 3,
+      backgroundColor: 'var(--card-background)',
+      borderRadius: 'var(--radius-md)',
+      border: '1px solid var(--border-color)',
+      boxShadow: 'var(--shadow-light)'
     }}>
-      <Typography variant="body2" color="text.secondary">
+      <Typography 
+        variant="body2" 
+        sx={{ 
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-body)'
+        }}
+      >
         Showing {startItem}-{endItem} of {totalElements} items
       </Typography>
       
@@ -59,15 +70,59 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
         width: { xs: '100%', sm: 'auto' }
       }}>
         <FormControl size="small" sx={{ minWidth: 80 }}>
-          <InputLabel>Size</InputLabel>
+          <InputLabel sx={{ 
+            color: 'var(--text-muted)',
+            fontFamily: 'var(--font-body)'
+          }}>
+            Size
+          </InputLabel>
           <Select
             value={pageSize}
             label="Size"
             onChange={handlePageSizeChange}
             disabled={loading}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'var(--background-secondary)',
+                borderColor: 'var(--border-color)',
+                '& fieldset': {
+                  borderColor: 'var(--border-color)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'var(--text-secondary)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--accent-orange)',
+                },
+              },
+              '& .MuiSelect-select': {
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-body)',
+              },
+              '& .MuiSvgIcon-root': {
+                color: 'var(--text-muted)',
+              }
+            }}
           >
             {pageSizeOptions.map(size => (
-              <MenuItem key={size} value={size}>
+              <MenuItem 
+                key={size} 
+                value={size}
+                sx={{
+                  fontFamily: 'var(--font-body)',
+                  color: 'var(--text-primary)',
+                  '&:hover': {
+                    backgroundColor: 'var(--background-secondary)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: 'var(--accent-orange)',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#B85A1A',
+                    }
+                  }
+                }}
+              >
                 {size}
               </MenuItem>
             ))}
@@ -85,7 +140,24 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           disabled={loading}
           sx={{
             '& .MuiPaginationItem-root': {
-              fontSize: { xs: '0.75rem', sm: '0.875rem' }
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              fontFamily: 'var(--font-body)',
+              color: 'var(--text-primary)',
+              borderColor: 'var(--border-color)',
+              '&:hover': {
+                backgroundColor: 'var(--background-secondary)',
+                color: 'var(--accent-orange)',
+              },
+              '&.Mui-selected': {
+                backgroundColor: 'var(--accent-orange)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: '#B85A1A',
+                }
+              }
+            },
+            '& .MuiPaginationItem-icon': {
+              color: 'var(--text-muted)',
             }
           }}
         />
