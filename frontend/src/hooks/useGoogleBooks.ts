@@ -55,14 +55,6 @@ export function useGoogleBooks(
           book.ratingsCount === 0 || book.ratingsCount >= 10
         );
 
-        console.log('Google Books data:', {
-          query,
-          totalBooks: convertedBooks.length,
-          filteredBooks: filteredBooks.length,
-          booksWithRatings: convertedBooks.filter(b => b.averageRating > 0 && b.ratingsCount > 0).length,
-          sampleBook: convertedBooks[0]
-        });
-
         setData(filteredBooks);
         setTotalItems(response.totalItems);
       } catch (err) {

@@ -30,8 +30,7 @@ export interface GoogleBooksResponse {
 }
 
 export class GoogleBooksService {
-  private static readonly BASE_URL = 'https://www.googleapis.com/books/v1';
-  private static readonly API_KEY = ''; // Google Books API doesn't require an API key for basic usage
+  private static readonly BASE_URL = 'http://localhost:8088/api/v1/google-books';
 
   /**
    * Search for books using Google Books API
@@ -44,18 +43,17 @@ export class GoogleBooksService {
     const queryParams = new URLSearchParams({
       q: query,
       maxResults: maxResults.toString(),
-      startIndex: startIndex.toString(),
-      key: this.API_KEY
+      startIndex: startIndex.toString()
     });
 
-    // Use fetch directly for Google Books API to avoid CORS issues
-    const response = await fetch(`${this.BASE_URL}/volumes?${queryParams.toString()}`);
-    
-    if (!response.ok) {
-      throw new Error(`Google Books API error: ${response.status}`);
-    }
+    const result = await __request<GoogleBooksResponse>({
+      method: 'GET',
+      path: `${this.BASE_URL}/search?${queryParams.toString()}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const result = await response.json();
     return result;
   }
 
@@ -66,9 +64,20 @@ export class GoogleBooksService {
     category: string = 'fiction',
     maxResults: number = 20
   ): Promise<GoogleBooksResponse> {
-    // Search for popular fiction books with better quality results
-    const query = `subject:${category} bestseller`;
-    return this.searchBooks(query, maxResults);
+    const queryParams = new URLSearchParams({
+      category: category,
+      maxResults: maxResults.toString()
+    });
+
+    const result = await __request<GoogleBooksResponse>({
+      method: 'GET',
+      path: `${this.BASE_URL}/popular?${queryParams.toString()}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result;
   }
 
   /**
@@ -77,23 +86,33 @@ export class GoogleBooksService {
   public static async getTrendingBooks(
     maxResults: number = 20
   ): Promise<GoogleBooksResponse> {
-    const currentYear = new Date().getFullYear();
-    const query = `publishedDate:${currentYear} fiction`;
-    return this.searchBooks(query, maxResults);
+    const queryParams = new URLSearchParams({
+      maxResults: maxResults.toString()
+    });
+
+    const result = await __request<GoogleBooksResponse>({
+      method: 'GET',
+      path: `${this.BASE_URL}/trending?${queryParams.toString()}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return result;
   }
 
   /**
    * Get book details by Google Books ID
    */
   public static async getBookById(bookId: string): Promise<GoogleBookItem> {
-    // Use fetch directly for Google Books API to avoid CORS issues
-    const response = await fetch(`${this.BASE_URL}/volumes/${bookId}`);
-    
-    if (!response.ok) {
-      throw new Error(`Google Books API error: ${response.status}`);
-    }
+    const result = await __request<GoogleBookItem>({
+      method: 'GET',
+      path: `${this.BASE_URL}/${bookId}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    const result = await response.json();
     return result;
   }
 

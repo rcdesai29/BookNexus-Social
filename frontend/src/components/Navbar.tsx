@@ -55,12 +55,13 @@ const Navbar: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
-      navigate(`/books?search=${encodeURIComponent(search.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
     }
   };
 
   const navLinks = [
     { label: 'Home', to: '/books', show: true },
+    { label: 'Search', to: '/search', show: true },
     { label: 'My Books', to: '/my-books', show: isLoggedIn },
     { label: 'Currently Reading', to: '/borrowed-books', show: isLoggedIn },
     { label: 'TBR', to: '/tbr', show: isLoggedIn },

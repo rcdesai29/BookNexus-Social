@@ -28,6 +28,8 @@ import jakarta.persistence.EntityNotFoundException;
 @RequiredArgsConstructor
 @Tag(name = "Book")
 public class BookController {
+    
+    private final RestTemplate restTemplate;
 
     private final BookService service;
 
@@ -171,7 +173,6 @@ public class BookController {
             if (book.getCover() != null && book.getCover() instanceof String
                     && ((String) book.getCover()).startsWith("http")) {
                 // Proxy Google Books image
-                RestTemplate restTemplate = new RestTemplate();
                 ResponseEntity<byte[]> response = restTemplate.getForEntity((String) book.getCover(), byte[].class);
                 return ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_JPEG)

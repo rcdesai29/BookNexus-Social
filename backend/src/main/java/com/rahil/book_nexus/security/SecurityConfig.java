@@ -45,8 +45,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/books/**",
                                 "/feedbacks/**",
-                                "/profiles/**")
+                                "/profiles/**",
+                                "/google-books/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/google-books/feedback")
+                        .authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

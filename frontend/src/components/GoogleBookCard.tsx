@@ -209,17 +209,7 @@ const GoogleBookCard: React.FC<GoogleBookCardProps> = ({
           </div>
         )}
         
-        {/* Debug info - remove this after testing */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ 
-            fontSize: '8px', 
-            color: '#999', 
-            marginTop: '4px',
-            fontFamily: 'monospace'
-          }}>
-            Rating: {book.averageRating}, Count: {book.ratingsCount}
-          </div>
-        )}
+
 
         {showReviewButton && (
           <button

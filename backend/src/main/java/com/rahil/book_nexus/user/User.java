@@ -31,6 +31,7 @@ import com.rahil.book_nexus.role.Role;
 import com.rahil.book_nexus.feedback.Feedback;
 import com.rahil.book_nexus.history.BookTransactionHistory;
 import com.rahil.book_nexus.book.Book;
+import com.rahil.book_nexus.googlebooks.GoogleBookFeedback;
 
 @Getter
 @Setter
@@ -68,6 +69,9 @@ public class User implements UserDetails, Principal {
 
     @OneToMany(mappedBy = "user")
     private List<Feedback> feedbacks;
+
+    @OneToMany(mappedBy = "user")
+    private List<GoogleBookFeedback> googleBookFeedbacks;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

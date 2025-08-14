@@ -20,6 +20,7 @@ import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
 import { useTrendingBooks, usePopularBooks, useBestsellers, GoogleBook } from '../hooks/useGoogleBooks';
+import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
 
 const BookListPage: React.FC = () => {
   const { data: allBooks, loading: allBooksLoading, error: allBooksError, page, setPage, size, setSize } = useBooks();
@@ -65,14 +66,20 @@ const BookListPage: React.FC = () => {
   };
 
   const handleSubmitReview = async (bookId: string, rating: number, review: string) => {
-    // For now, we'll just log the review since we don't have a backend endpoint for Google Books reviews
-    console.log('Review submitted:', { bookId, rating, review });
+    if (!selectedBook) return;
     
-    // In a real implementation, you would save this to your backend
-    // await FeedbackService.saveGoogleBookFeedback({ bookId, rating, review });
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      await GoogleBookFeedbackService.saveFeedback({
+        googleBookId: bookId,
+        bookTitle: selectedBook.title,
+        authorName: selectedBook.authorName,
+        rating: rating,
+        review: review
+      });
+    } catch (error) {
+      console.error('Failed to save review:', error);
+      throw error;
+    }
   };
 
   const renderBookCover = (book: any, style: React.CSSProperties = {}) => {

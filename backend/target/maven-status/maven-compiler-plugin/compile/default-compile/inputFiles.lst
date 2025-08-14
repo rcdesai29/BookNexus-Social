@@ -33,6 +33,15 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/FeedbackService.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/file/FileStorageService.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/file/FileUtils.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBook.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookController.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookFeedback.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookFeedbackRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookFeedbackRequest.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookFeedbackResponse.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookFeedbackService.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookResponse.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookService.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/handler/BusinessErrorCodes.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/handler/ExceptionResponse.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/handler/GlobalExceptionHandler.java

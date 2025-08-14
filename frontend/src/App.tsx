@@ -15,6 +15,7 @@ import RegisterPage from './pages/RegisterPage';
 import TBRPage from './pages/TBRPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
+import SearchPage from './pages/SearchPage';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
             <BookDetailPage />
           </ProtectedRoute>
         } />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/my-books" element={
           <ProtectedRoute>
             <MyBooksPage />
