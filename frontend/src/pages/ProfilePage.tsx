@@ -1,24 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Divider,
-  Grid,
-  IconButton,
-  Paper,
-  Tab,
-  Tabs,
-  Typography,
-  Alert,
-  CircularProgress
-} from '@mui/material';
-import {
   Edit as EditIcon,
   LocationOn as LocationIcon,
   Language as WebsiteIcon,
@@ -88,30 +70,6 @@ const ProfilePage: React.FC = () => {
     navigate(`/profile/${userId}/edit`);
   };
 
-  if (loading) {
-    return (
-      <Container sx={{ mt: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <Container sx={{ mt: 4 }}>
-        <Alert severity="info">Profile not found.</Alert>
-      </Container>
-    );
-  }
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -120,183 +78,623 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  const tabStyle = (isActive: boolean): React.CSSProperties => ({
+    padding: '12px 24px',
+    backgroundColor: isActive ? '#D2691E' : 'transparent',
+    color: isActive ? 'white' : '#4B3F30',
+    border: 'none',
+    borderRadius: '8px 8px 0 0',
+    fontSize: '16px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    borderBottom: isActive ? '3px solid #B85A1A' : '1px solid #E6D7C3'
+  });
+
+  const statsCardStyle: React.CSSProperties = {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(10px)',
+    padding: '24px',
+    borderRadius: '12px',
+    border: '1px solid #E6D7C3',
+    boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
+    textAlign: 'center',
+    transition: 'all 0.3s ease'
+  };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#FAF3E3',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #E6D7C3',
+          borderTop: '4px solid #D2691E',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#FAF3E3',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '24px',
+          borderRadius: '12px',
+          border: '1px solid #E6D7C3',
+          textAlign: 'center'
+        }}>
+          <h3 style={{
+            fontFamily: 'Playfair Display, serif',
+            color: '#4B3F30',
+            marginBottom: '8px'
+          }}>
+            Error Loading Profile
+          </h3>
+          <p style={{ color: '#6A5E4D' }}>
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#FAF3E3',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '24px',
+          borderRadius: '12px',
+          border: '1px solid #E6D7C3',
+          textAlign: 'center'
+        }}>
+          <h3 style={{
+            fontFamily: 'Playfair Display, serif',
+            color: '#4B3F30',
+            marginBottom: '8px'
+          }}>
+            Profile Not Found
+          </h3>
+          <p style={{ color: '#6A5E4D' }}>
+            The profile you're looking for doesn't exist.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      {/* Profile Header */}
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 3 }}>
-          {/* Avatar and Basic Info */}
-          <Box sx={{ textAlign: 'center' }}>
-            <Avatar
-              src={profile.avatarUrl || undefined}
-              sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
+    <div style={{ minHeight: '100vh', backgroundColor: '#FAF3E3' }}>
+      {/* Header Section */}
+      <div style={{
+        background: 'linear-gradient(90deg, #4B3F30, #5D4A33, #4B3F30)',
+        color: 'white',
+        padding: '48px 0',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <h1 style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: '36px',
+            fontWeight: 700,
+            marginBottom: '16px'
+          }}>
+            Profile
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            color: 'rgba(255, 255, 255, 0.9)',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Discover the literary world of {profile.displayName || profile.fullName}
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+        {/* Profile Header Card */}
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          padding: '32px',
+          borderRadius: '16px',
+          border: '1px solid #E6D7C3',
+          boxShadow: '0 4px 20px rgba(75, 63, 48, 0.1)',
+          marginBottom: '32px'
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 2fr',
+            gap: '32px',
+            alignItems: 'start'
+          }}>
+            {/* Avatar and Basic Info */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                backgroundColor: '#E6D7C3',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                fontSize: '48px',
+                color: '#8B7355',
+                fontWeight: 'bold'
+              }}>
+                {profile.displayName?.charAt(0) || profile.fullName?.charAt(0) || 'U'}
+              </div>
+              <h2 style={{
+                fontFamily: 'Playfair Display, serif',
+                fontSize: '28px',
+                fontWeight: 600,
+                color: '#4B3F30',
+                marginBottom: '8px'
+              }}>
+                {profile.displayName || profile.fullName}
+              </h2>
+              <p style={{
+                color: '#6A5E4D',
+                fontSize: '16px',
+                marginBottom: '16px'
+              }}>
+                @{profile.username}
+              </p>
+              
+              {/* Follow Button */}
+              {!profile.isOwnProfile && (
+                <button
+                  style={{
+                    backgroundColor: profile.isFollowing ? 'transparent' : '#D2691E',
+                    color: profile.isFollowing ? '#D2691E' : 'white',
+                    border: `1px solid #D2691E`,
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    margin: '0 auto'
+                  }}
+                  onMouseOver={(e) => {
+                    if (profile.isFollowing) {
+                      e.currentTarget.style.backgroundColor = '#D2691E';
+                      e.currentTarget.style.color = 'white';
+                    } else {
+                      e.currentTarget.style.backgroundColor = '#B85A1A';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (profile.isFollowing) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#D2691E';
+                    } else {
+                      e.currentTarget.style.backgroundColor = '#D2691E';
+                    }
+                  }}
+                  onClick={handleFollow}
+                  disabled={followLoading}
+                >
+                  {profile.isFollowing ? <FollowingIcon /> : <FollowIcon />}
+                  {profile.isFollowing ? 'Following' : 'Follow'}
+                </button>
+              )}
+              
+              {/* Edit Profile Button */}
+              {profile.isOwnProfile && (
+                <button
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: '#D2691E',
+                    border: '1px solid #D2691E',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    margin: '0 auto'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#D2691E';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#D2691E';
+                  }}
+                  onClick={handleEditProfile}
+                >
+                  <EditIcon />
+                  Edit Profile
+                </button>
+              )}
+            </div>
+
+            {/* Profile Details */}
+            <div>
+              {profile.bio && (
+                <p style={{
+                  fontSize: '18px',
+                  color: '#4B3F30',
+                  marginBottom: '24px',
+                  lineHeight: 1.6
+                }}>
+                  {profile.bio}
+                </p>
+              )}
+
+              {/* Contact Info */}
+              {(profile.location || profile.website) && (
+                <div style={{ marginBottom: '16px' }}>
+                  {profile.location && (
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      borderRadius: '6px',
+                      border: '1px solid #E6D7C3',
+                      marginRight: '8px',
+                      marginBottom: '8px'
+                    }}>
+                      <LocationIcon style={{ color: '#8B7355', fontSize: '16px' }} />
+                      <span style={{ color: '#4B3F30', fontSize: '14px' }}>
+                        {profile.location}
+                      </span>
+                    </div>
+                  )}
+                  {profile.website && (
+                    <button
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                        borderRadius: '6px',
+                        border: '1px solid #E6D7C3',
+                        marginRight: '8px',
+                        marginBottom: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        e.currentTarget.style.borderColor = '#D2691E';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                        e.currentTarget.style.borderColor = '#E6D7C3';
+                      }}
+                      onClick={() => profile.website && window.open(profile.website, '_blank')}
+                    >
+                      <WebsiteIcon style={{ color: '#8B7355', fontSize: '16px' }} />
+                      <span style={{ color: '#4B3F30', fontSize: '14px' }}>
+                        Website
+                      </span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Social Links */}
+              {(profile.twitterHandle || profile.instagramHandle) && (
+                <div style={{ marginBottom: '16px' }}>
+                  {profile.twitterHandle && (
+                    <button
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                        borderRadius: '6px',
+                        border: '1px solid #E6D7C3',
+                        marginRight: '8px',
+                        marginBottom: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        e.currentTarget.style.borderColor = '#D2691E';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                        e.currentTarget.style.borderColor = '#E6D7C3';
+                      }}
+                      onClick={() => window.open(`https://twitter.com/${profile.twitterHandle}`, '_blank')}
+                    >
+                      <TwitterIcon style={{ color: '#8B7355', fontSize: '16px' }} />
+                      <span style={{ color: '#4B3F30', fontSize: '14px' }}>
+                        @{profile.twitterHandle}
+                      </span>
+                    </button>
+                  )}
+                  {profile.instagramHandle && (
+                    <button
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                        borderRadius: '6px',
+                        border: '1px solid #E6D7C3',
+                        marginRight: '8px',
+                        marginBottom: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        e.currentTarget.style.borderColor = '#D2691E';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                        e.currentTarget.style.borderColor = '#E6D7C3';
+                      }}
+                      onClick={() => window.open(`https://instagram.com/${profile.instagramHandle}`, '_blank')}
+                    >
+                      <InstagramIcon style={{ color: '#8B7355', fontSize: '16px' }} />
+                      <span style={{ color: '#4B3F30', fontSize: '14px' }}>
+                        @{profile.instagramHandle}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Join Date */}
+              {profile.memberSince && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#6A5E4D',
+                  fontSize: '14px'
+                }}>
+                  <CalendarIcon style={{ fontSize: '16px' }} />
+                  <span>Member since {formatDate(profile.memberSince)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '16px',
+          marginBottom: '32px'
+        }}>
+          <div style={statsCardStyle}>
+            <BookIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#4B3F30',
+              marginBottom: '4px'
+            }}>
+              {profile.booksRead || 0}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#6A5E4D'
+            }}>
+              Books Read
+            </div>
+          </div>
+          <div style={statsCardStyle}>
+            <PersonIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#4B3F30',
+              marginBottom: '4px'
+            }}>
+              {profile.followersCount || 0}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#6A5E4D'
+            }}>
+              Followers
+            </div>
+          </div>
+          <div style={statsCardStyle}>
+            <PeopleIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#4B3F30',
+              marginBottom: '4px'
+            }}>
+              {profile.followingCount || 0}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#6A5E4D'
+            }}>
+              Following
+            </div>
+          </div>
+          <div style={statsCardStyle}>
+            <ReviewIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#4B3F30',
+              marginBottom: '4px'
+            }}>
+              {profile.reviewsCount || 0}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#6A5E4D'
+            }}>
+              Reviews
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs for different sections */}
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '16px',
+          border: '1px solid #E6D7C3',
+          boxShadow: '0 4px 20px rgba(75, 63, 48, 0.1)',
+          overflow: 'hidden'
+        }}>
+          {/* Tab Navigation */}
+          <div style={{
+            display: 'flex',
+            borderBottom: '1px solid #E6D7C3',
+            backgroundColor: 'rgba(255, 255, 255, 0.5)'
+          }}>
+            <button
+              style={tabStyle(activeTab === 0)}
+              onClick={() => setActiveTab(0)}
             >
-              {profile.displayName?.charAt(0) || profile.fullName?.charAt(0) || 'U'}
-            </Avatar>
-            <Typography variant="h4" gutterBottom>
-              {profile.displayName || profile.fullName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              @{profile.username}
-            </Typography>
-            
-            {/* Follow Button */}
-            {!profile.isOwnProfile && (
-              <Button
-                variant={profile.isFollowing ? "outlined" : "contained"}
-                startIcon={profile.isFollowing ? <FollowingIcon /> : <FollowIcon />}
-                onClick={handleFollow}
-                disabled={followLoading}
-                sx={{ mt: 2 }}
-              >
-                {profile.isFollowing ? 'Following' : 'Follow'}
-              </Button>
+              Currently Reading
+            </button>
+            <button
+              style={tabStyle(activeTab === 1)}
+              onClick={() => setActiveTab(1)}
+            >
+              Read Books
+            </button>
+            <button
+              style={tabStyle(activeTab === 2)}
+              onClick={() => setActiveTab(2)}
+            >
+              Reviews
+            </button>
+            <button
+              style={tabStyle(activeTab === 3)}
+              onClick={() => setActiveTab(3)}
+            >
+              Followers
+            </button>
+            <button
+              style={tabStyle(activeTab === 4)}
+              onClick={() => setActiveTab(4)}
+            >
+              Following
+            </button>
+          </div>
+          
+          {/* Tab Content */}
+          <div style={{ padding: '32px' }}>
+            {activeTab === 0 && (
+              <div style={{
+                textAlign: 'center',
+                color: '#6A5E4D',
+                fontSize: '16px'
+              }}>
+                Currently reading: {profile.currentlyReading || 0} books
+                <div style={{ marginTop: '16px' }}>
+                  <BookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                  <p style={{ marginTop: '8px' }}>Reading activity will be displayed here</p>
+                </div>
+              </div>
             )}
-            
-            {/* Edit Profile Button */}
-            {profile.isOwnProfile && (
-              <Button
-                variant="outlined"
-                startIcon={<EditIcon />}
-                onClick={handleEditProfile}
-                sx={{ mt: 2 }}
-              >
-                Edit Profile
-              </Button>
+            {activeTab === 1 && (
+              <div style={{
+                textAlign: 'center',
+                color: '#6A5E4D',
+                fontSize: '16px'
+              }}>
+                Read: {profile.booksRead || 0} books
+                <div style={{ marginTop: '16px' }}>
+                  <BookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                  <p style={{ marginTop: '8px' }}>Completed books will be displayed here</p>
+                </div>
+              </div>
             )}
-          </Box>
-
-          {/* Profile Details */}
-          <Box>
-            {profile.bio && (
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                {profile.bio}
-              </Typography>
+            {activeTab === 2 && (
+              <div style={{
+                textAlign: 'center',
+                color: '#6A5E4D',
+                fontSize: '16px'
+              }}>
+                Reviews: {profile.reviewsCount || 0} reviews
+                <div style={{ marginTop: '16px' }}>
+                  <ReviewIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                  <p style={{ marginTop: '8px' }}>Book reviews will be displayed here</p>
+                </div>
+              </div>
             )}
-
-            {/* Contact Info */}
-            <Box sx={{ mb: 2 }}>
-              {profile.location && (
-                <Chip
-                  icon={<LocationIcon />}
-                  label={profile.location}
-                  variant="outlined"
-                  sx={{ mr: 1, mb: 1 }}
-                />
-              )}
-              {profile.website && (
-                <Chip
-                  icon={<WebsiteIcon />}
-                  label="Website"
-                  variant="outlined"
-                  sx={{ mr: 1, mb: 1 }}
-                  clickable
-                  onClick={() => profile.website && window.open(profile.website, '_blank')}
-                />
-              )}
-            </Box>
-
-            {/* Social Links */}
-            <Box sx={{ mb: 2 }}>
-              {profile.twitterHandle && (
-                <IconButton
-                  onClick={() => window.open(`https://twitter.com/${profile.twitterHandle}`, '_blank')}
-                  sx={{ mr: 1 }}
-                >
-                  <TwitterIcon />
-                </IconButton>
-              )}
-              {profile.instagramHandle && (
-                <IconButton
-                  onClick={() => window.open(`https://instagram.com/${profile.instagramHandle}`, '_blank')}
-                  sx={{ mr: 1 }}
-                >
-                  <InstagramIcon />
-                </IconButton>
-              )}
-            </Box>
-
-            {/* Member Since */}
-            <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <CalendarIcon sx={{ mr: 1, fontSize: 16 }} />
-              Member since {formatDate(profile.memberSince)}
-            </Typography>
-          </Box>
-        </Box>
-      </Paper>
-
-      {/* Stats Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <BookIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.booksRead}</Typography>
-            <Typography variant="body2" color="text.secondary">Books Read</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <PersonIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.followersCount}</Typography>
-            <Typography variant="body2" color="text.secondary">Followers</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <PeopleIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.followingCount}</Typography>
-            <Typography variant="body2" color="text.secondary">Following</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <ReviewIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{profile.reviewsCount}</Typography>
-            <Typography variant="body2" color="text.secondary">Reviews</Typography>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* Tabs for different sections */}
-      <Paper elevation={1}>
-        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
-          <Tab label="Currently Reading" />
-          <Tab label="Read Books" />
-          <Tab label="Reviews" />
-          <Tab label="Followers" />
-          <Tab label="Following" />
-        </Tabs>
-        <Divider />
-        
-        <Box sx={{ p: 3 }}>
-          {activeTab === 0 && (
-            <Typography variant="body1" color="text.secondary">
-              Currently reading: {profile.currentlyReading} books
-            </Typography>
-          )}
-          {activeTab === 1 && (
-            <Typography variant="body1" color="text.secondary">
-              Read: {profile.booksRead} books
-            </Typography>
-          )}
-          {activeTab === 2 && (
-            <Typography variant="body1" color="text.secondary">
-              Reviews: {profile.reviewsCount} reviews
-            </Typography>
-          )}
-          {activeTab === 3 && (
-            <Typography variant="body1" color="text.secondary">
-              Followers: {profile.followersCount} followers
-            </Typography>
-          )}
-          {activeTab === 4 && (
-            <Typography variant="body1" color="text.secondary">
-              Following: {profile.followingCount} users
-            </Typography>
-          )}
-        </Box>
-      </Paper>
-    </Container>
+            {activeTab === 3 && (
+              <div style={{
+                textAlign: 'center',
+                color: '#6A5E4D',
+                fontSize: '16px'
+              }}>
+                Followers: {profile.followersCount || 0} followers
+                <div style={{ marginTop: '16px' }}>
+                  <PeopleIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                  <p style={{ marginTop: '8px' }}>Follower list will be displayed here</p>
+                </div>
+              </div>
+            )}
+            {activeTab === 4 && (
+              <div style={{
+                textAlign: 'center',
+                color: '#6A5E4D',
+                fontSize: '16px'
+              }}>
+                Following: {profile.followingCount || 0} users
+                <div style={{ marginTop: '16px' }}>
+                  <PeopleIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                  <p style={{ marginTop: '8px' }}>Following list will be displayed here</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

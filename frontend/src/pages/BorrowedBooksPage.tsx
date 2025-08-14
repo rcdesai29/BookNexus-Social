@@ -1,5 +1,5 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Alert, Button, Card, CardActions, CardContent, CardMedia, CircularProgress, Container, Typography } from '@mui/material';
+import { MenuBook, BookmarkBorder } from '@mui/icons-material';
 import React, { useState } from 'react';
 import type { BorrowedBookResponse } from '../app/services/models/BorrowedBookResponse';
 import { BookService } from '../app/services/services/BookService';
@@ -63,94 +63,326 @@ const BorrowedBooksPage: React.FC = () => {
 
   const isBookRead = (book: BorrowedBookResponse) => book.read || readBooks.has(book.id!);
 
-  return (
-    <Container maxWidth="xl" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Currently Reading</Typography>
-      {loading && <CircularProgress />}
-      {error && <Alert severity="error">{error.message || String(error)}</Alert>}
-      
-      {books.length === 0 && !loading && (
-        <Typography variant="body1" color="text.secondary">
-          You haven't borrowed any books yet.
-        </Typography>
-      )}
-
-      <div className="book-list-grid">
-        {books.map(book => (
-          <div className="book-list-card" key={book.id}>
-            <Card sx={{ 
-              height: '100%', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              width: '100%',
-              maxWidth: 280,
-              border: isBookRead(book) ? '2px solid #4caf50' : 'none'
-            }}>
-              {book.cover ? (
-                <CardMedia
-                  component="img"
-                  height="120"
-                  image={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
-                         `http://localhost:8088/api/v1/books/cover/${book.id}` : 
-                         `data:image/jpeg;base64,${book.cover}`}
-                  alt={book.title}
-                  sx={{ objectFit: 'contain' }}
-                />
-              ) : (
-                <CardMedia
-                  component="div"
-                  sx={{ height: 120, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    No Cover
-                  </Typography>
-                </CardMedia>
-              )}
-              <CardContent sx={{ flexGrow: 1, p: 1.5 }}>
-                <Typography variant="subtitle1" component="div" sx={{ fontWeight: 'bold', mb: 0.5, lineHeight: 1.2 }}>
-                  {book.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  by {book.authorName}
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ p: 1.5, pt: 0 }}>
-                <Button 
-                  size="small" 
-                  variant={isBookRead(book) ? "contained" : "outlined"}
-                  color={isBookRead(book) ? "success" : "primary"}
-                  startIcon={isBookRead(book) ? <CheckCircleIcon /> : undefined}
-                  onClick={() => book.id && (isBookRead(book) ? handleUnmarkAsRead(book.id) : handleMarkAsRead(book.id))}
-                  sx={{ flex: 1, mr: 1 }}
-                >
-                  {isBookRead(book) ? "Read ✓" : "Mark as Read"}
-                </Button>
-                <Button 
-                  size="small" 
-                  variant="outlined" 
-                  color="secondary"
-                  onClick={() => book.id && handleReturnBook(book.id)}
-                  sx={{ flex: 1 }}
-                >
-                  Return
-                </Button>
-              </CardActions>
-            </Card>
-          </div>
-        ))}
-      </div>
-      {data && (
-        <PaginationControls
-          currentPage={page}
-          totalPages={data.totalPages || 0}
-          pageSize={size}
-          totalElements={data.totalElements || 0}
-          onPageChange={setPage}
-          onPageSizeChange={setSize}
-          loading={loading}
+  const renderBookCover = (book: BorrowedBookResponse) => {
+    if (book.cover) {
+      return (
+        <img
+          src={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
+               `http://localhost:8088/api/v1/books/cover/${book.id}` : 
+               `data:image/jpeg;base64,${book.cover}`}
+          alt={book.title}
+          style={{
+            width: '100%',
+            height: '200px',
+            objectFit: 'cover',
+            borderRadius: '8px',
+            marginBottom: '12px'
+          }}
         />
-      )}
-    </Container>
+      );
+    }
+    return (
+      <div style={{
+        width: '100%',
+        height: '200px',
+        background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '8px',
+        marginBottom: '12px'
+      }}>
+        <MenuBook style={{ color: '#8B7355', fontSize: '48px' }} />
+      </div>
+    );
+  };
+
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(10px)',
+    padding: '16px',
+    borderRadius: '12px',
+    border: isBookRead(books[0]) ? '2px solid #4CAF50' : '1px solid #E6D7C3',
+    boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
+    transition: 'all 0.3s ease',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative'
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: '#D2691E',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px 16px',
+    fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    marginTop: '8px'
+  };
+
+  const secondaryButtonStyle: React.CSSProperties = {
+    backgroundColor: 'transparent',
+    color: '#D2691E',
+    border: '1px solid #D2691E',
+    borderRadius: '6px',
+    padding: '8px 16px',
+    fontSize: '14px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    marginTop: '8px'
+  };
+
+  const readBadgeStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)'
+  };
+
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#FAF3E3',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #E6D7C3',
+          borderTop: '4px solid #D2691E',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#FAF3E3',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          padding: '24px',
+          borderRadius: '12px',
+          border: '1px solid #E6D7C3',
+          textAlign: 'center'
+        }}>
+          <h3 style={{
+            fontFamily: 'Playfair Display, serif',
+            color: '#4B3F30',
+            marginBottom: '8px'
+          }}>
+            Error Loading Borrowed Books
+          </h3>
+          <p style={{ color: '#6A5E4D' }}>
+            {error.message || String(error)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', backgroundColor: '#FAF3E3' }}>
+      {/* Header Section */}
+      <div style={{
+        background: 'linear-gradient(90deg, #4B3F30, #5D4A33, #4B3F30)',
+        color: 'white',
+        padding: '48px 0',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <h1 style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: '36px',
+            fontWeight: 700,
+            marginBottom: '16px'
+          }}>
+            Currently Reading
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            color: 'rgba(255, 255, 255, 0.9)',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Track your reading progress and manage borrowed books
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+        {books.length === 0 && !loading && (
+          <div style={{
+            textAlign: 'center',
+            padding: '64px 24px',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: '16px',
+            border: '1px solid #E6D7C3'
+          }}>
+            <BookmarkBorder style={{ 
+              color: '#8B7355', 
+              fontSize: '64px',
+              marginBottom: '24px'
+            }} />
+            <h3 style={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: '24px',
+              color: '#4B3F30',
+              marginBottom: '16px'
+            }}>
+              No Books Borrowed
+            </h3>
+            <p style={{
+              color: '#6A5E4D',
+              fontSize: '16px',
+              marginBottom: '24px'
+            }}>
+              You haven't borrowed any books yet. Browse the library to find your next read!
+            </p>
+            <button
+              style={{
+                ...buttonStyle,
+                padding: '12px 24px',
+                fontSize: '16px'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+              onClick={() => window.location.href = '/books'}
+            >
+              Browse Books
+            </button>
+          </div>
+        )}
+
+        {books.length > 0 && (
+          <>
+            <div className="book-list-grid">
+              {books.map(book => (
+                <div 
+                  key={book.id}
+                  style={cardStyle}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(75, 63, 48, 0.15)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
+                  }}
+                >
+                  {isBookRead(book) && (
+                    <div style={readBadgeStyle}>
+                      <CheckCircleIcon style={{ fontSize: '20px' }} />
+                    </div>
+                  )}
+                  {renderBookCover(book)}
+                  <h3 style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    color: '#4B3F30',
+                    marginBottom: '8px',
+                    lineHeight: 1.3
+                  }}>
+                    {book.title}
+                  </h3>
+                  <p style={{
+                    color: '#6A5E4D',
+                    fontSize: '14px',
+                    marginBottom: '16px'
+                  }}>
+                    by {book.authorName}
+                  </p>
+                  
+                  <div style={{ marginTop: 'auto' }}>
+                    {isBookRead(book) ? (
+                      <button
+                        style={secondaryButtonStyle}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = '#D2691E';
+                          e.currentTarget.style.color = 'white';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#D2691E';
+                        }}
+                        onClick={() => book.id && handleUnmarkAsRead(book.id)}
+                      >
+                        Mark as Unread
+                      </button>
+                    ) : (
+                      <button
+                        style={buttonStyle}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+                        onClick={() => book.id && handleMarkAsRead(book.id)}
+                      >
+                        Mark as Read
+                      </button>
+                    )}
+                    <button
+                      style={secondaryButtonStyle}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = '#D2691E';
+                        e.currentTarget.style.color = 'white';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = '#D2691E';
+                      }}
+                      onClick={() => book.id && handleReturnBook(book.id)}
+                    >
+                      Return Book
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {data && (
+              <PaginationControls
+                currentPage={page}
+                totalPages={data.totalPages || 0}
+                pageSize={size}
+                totalElements={data.totalElements || 0}
+                onPageChange={setPage}
+                onPageSizeChange={setSize}
+                loading={loading}
+              />
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
