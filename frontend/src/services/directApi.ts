@@ -1,6 +1,15 @@
 // Direct API service to bypass OpenAPI issues
+let cachedBooksData: any = null;
+let cacheTime = 0;
+const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
+
 export const directApiService = {
   async getGoogleBooks(query: string = 'bestsellers', maxResults: number = 20): Promise<any> {
+    // Use cache for trending/bestsellers queries to improve performance
+    if ((query === 'bestsellers' || query === 'trending') && cachedBooksData && (Date.now() - cacheTime < CACHE_DURATION)) {
+      console.log('Using cached books data for better performance');
+      return cachedBooksData;
+    }
     try {
       let endpoint = '';
       
@@ -30,6 +39,13 @@ export const directApiService = {
       
       const data = await response.json();
       console.log('API Response:', data);
+      
+      // Cache the results for trending/bestsellers queries
+      if (query === 'bestsellers' || query === 'trending') {
+        cachedBooksData = data;
+        cacheTime = Date.now();
+        console.log('Cached books data for improved performance');
+      }
       
       return data;
     } catch (error) {

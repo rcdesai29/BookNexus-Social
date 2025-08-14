@@ -21,6 +21,11 @@ public class GoogleBookService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    
+    // Simple cache to avoid repeated API calls
+    private GoogleBookResponse cachedTrendingBooks;
+    private long lastCacheTime = 0;
+    private static final long CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
     @Value("${application.external.googlebooks.enabled:false}")
     private boolean googleBooksEnabled;
@@ -189,28 +194,40 @@ public class GoogleBookService {
     }
 
     public GoogleBookResponse getTrendingBooks(int maxResults) {
-        // Use a mix of popular book titles and bestsellers for better discovery
-        List<String> popularQueries = List.of(
-            "Red Rising Pierce Brown",
-            "Atomic Habits James Clear", 
-            "Harry Potter Rowling",
-            "A Court of Thorns and Roses Sarah J Maas",
-            "The Poppy War R F Kuang",
-            "Fourth Wing Rebecca Ross",
-            "It Ends with Us Colleen Hoover",
-            "The Seven Husbands of Evelyn Hugo",
-            "Project Hail Mary Andy Weir",
-            "The Silent Patient Alex Michaelides",
-            "Where the Crawdads Sing Delia Owens",
-            "Dune Frank Herbert",
-            "The Midnight Library Matt Haig",
-            "Circe Madeline Miller"
+        // Check cache first
+        long currentTime = System.currentTimeMillis();
+        if (cachedTrendingBooks != null && (currentTime - lastCacheTime) < CACHE_DURATION_MS) {
+            log.debug("Returning cached trending books");
+            // Return from cache but respect the requested maxResults
+            List<GoogleBookDto> cachedItems = cachedTrendingBooks.getItems();
+            if (cachedItems != null && !cachedItems.isEmpty()) {
+                List<GoogleBookDto> shuffledBooks = new ArrayList<>(cachedItems);
+                java.util.Collections.shuffle(shuffledBooks);
+                List<GoogleBookDto> limitedBooks = shuffledBooks.stream()
+                        .limit(maxResults)
+                        .collect(java.util.stream.Collectors.toList());
+                
+                return GoogleBookResponse.builder()
+                        .items(limitedBooks)
+                        .totalItems(limitedBooks.size())
+                        .kind("books#volumes")
+                        .build();
+            }
+        }
+        
+        // Use fewer but more effective combined queries for better performance
+        List<String> optimizedQueries = List.of(
+            "Red Rising OR Atomic Habits OR Harry Potter",
+            "Court Thorns Roses OR Poppy War OR Fourth Wing", 
+            "It Ends with Us OR Seven Husbands Evelyn Hugo",
+            "Project Hail Mary OR Silent Patient OR Dune",
+            "Midnight Library OR Circe OR Where Crawdads Sing"
         );
         
         List<GoogleBookDto> allBooks = new ArrayList<>();
-        int booksPerQuery = Math.max(1, maxResults / popularQueries.size());
+        int booksPerQuery = Math.max(3, maxResults / optimizedQueries.size());
         
-        for (String query : popularQueries) {
+        for (String query : optimizedQueries) {
             try {
                 GoogleBookResponse response = searchBooks(query, booksPerQuery, 0);
                 if (response.getItems() != null) {
@@ -225,6 +242,16 @@ public class GoogleBookService {
                 // Continue with other queries
             }
         }
+        
+        // Cache the results
+        GoogleBookResponse result = GoogleBookResponse.builder()
+                .items(allBooks)
+                .totalItems(allBooks.size())
+                .kind("books#volumes")
+                .build();
+        
+        cachedTrendingBooks = result;
+        lastCacheTime = currentTime;
         
         // Shuffle for variety and limit to requested number
         java.util.Collections.shuffle(allBooks);

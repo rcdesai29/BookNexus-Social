@@ -1137,3 +1137,69 @@ src/pages/SearchPage.tsx
 
 webpack compiled with 1 warning
 No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+Compiling...
+No issues found.
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
