@@ -22,3 +22,4 @@ export type { RegistrationRequest } from './models/RegistrationRequest';
 export { AuthenticationService } from './services/AuthenticationService';
 export { BookService } from './services/BookService';
 export { FeedbackService } from './services/FeedbackService';
+export { GoogleBooksService } from './services/GoogleBooksService';

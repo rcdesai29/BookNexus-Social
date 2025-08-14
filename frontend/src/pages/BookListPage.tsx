@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CircularProgress,
@@ -13,23 +13,36 @@ import {
   MenuBook
 } from '@mui/icons-material';
 import PaginationControls from '../components/PaginationControls';
+import GoogleBookCard from '../components/GoogleBookCard';
+import GoogleBookReviewModal from '../components/GoogleBookReviewModal';
 import { useBooks } from '../hooks/useBooks';
 import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
+import { useTrendingBooks, usePopularBooks, useBestsellers, GoogleBook } from '../hooks/useGoogleBooks';
 
 const BookListPage: React.FC = () => {
   const { data: allBooks, loading: allBooksLoading, error: allBooksError, page, setPage, size, setSize } = useBooks();
   const { data: borrowedBooks, loading: borrowedLoading } = useBorrowedBooks();
   const { data: myBooks, loading: myBooksLoading } = useMyBooks();
   const { data: readBooks, loading: readBooksLoading } = useReadBooks();
+  
+  // Google Books API hooks
+  const { data: trendingBooks, loading: trendingLoading } = useTrendingBooks(3);
+  const { data: popularBooks, loading: popularLoading } = usePopularBooks(4);
+  const { data: bestsellers, loading: bestsellersLoading } = useBestsellers(20);
+  
   const navigate = useNavigate();
+  
+  // Modal state
+  const [selectedBook, setSelectedBook] = useState<GoogleBook | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // Get currently reading book (first borrowed book)
   const currentlyReading = borrowedBooks?.content?.[0];
 
-  // Get trending books (first 5 from all books)
-  const trendingBooks = allBooks?.content?.slice(0, 5) || [];
+  // Get trending books from Google Books API
+  const trendingBooksData = trendingBooks || [];
 
   // Get to-read books (my books that aren't borrowed or read)
   const toReadBooks = myBooks?.content?.filter(book => 
@@ -39,6 +52,28 @@ const BookListPage: React.FC = () => {
 
   // Get favorite books (read books, first 4)
   const favoriteBooks = readBooks?.content?.slice(0, 4) || [];
+
+  // Review modal handlers
+  const handleReviewClick = (book: GoogleBook) => {
+    setSelectedBook(book);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setSelectedBook(null);
+  };
+
+  const handleSubmitReview = async (bookId: string, rating: number, review: string) => {
+    // For now, we'll just log the review since we don't have a backend endpoint for Google Books reviews
+    console.log('Review submitted:', { bookId, rating, review });
+    
+    // In a real implementation, you would save this to your backend
+    // await FeedbackService.saveGoogleBookFeedback({ bookId, rating, review });
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
 
   const renderBookCover = (book: any, style: React.CSSProperties = {}) => {
     if (book.cover) {
@@ -218,62 +253,27 @@ const BookListPage: React.FC = () => {
             <div style={{ marginBottom: '24px' }}>
               <h2 style={headingStyle}>Trending Today</h2>
               
-              {allBooksLoading ? (
+              {trendingLoading ? (
                 <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
                   <CircularProgress sx={{ color: '#D2691E' }} />
                 </div>
-              ) : trendingBooks.length > 0 ? (
+              ) : trendingBooksData.length > 0 ? (
                 <div style={cardStyle}>
                   <div style={{
                     display: 'flex',
-                    gap: '16px',
+                    gap: '12px',
                     overflowX: 'auto',
                     paddingBottom: '8px'
                   }}>
-                    {trendingBooks.map((book) => (
-                      <div 
-                        key={book.id}
-                        style={{
-                          minWidth: '110px',
-                          width: '110px',
-                          height: '170px',
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                          cursor: 'pointer',
-                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                          padding: '8px',
-                          transition: 'transform 0.2s'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
-                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        onClick={() => navigate(`/books/${book.id}`)}
-                      >
-                        {renderBookCover(book, { width: '100%', height: '120px', marginBottom: '8px' })}
-                        <h4 style={{
-                          fontFamily: 'Playfair Display, serif',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          color: '#4B3F30',
-                          lineHeight: 1.2,
-                          margin: 0,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical'
-                        }}>
-                          {book.title}
-                        </h4>
-                        <p style={{
-                          color: '#6A5E4D',
-                          fontSize: '10px',
-                          margin: 0,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {book.authorName}
-                        </p>
+                    {trendingBooksData.map((book) => (
+                      <div key={book.googleBookId} style={{ minWidth: '120px', width: '120px' }}>
+                        <GoogleBookCard
+                          book={book}
+                          showRating={true}
+                          showReviewButton={false}
+                          onReviewClick={handleReviewClick}
+                          style={{ padding: '12px' }}
+                        />
                       </div>
                     ))}
                   </div>
@@ -282,6 +282,43 @@ const BookListPage: React.FC = () => {
                 <div style={{ ...cardStyle, textAlign: 'center' }}>
                   <TrendingUp style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
                   <p style={{ color: '#6A5E4D' }}>No trending books available</p>
+                </div>
+              )}
+            </div>
+
+            {/* Popular Books Section */}
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={headingStyle}>Popular Books</h2>
+              
+              {popularLoading ? (
+                <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
+                  <CircularProgress sx={{ color: '#D2691E' }} />
+                </div>
+              ) : popularBooks.length > 0 ? (
+                <div style={cardStyle}>
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    overflowX: 'auto',
+                    paddingBottom: '8px'
+                  }}>
+                    {popularBooks.map((book) => (
+                      <div key={book.googleBookId} style={{ minWidth: '120px', width: '120px' }}>
+                        <GoogleBookCard
+                          book={book}
+                          showRating={true}
+                          showReviewButton={false}
+                          onReviewClick={handleReviewClick}
+                          style={{ padding: '12px' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ ...cardStyle, textAlign: 'center' }}>
+                  <Favorite style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+                  <p style={{ color: '#6A5E4D' }}>No popular books available</p>
                 </div>
               )}
             </div>
@@ -394,98 +431,46 @@ const BookListPage: React.FC = () => {
           </Alert>
         )}
 
-        {allBooks?.content && allBooks.content.length > 0 && (
-          <div>
-            <h2 style={headingStyle}>Discover Books</h2>
-            
+        {/* Discover Books Section */}
+        <div>
+          <h2 style={headingStyle}>Discover Books</h2>
+          
+          {bestsellersLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+              <CircularProgress sx={{ color: '#D2691E' }} size={48} />
+            </div>
+          ) : bestsellers.length > 0 ? (
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
               gap: '24px'
             }}>
-              {allBooks.content.map(book => (
-                <div key={book.id}>
-                  <div 
-                    style={{
-                      ...cardStyle,
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s, box-shadow 0.2s',
-                      height: '100%'
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-4px)';
-                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(75, 63, 48, 0.15)';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
-                    }}
-                    onClick={() => navigate(`/books/${book.id}`)}
-                  >
-                    {renderBookCover(book, { width: '100%', height: '192px', marginBottom: '16px' })}
-                    <div>
-                      <h4 style={{
-                        fontFamily: 'Playfair Display, serif',
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        color: '#4B3F30',
-                        marginBottom: '8px',
-                        lineHeight: 1.3,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                      }}>
-                        {book.title}
-                      </h4>
-                      <p style={{
-                        color: '#6A5E4D',
-                        marginBottom: '12px',
-                        fontSize: '12px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        by {book.authorName}
-                      </p>
-                      <button 
-                        style={{
-                          ...buttonStyle,
-                          width: '100%',
-                          fontSize: '12px'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/books/${book.id}`);
-                        }}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              {bestsellers.map(book => (
+                <GoogleBookCard
+                  key={book.googleBookId}
+                  book={book}
+                  showRating={true}
+                  showReviewButton={true}
+                  onReviewClick={handleReviewClick}
+                />
               ))}
             </div>
-            
-            {allBooks && (
-              <div style={{ marginTop: '48px' }}>
-                <PaginationControls
-                  currentPage={page}
-                  totalPages={allBooks.totalPages || 0}
-                  pageSize={size}
-                  totalElements={allBooks.totalElements || 0}
-                  onPageChange={setPage}
-                  onPageSizeChange={setSize}
-                  loading={allBooksLoading}
-                />
-              </div>
-            )}
-          </div>
-        )}
+          ) : (
+            <div style={{ ...cardStyle, textAlign: 'center', padding: '48px' }}>
+              <MenuBook style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+              <p style={{ color: '#6A5E4D' }}>No books available</p>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Google Book Review Modal */}
+      <GoogleBookReviewModal
+        book={selectedBook}
+        isOpen={isReviewModalOpen}
+        onClose={handleCloseReviewModal}
+        onSubmitReview={handleSubmitReview}
+      />
     </div>
   );
 };
