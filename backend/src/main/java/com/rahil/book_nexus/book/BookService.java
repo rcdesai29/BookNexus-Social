@@ -59,15 +59,15 @@ public class BookService {
                 Book savedBook = bookRepository.save(book);
                 log.info("Book saved with ID: {}", savedBook.getId());
 
-                // Automatically create a transaction history record marking the book as read
-                // since the user is uploading it to their library
+                // Create a transaction history record for the book owner
+                // but don't automatically mark as read - let user decide when they read it
                 BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
                                 .user(user)
                                 .book(savedBook)
                                 .returned(true)
                                 .returnApproved(true)
-                                .read(true)
-                                .readCount(1)
+                                .read(false) // Don't automatically mark as read
+                                .readCount(0) // Start with 0 reads
                                 .createdBy(user.getId())
                                 .build();
                 BookTransactionHistory savedTransaction = transactionHistoryRepository.save(transactionHistory);

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  StarHalf as StarHalfIcon,
   MenuBook as MenuBookIcon,
   RateReview as ReviewIcon
 } from '@mui/icons-material';
-import { GoogleBook } from '../hooks/useGoogleBooks';
+import { GoogleBook } from '../hooks/useGoogleBooksSimple';
+import StarRating from './StarRating';
+import { tokenService } from '../services/tokenService';
 
 interface GoogleBookCardProps {
   book: GoogleBook;
@@ -24,7 +22,6 @@ const GoogleBookCard: React.FC<GoogleBookCardProps> = ({
   onReviewClick,
   style = {}
 }) => {
-  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const isSmall = style.padding === '12px';
 
@@ -63,42 +60,6 @@ const GoogleBookCard: React.FC<GoogleBookCardProps> = ({
     );
   };
 
-  const renderStars = (rating: number) => {
-    const starSize = isSmall ? '12px' : '16px';
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <StarIcon
-          key={`full-${i}`}
-          style={{ color: '#FFD700', fontSize: starSize }}
-        />
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <StarHalfIcon
-          key="half"
-          style={{ color: '#FFD700', fontSize: starSize }}
-        />
-      );
-    }
-
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <StarBorderIcon
-          key={`empty-${i}`}
-          style={{ color: '#D3D3D3', fontSize: starSize }}
-        />
-      );
-    }
-
-    return stars;
-  };
 
   const cardStyle: React.CSSProperties = {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -187,25 +148,14 @@ const GoogleBookCard: React.FC<GoogleBookCardProps> = ({
           by {book.authorName}
         </p>
 
-        {showRating && book.averageRating > 0 && book.ratingsCount >= 10 && (
+        {showRating && (
           <div style={{ marginBottom: isSmall ? '8px' : '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '2px' }}>
-              {renderStars(book.averageRating)}
-              <span style={{ 
-                color: '#6A5E4D', 
-                fontSize: isSmall ? '9px' : '12px', 
-                marginLeft: '2px' 
-              }}>
-                ({book.ratingsCount})
-              </span>
-            </div>
-            <div style={{ 
-              color: '#4B3F30', 
-              fontSize: isSmall ? '9px' : '12px', 
-              fontWeight: 500 
-            }}>
-              {book.averageRating.toFixed(1)} out of 5
-            </div>
+            <StarRating 
+              rating={book.averageRating} 
+              showCount={true}
+              count={book.ratingsCount}
+              size={isSmall ? "small" : "medium"}
+            />
           </div>
         )}
         
@@ -219,7 +169,9 @@ const GoogleBookCard: React.FC<GoogleBookCardProps> = ({
             onClick={handleReviewClick}
           >
             <ReviewIcon style={{ fontSize: '14px' }} />
-            {book.averageRating > 0 && book.ratingsCount >= 10 ? 'Add Review' : 'Rate & Review'}
+{tokenService.isLoggedIn() 
+              ? (book.averageRating > 0 && book.ratingsCount >= 10 ? 'Add Review' : 'Rate & Review')
+              : 'Sign in to Review'}
           </button>
         )}
       </div>

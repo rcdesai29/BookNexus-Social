@@ -24,3 +24,4 @@ export { BookService } from './services/BookService';
 export { FeedbackService } from './services/FeedbackService';
 export { GoogleBooksService } from './services/GoogleBooksService';
 export { GoogleBookFeedbackService } from './services/GoogleBookFeedbackService';
+export { UserBookListService } from './services/UserBookListService';

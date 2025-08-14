@@ -7,16 +7,15 @@ import {
 import {
   Search as SearchIcon,
   Clear as ClearIcon,
-  Book as BookIcon,
-  TrendingUp as TrendingIcon
+  Book as BookIcon
 } from '@mui/icons-material';
 import GoogleBookCard from '../components/GoogleBookCard';
 import GoogleBookReviewModal from '../components/GoogleBookReviewModal';
-import { useBooks } from '../hooks/useBooks';
-import { useGoogleBooks, GoogleBook } from '../hooks/useGoogleBooks';
-import { GoogleBooksService } from '../app/services/services/GoogleBooksService';
+import { GoogleBook } from '../hooks/useGoogleBooksSimple';
+import { directApiService } from '../services/directApi';
 import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
 import { BookService } from '../app/services/services/BookService';
+import { tokenService } from '../services/tokenService';
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +28,6 @@ const SearchPage: React.FC = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   
   // State for results
-  const [localBooks, setLocalBooks] = useState<any[]>([]);
-  const [googleBooks, setGoogleBooks] = useState<GoogleBook[]>([]);
   const [combinedResults, setCombinedResults] = useState<any[]>([]);
   
   // Modal state
@@ -40,8 +37,6 @@ const SearchPage: React.FC = () => {
   // Search function
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
-      setLocalBooks([]);
-      setGoogleBooks([]);
       setCombinedResults([]);
       return;
     }
@@ -59,15 +54,35 @@ const SearchPage: React.FC = () => {
       ) || [];
 
       // Search Google Books API
-      const googleResults = await GoogleBooksService.searchBooks(searchQuery, 20);
-      const convertedGoogleBooks = (googleResults.items || []).map(book => 
-        GoogleBooksService.convertGoogleBookToBookFormat(book)
-      );
+      const googleResults = await directApiService.getGoogleBooks(searchQuery, 20);
+      const convertedGoogleBooks = (googleResults.items || []).map((item: any) => {
+        // Backend returns flattened structure, not wrapped in volumeInfo
+        const isbn = item.isbn13 || item.isbn10 || 
+                     item.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier ||
+                     item.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier ||
+                     '';
+
+        return {
+          id: item.id,
+          title: item.title || 'Unknown Title',
+          authorName: item.authors?.join(', ') || 'Unknown Author',
+          isbn: isbn,
+          synopsis: item.description || 'No description available.',
+          cover: item.imageLinks?.thumbnail || null,
+          publishedDate: item.publishedDate,
+          pageCount: item.pageCount,
+          categories: item.categories,
+          averageRating: item.averageRating || 0,
+          ratingsCount: item.ratingsCount || 0,
+          isGoogleBook: true,
+          googleBookId: item.id
+        };
+      });
 
       // Filter Google Books to avoid duplicates and low-quality results
-      const filteredGoogleBooks = convertedGoogleBooks.filter(book => {
-        // Remove books with very low rating counts
-        if (book.ratingsCount > 0 && book.ratingsCount < 10) return false;
+      const filteredGoogleBooks = convertedGoogleBooks.filter((book: GoogleBook) => {
+        // Remove books with very low rating counts (but be more lenient)
+        if (book.ratingsCount > 0 && book.ratingsCount < 5) return false;
         
         // Check if this Google Book is already in local database
         const isDuplicate = filteredLocalBooks.some(localBook => 
@@ -79,13 +94,12 @@ const SearchPage: React.FC = () => {
         return !isDuplicate;
       });
 
-      setLocalBooks(filteredLocalBooks);
-      setGoogleBooks(filteredGoogleBooks);
+      // Store filtered results for combination
 
       // Combine and sort results
       const combined = [
         ...filteredLocalBooks.map(book => ({ ...book, source: 'local' })),
-        ...filteredGoogleBooks.map(book => ({ ...book, source: 'google' }))
+        ...filteredGoogleBooks.map((book: GoogleBook) => ({ ...book, source: 'google' }))
       ];
 
       // Sort by relevance (exact matches first, then partial matches)
@@ -143,6 +157,13 @@ const SearchPage: React.FC = () => {
 
   // Review modal handlers
   const handleReviewClick = (book: GoogleBook) => {
+    // Check if user is logged in
+    if (!tokenService.isLoggedIn()) {
+      // Redirect to login page for guests
+      navigate('/login');
+      return;
+    }
+    
     setSelectedBook(book);
     setIsReviewModalOpen(true);
   };

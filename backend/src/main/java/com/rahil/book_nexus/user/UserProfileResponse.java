@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -49,8 +49,8 @@ public class UserProfileResponse {
     private Long followingCount;
     
     // Timestamps
-    private LocalDate memberSince;
-    private LocalDate lastActive;
+    private String memberSince;
+    private String lastActive;
     
     // Social
     private Boolean isFollowing;

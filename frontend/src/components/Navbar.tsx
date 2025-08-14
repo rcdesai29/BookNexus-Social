@@ -60,13 +60,12 @@ const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { label: 'Home', to: '/books', show: true },
+    { label: 'Home', to: '/', show: true },
     { label: 'Search', to: '/search', show: true },
     { label: 'My Books', to: '/my-books', show: isLoggedIn },
     { label: 'Currently Reading', to: '/borrowed-books', show: isLoggedIn },
     { label: 'TBR', to: '/tbr', show: isLoggedIn },
     { label: 'Read', to: '/read', show: isLoggedIn },
-    { label: 'Add Book', to: '/add-book', show: isLoggedIn },
   ];
 
   const filteredLinks = navLinks.filter(link => link.show);
@@ -227,7 +226,7 @@ const Navbar: React.FC = () => {
         <Typography
           variant="h4"
           component={Link}
-          to="/books"
+          to="/"
           sx={{
             color: '#3C2A1E',
             textDecoration: 'none',
@@ -396,28 +395,6 @@ const Navbar: React.FC = () => {
             ) : (
               <Stack direction="row" spacing={2}>
                 <Button
-                  variant="outlined"
-                  component={Link}
-                  to="/login"
-                  sx={{
-                    color: '#3C2A1E',
-                    borderColor: '#E6D7C3',
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 500,
-                    px: 3,
-                    py: 1,
-                    borderRadius: '8px',
-                    textTransform: 'none',
-                    '&:hover': {
-                      backgroundColor: '#F7F1E8',
-                      borderColor: '#B8956A',
-                      color: '#B8956A'
-                    }
-                  }}
-                >
-                  Login
-                </Button>
-                <Button
                   variant="contained"
                   component={Link}
                   to="/register"
@@ -437,7 +414,29 @@ const Navbar: React.FC = () => {
                     }
                   }}
                 >
-                  Register
+                  Create Account
+                </Button>
+                <Button
+                  variant="outlined"
+                  component={Link}
+                  to="/login"
+                  sx={{
+                    color: '#3C2A1E',
+                    borderColor: '#E6D7C3',
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    px: 3,
+                    py: 1,
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    '&:hover': {
+                      backgroundColor: '#F7F1E8',
+                      borderColor: '#B8956A',
+                      color: '#B8956A'
+                    }
+                  }}
+                >
+                  Sign In
                 </Button>
               </Stack>
             )}

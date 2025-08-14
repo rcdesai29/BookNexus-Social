@@ -4,7 +4,8 @@ import './App.css';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import ActivateAccountPage from './pages/ActivateAccountPage';
-import AddBookPage from './pages/AddBookPage';
+
+import HomePage from './pages/HomePage';
 import BookDetailPage from './pages/BookDetailPage';
 import BookListPage from './pages/BookListPage';
 import BorrowedBooksPage from './pages/BorrowedBooksPage';
@@ -26,6 +27,13 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/activate-account" element={<ActivateAccountPage />} />
+        
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
+        
+        {/* Protected routes */}
         <Route path="/books" element={
           <ProtectedRoute>
             <BookListPage />
@@ -36,7 +44,6 @@ function App() {
             <BookDetailPage />
           </ProtectedRoute>
         } />
-        <Route path="/search" element={<SearchPage />} />
         <Route path="/my-books" element={
           <ProtectedRoute>
             <MyBooksPage />
@@ -47,11 +54,6 @@ function App() {
             <BorrowedBooksPage />
           </ProtectedRoute>
         } />
-        <Route path="/add-book" element={
-          <ProtectedRoute>
-            <AddBookPage />
-          </ProtectedRoute>
-        } />
         <Route path="/tbr" element={<ProtectedRoute><TBRPage /></ProtectedRoute>} />
         <Route path="/read" element={<ProtectedRoute><ReadPage /></ProtectedRoute>} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
@@ -60,8 +62,9 @@ function App() {
             <EditProfilePage />
           </ProtectedRoute>
         } />
-        <Route path="/" element={<Navigate to="/books" replace />} />
-        <Route path="*" element={<Navigate to="/books" replace />} />
+        
+        {/* Fallback for unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

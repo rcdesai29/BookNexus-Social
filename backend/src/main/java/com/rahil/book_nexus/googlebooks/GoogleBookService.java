@@ -54,12 +54,12 @@ public class GoogleBookService {
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             JsonNode rootNode = objectMapper.readTree(response.getBody());
 
-            List<GoogleBook> books = new ArrayList<>();
+            List<GoogleBookDto> books = new ArrayList<>();
             JsonNode itemsNode = rootNode.get("items");
             
             if (itemsNode != null && itemsNode.isArray()) {
                 for (JsonNode itemNode : itemsNode) {
-                    GoogleBook book = parseGoogleBook(itemNode);
+                    GoogleBookDto book = parseGoogleBook(itemNode);
                     if (book != null) {
                         books.add(book);
                     }
@@ -82,7 +82,7 @@ public class GoogleBookService {
         }
     }
 
-    public GoogleBook getBookById(String bookId) {
+    public GoogleBookDto getBookById(String bookId) {
         if (!googleBooksEnabled) {
             log.warn("Google Books API is disabled");
             return null;
@@ -105,7 +105,7 @@ public class GoogleBookService {
         }
     }
 
-    private GoogleBook parseGoogleBook(JsonNode itemNode) {
+    private GoogleBookDto parseGoogleBook(JsonNode itemNode) {
         try {
             JsonNode volumeInfo = itemNode.get("volumeInfo");
             if (volumeInfo == null) {
@@ -128,10 +128,10 @@ public class GoogleBookService {
             }
 
             // Parse image links
-            GoogleBook.GoogleBookImageLinks imageLinks = null;
+            GoogleBookDto.GoogleBookImageLinks imageLinks = null;
             JsonNode imageLinksNode = volumeInfo.get("imageLinks");
             if (imageLinksNode != null) {
-                imageLinks = GoogleBook.GoogleBookImageLinks.builder()
+                imageLinks = GoogleBookDto.GoogleBookImageLinks.builder()
                         .thumbnail(getStringValue(imageLinksNode, "thumbnail"))
                         .smallThumbnail(getStringValue(imageLinksNode, "smallThumbnail"))
                         .build();
@@ -162,7 +162,7 @@ public class GoogleBookService {
                 }
             }
 
-            return GoogleBook.builder()
+            return GoogleBookDto.builder()
                     .id(itemNode.get("id") != null ? itemNode.get("id").asText() : null)
                     .title(title)
                     .authors(authors)
@@ -189,13 +189,115 @@ public class GoogleBookService {
     }
 
     public GoogleBookResponse getTrendingBooks(int maxResults) {
-        int currentYear = java.time.Year.now().getValue();
-        String query = "publishedDate:" + currentYear + " fiction";
-        return searchBooks(query, maxResults, 0);
+        // Use a mix of popular book titles and bestsellers for better discovery
+        List<String> popularQueries = List.of(
+            "Red Rising Pierce Brown",
+            "Atomic Habits James Clear", 
+            "Harry Potter Rowling",
+            "A Court of Thorns and Roses Sarah J Maas",
+            "The Poppy War R F Kuang",
+            "Fourth Wing Rebecca Ross",
+            "It Ends with Us Colleen Hoover",
+            "The Seven Husbands of Evelyn Hugo",
+            "Project Hail Mary Andy Weir",
+            "The Silent Patient Alex Michaelides",
+            "Where the Crawdads Sing Delia Owens",
+            "Dune Frank Herbert",
+            "The Midnight Library Matt Haig",
+            "Circe Madeline Miller"
+        );
+        
+        List<GoogleBookDto> allBooks = new ArrayList<>();
+        int booksPerQuery = Math.max(1, maxResults / popularQueries.size());
+        
+        for (String query : popularQueries) {
+            try {
+                GoogleBookResponse response = searchBooks(query, booksPerQuery, 0);
+                if (response.getItems() != null) {
+                    allBooks.addAll(response.getItems());
+                }
+                // Stop if we have enough books
+                if (allBooks.size() >= maxResults) {
+                    break;
+                }
+            } catch (Exception e) {
+                log.warn("Error searching for query '{}': {}", query, e.getMessage());
+                // Continue with other queries
+            }
+        }
+        
+        // Shuffle for variety and limit to requested number
+        java.util.Collections.shuffle(allBooks);
+        List<GoogleBookDto> limitedBooks = allBooks.stream()
+                .limit(maxResults)
+                .collect(java.util.stream.Collectors.toList());
+        
+        return GoogleBookResponse.builder()
+                .items(limitedBooks)
+                .totalItems(limitedBooks.size())
+                .kind("books#volumes")
+                .build();
     }
 
     public GoogleBookResponse getPopularBooks(String category, int maxResults) {
-        String query = "subject:" + category + " bestseller";
-        return searchBooks(query, maxResults, 0);
+        // Use specific popular books by category
+        List<String> queries;
+        if ("fiction".equalsIgnoreCase(category)) {
+            queries = List.of(
+                "The Book Thief Markus Zusak",
+                "The Kite Runner Khaled Hosseini", 
+                "1984 George Orwell",
+                "To Kill a Mockingbird Harper Lee",
+                "The Great Gatsby F Scott Fitzgerald",
+                "Pride and Prejudice Jane Austen",
+                "The Catcher in the Rye J D Salinger"
+            );
+        } else if ("fantasy".equalsIgnoreCase(category)) {
+            queries = List.of(
+                "The Hobbit J R R Tolkien",
+                "Game of Thrones George R R Martin",
+                "The Name of the Wind Patrick Rothfuss",
+                "The Way of Kings Brandon Sanderson",
+                "The Final Empire Brandon Sanderson"
+            );
+        } else if ("romance".equalsIgnoreCase(category)) {
+            queries = List.of(
+                "It Ends with Us Colleen Hoover",
+                "Beach Read Emily Henry",
+                "The Hating Game Sally Thorne",
+                "Red White Royal Blue Casey McQuiston"
+            );
+        } else {
+            // Fallback to trending books
+            return getTrendingBooks(maxResults);
+        }
+        
+        List<GoogleBookDto> allBooks = new ArrayList<>();
+        int booksPerQuery = Math.max(1, maxResults / queries.size());
+        
+        for (String query : queries) {
+            try {
+                GoogleBookResponse response = searchBooks(query, booksPerQuery, 0);
+                if (response.getItems() != null) {
+                    allBooks.addAll(response.getItems());
+                }
+                if (allBooks.size() >= maxResults) {
+                    break;
+                }
+            } catch (Exception e) {
+                log.warn("Error searching for category query '{}': {}", query, e.getMessage());
+            }
+        }
+        
+        java.util.Collections.shuffle(allBooks);
+        List<GoogleBookDto> limitedBooks = allBooks.stream()
+                .limit(maxResults)
+                .collect(java.util.stream.Collectors.toList());
+        
+        return GoogleBookResponse.builder()
+                .items(limitedBooks)
+                .totalItems(limitedBooks.size())
+                .kind("books#volumes")
+                .build();
     }
 }

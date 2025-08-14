@@ -5,22 +5,17 @@ import {
   Alert
 } from '@mui/material';
 import {
-  TrendingUp,
   Coffee,
   AutoStories,
-  Favorite,
   Star,
   MenuBook
 } from '@mui/icons-material';
-import PaginationControls from '../components/PaginationControls';
-import GoogleBookCard from '../components/GoogleBookCard';
-import GoogleBookReviewModal from '../components/GoogleBookReviewModal';
 import { useBooks } from '../hooks/useBooks';
 import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
-import { useTrendingBooks, usePopularBooks, useBestsellers, GoogleBook } from '../hooks/useGoogleBooks';
-import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
+import { useGoogleBooks } from '../hooks/useGoogleBooks';
+import { UserBookListService } from '../app/services/services/UserBookListService';
 
 const BookListPage: React.FC = () => {
   const { data: allBooks, loading: allBooksLoading, error: allBooksError, page, setPage, size, setSize } = useBooks();
@@ -28,22 +23,13 @@ const BookListPage: React.FC = () => {
   const { data: myBooks, loading: myBooksLoading } = useMyBooks();
   const { data: readBooks, loading: readBooksLoading } = useReadBooks();
   
-  // Google Books API hooks
-  const { data: trendingBooks, loading: trendingLoading } = useTrendingBooks(3);
-  const { data: popularBooks, loading: popularLoading } = usePopularBooks(4);
-  const { data: bestsellers, loading: bestsellersLoading } = useBestsellers(20);
+  // Use Google Books for discovery
+  const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooks('popular fiction', 20);
   
   const navigate = useNavigate();
-  
-  // Modal state
-  const [selectedBook, setSelectedBook] = useState<GoogleBook | null>(null);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // Get currently reading book (first borrowed book)
   const currentlyReading = borrowedBooks?.content?.[0];
-
-  // Get trending books from Google Books API
-  const trendingBooksData = trendingBooks || [];
 
   // Get to-read books (my books that aren't borrowed or read)
   const toReadBooks = myBooks?.content?.filter(book => 
@@ -52,35 +38,20 @@ const BookListPage: React.FC = () => {
   ).slice(0, 4) || [];
 
   // Get favorite books (read books, first 4)
-  const favoriteBooks = readBooks?.content?.slice(0, 4) || [];
+  const favoriteBooks: any[] = [];
 
-  // Review modal handlers
-  const handleReviewClick = (book: GoogleBook) => {
-    setSelectedBook(book);
-    setIsReviewModalOpen(true);
-  };
-
-  const handleCloseReviewModal = () => {
-    setIsReviewModalOpen(false);
-    setSelectedBook(null);
-  };
-
-  const handleSubmitReview = async (bookId: string, rating: number, review: string) => {
-    if (!selectedBook) return;
-    
+  // Handle adding Google Books to user lists
+  const handleAddToUserList = async (googleBookId: string, listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') => {
     try {
-      await GoogleBookFeedbackService.saveFeedback({
-        googleBookId: bookId,
-        bookTitle: selectedBook.title,
-        authorName: selectedBook.authorName,
-        rating: rating,
-        review: review
-      });
+      await UserBookListService.addGoogleBookToList(googleBookId, listType);
+      // You could add a success notification here
+      console.log(`Added book ${googleBookId} to ${listType} list`);
     } catch (error) {
-      console.error('Failed to save review:', error);
-      throw error;
+      console.error('Failed to add book to list:', error);
+      // You could add an error notification here
     }
   };
+
 
   const renderBookCover = (book: any, style: React.CSSProperties = {}) => {
     if (book.cover) {
@@ -172,183 +143,92 @@ const BookListPage: React.FC = () => {
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
-        {/* 3-Column Layout */}
+        {/* 2-Column Layout */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '32px',
           marginBottom: '48px'
         }}>
           
-          {/* LEFT COLUMN — Currently Reading */}
+          {/* LEFT COLUMN — Currently Reading & To Read */}
           <div>
-            <h2 style={headingStyle}>Currently Reading</h2>
-            
-            {currentlyReading ? (
-              <div style={cardStyle}>
-                <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-                  {renderBookCover(currentlyReading, { width: '100px', height: '150px' })}
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{
-                      fontFamily: 'Playfair Display, serif',
-                      fontSize: '18px',
-                      fontWeight: 600,
-                      color: '#4B3F30',
-                      marginBottom: '8px',
-                      lineHeight: 1.3
-                    }}>
-                      {currentlyReading.title}
-                    </h3>
-                    <p style={{
-                      color: '#6A5E4D',
-                      marginBottom: '16px',
-                      fontSize: '14px'
-                    }}>
-                      by {currentlyReading.authorName}
-                    </p>
-                    
-                    {/* Progress Bar */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '8px'
+            {/* Currently Reading Section */}
+            <div style={{ marginBottom: '32px' }}>
+              <h2 style={headingStyle}>Currently Reading</h2>
+              
+              {currentlyReading ? (
+                <div style={cardStyle}>
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                    {renderBookCover(currentlyReading, { width: '100px', height: '150px' })}
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        fontFamily: 'Playfair Display, serif',
+                        fontSize: '18px',
+                        fontWeight: 600,
+                        color: '#4B3F30',
+                        marginBottom: '8px',
+                        lineHeight: 1.3
                       }}>
-                        <span style={{ color: '#6A5E4D', fontSize: '14px' }}>Progress</span>
-                        <span style={{ color: '#4B3F30', fontSize: '14px', fontWeight: 500 }}>0%</span>
-                      </div>
-                      <div style={{
-                        width: '100%',
-                        backgroundColor: '#F4E3C1',
-                        borderRadius: '9999px',
-                        height: '8px'
+                        {currentlyReading.title}
+                      </h3>
+                      <p style={{
+                        color: '#6A5E4D',
+                        marginBottom: '16px',
+                        fontSize: '14px'
                       }}>
+                        by {currentlyReading.authorName}
+                      </p>
+                      
+                      {/* Progress Bar */}
+                      <div style={{ marginBottom: '16px' }}>
                         <div style={{
-                          backgroundColor: '#D2691E',
-                          height: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '8px'
+                        }}>
+                          <span style={{ color: '#6A5E4D', fontSize: '14px' }}>Progress</span>
+                          <span style={{ color: '#4B3F30', fontSize: '14px', fontWeight: 500 }}>0%</span>
+                        </div>
+                        <div style={{
+                          width: '100%',
+                          backgroundColor: '#F4E3C1',
                           borderRadius: '9999px',
-                          width: '0%',
-                          transition: 'width 0.3s'
-                        }}></div>
+                          height: '8px'
+                        }}>
+                          <div style={{
+                            backgroundColor: '#D2691E',
+                            height: '8px',
+                            borderRadius: '9999px',
+                            width: '0%',
+                            transition: 'width 0.3s'
+                          }}></div>
+                        </div>
                       </div>
+                      
+                      <button
+                        style={buttonStyle}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+                        onClick={() => {/* Add progress update logic */}}
+                      >
+                        Update Progress
+                      </button>
                     </div>
-                    
-                    <button
-                      style={buttonStyle}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-                      onClick={() => {/* Add progress update logic */}}
-                    >
-                      Update Progress
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div style={{ ...cardStyle, textAlign: 'center' }}>
-                <Coffee style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
-                <p style={{ color: '#6A5E4D' }}>
-                  {borrowedLoading ? 'Loading...' : 'Add your first book!'}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* CENTER COLUMN — Trending Today + From Friends */}
-          <div>
-            {/* Trending Today Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <h2 style={headingStyle}>Trending Today</h2>
-              
-              {trendingLoading ? (
-                <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
-                  <CircularProgress sx={{ color: '#D2691E' }} />
-                </div>
-              ) : trendingBooksData.length > 0 ? (
-                <div style={cardStyle}>
-                  <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    overflowX: 'auto',
-                    paddingBottom: '8px'
-                  }}>
-                    {trendingBooksData.map((book) => (
-                      <div key={book.googleBookId} style={{ minWidth: '120px', width: '120px' }}>
-                        <GoogleBookCard
-                          book={book}
-                          showRating={true}
-                          showReviewButton={false}
-                          onReviewClick={handleReviewClick}
-                          style={{ padding: '12px' }}
-                        />
-                      </div>
-                    ))}
                   </div>
                 </div>
               ) : (
                 <div style={{ ...cardStyle, textAlign: 'center' }}>
-                  <TrendingUp style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
-                  <p style={{ color: '#6A5E4D' }}>No trending books available</p>
+                  <Coffee style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
+                  <p style={{ color: '#6A5E4D' }}>
+                    {borrowedLoading ? 'Loading...' : 'Add your first book!'}
+                  </p>
                 </div>
               )}
             </div>
 
-            {/* Popular Books Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <h2 style={headingStyle}>Popular Books</h2>
-              
-              {popularLoading ? (
-                <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
-                  <CircularProgress sx={{ color: '#D2691E' }} />
-                </div>
-              ) : popularBooks.length > 0 ? (
-                <div style={cardStyle}>
-                  <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    overflowX: 'auto',
-                    paddingBottom: '8px'
-                  }}>
-                    {popularBooks.map((book) => (
-                      <div key={book.googleBookId} style={{ minWidth: '120px', width: '120px' }}>
-                        <GoogleBookCard
-                          book={book}
-                          showRating={true}
-                          showReviewButton={false}
-                          onReviewClick={handleReviewClick}
-                          style={{ padding: '12px' }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div style={{ ...cardStyle, textAlign: 'center' }}>
-                  <Favorite style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
-                  <p style={{ color: '#6A5E4D' }}>No popular books available</p>
-                </div>
-              )}
-            </div>
-
-            {/* From Friends Section */}
-            <div>
-              <h2 style={headingStyle}>From Friends</h2>
-              <div style={{ ...cardStyle, textAlign: 'center' }}>
-                <Favorite style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
-                <p style={{ color: '#6A5E4D', marginBottom: '8px' }}>
-                  Join a book club to connect with others
-                </p>
-                <p style={{ color: '#8B7355', fontSize: '14px' }}>
-                  Social features coming soon!
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN — To Read & Favorites */}
-          <div>
             {/* To Read Section */}
-            <div style={{ marginBottom: '24px' }}>
+            <div>
               <h2 style={headingStyle}>To Read</h2>
               {myBooksLoading ? (
                 <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
@@ -384,9 +264,12 @@ const BookListPage: React.FC = () => {
                 </div>
               )}
             </div>
+          </div>
 
+          {/* RIGHT COLUMN — Favorites & Discover */}
+          <div>
             {/* Favorites Section */}
-            <div>
+            <div style={{ marginBottom: '32px' }}>
               <h2 style={headingStyle}>Favorites</h2>
               {readBooksLoading ? (
                 <div style={{ ...cardStyle, display: 'flex', justifyContent: 'center', padding: '32px' }}>
@@ -422,6 +305,37 @@ const BookListPage: React.FC = () => {
                 </div>
               )}
             </div>
+
+                        {/* Quick Actions */}
+            <div>
+              <h2 style={headingStyle}>Quick Actions</h2>
+              <div style={cardStyle}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: '16px'
+                }}>
+                  <button
+                    style={{
+                      ...buttonStyle,
+                      width: '100%',
+                      padding: '16px',
+                      fontSize: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+                    onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                  >
+                    <MenuBook style={{ fontSize: '24px' }} />
+                    Browse Books
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -442,42 +356,159 @@ const BookListPage: React.FC = () => {
         <div>
           <h2 style={headingStyle}>Discover Books</h2>
           
-          {bestsellersLoading ? (
+          {discoverBooksLoading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
               <CircularProgress sx={{ color: '#D2691E' }} size={48} />
             </div>
-          ) : bestsellers.length > 0 ? (
+          ) : discoverBooksError ? (
+            <div style={{ ...cardStyle, textAlign: 'center', padding: '48px' }}>
+              <Alert severity="error" style={{ marginBottom: '16px' }}>
+                Failed to load books from Google Books API
+              </Alert>
+              <p style={{ color: '#6A5E4D' }}>Please try again later</p>
+            </div>
+          ) : discoverBooks && discoverBooks.length > 0 ? (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
               gap: '24px'
             }}>
-              {bestsellers.map(book => (
-                <GoogleBookCard
-                  key={book.googleBookId}
-                  book={book}
-                  showRating={true}
-                  showReviewButton={true}
-                  onReviewClick={handleReviewClick}
-                />
+              {discoverBooks.map((book: any) => (
+                <div 
+                  key={book.id}
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: '1px solid #E6D7C3',
+                    boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(75, 63, 48, 0.15)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
+                  }}
+                >
+                  {/* Book Cover */}
+                  <div style={{ marginBottom: '12px' }}>
+                    {book.cover ? (
+                      <img
+                        src={book.cover}
+                        alt={book.title}
+                        style={{
+                          width: '100%',
+                          height: '200px',
+                          objectFit: 'cover',
+                          borderRadius: '8px'
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: '100%',
+                        height: '200px',
+                        background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '8px'
+                      }}>
+                        <MenuBook style={{ color: '#8B7355', fontSize: '48px' }} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Book Info */}
+                  <h3 style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: '#4B3F30',
+                    marginBottom: '8px',
+                    lineHeight: 1.3,
+                    flex: 1
+                  }}>
+                    {book.title}
+                  </h3>
+                  <p style={{
+                    color: '#6A5E4D',
+                    fontSize: '14px',
+                    marginBottom: '8px'
+                  }}>
+                    by {book.authorName}
+                  </p>
+
+                  {/* Rating */}
+                  {book.averageRating && (
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                      <Star style={{ color: '#FFD700', fontSize: '16px', marginRight: '4px' }} />
+                      <span style={{ fontSize: '14px', color: '#6A5E4D' }}>
+                        {book.averageRating.toFixed(1)} ({book.ratingsCount || 0} ratings)
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        fontSize: '12px',
+                        padding: '8px',
+                        backgroundColor: '#4CAF50'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+                      onClick={() => handleAddToUserList(book.id, 'FAVORITE')}
+                    >
+                      Add to Favorites
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        fontSize: '12px',
+                        padding: '8px',
+                        backgroundColor: '#2196F3'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+                      onClick={() => handleAddToUserList(book.id, 'TBR')}
+                    >
+                      Add to TBR
+                    </button>
+                    <button
+                      style={{
+                        ...buttonStyle,
+                        fontSize: '12px',
+                        padding: '8px'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
+                      onClick={() => navigate(`/search?q=${encodeURIComponent(book.title)}`)}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
             <div style={{ ...cardStyle, textAlign: 'center', padding: '48px' }}>
               <MenuBook style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
-              <p style={{ color: '#6A5E4D' }}>No books available</p>
+              <p style={{ color: '#6A5E4D' }}>No books available for discovery</p>
+              <p style={{ color: '#8B7355', fontSize: '14px', marginTop: '8px' }}>
+                Try searching for books instead!
+              </p>
             </div>
           )}
         </div>
       </div>
-
-      {/* Google Book Review Modal */}
-      <GoogleBookReviewModal
-        book={selectedBook}
-        isOpen={isReviewModalOpen}
-        onClose={handleCloseReviewModal}
-        onSubmitReview={handleSubmitReview}
-      />
     </div>
   );
 };

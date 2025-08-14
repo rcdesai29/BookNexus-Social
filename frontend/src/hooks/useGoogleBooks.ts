@@ -40,8 +40,8 @@ export function useGoogleBooks(
         } else if (query === 'popular') {
           response = await GoogleBooksService.getPopularBooks('fiction', maxResults);
         } else if (query === 'bestsellers') {
-          // Search for popular books with high ratings and recent publications
-          response = await GoogleBooksService.searchBooks('bestseller fiction 2024', maxResults, startIndex);
+          // Use the backend's trending books endpoint which now has better queries
+          response = await GoogleBooksService.getTrendingBooks(maxResults);
         } else {
           response = await GoogleBooksService.searchBooks(query, maxResults, startIndex);
         }
@@ -51,8 +51,9 @@ export function useGoogleBooks(
         );
 
         // Filter out books with very low rating counts to avoid showing fake-looking ratings
+        // But be more lenient to ensure we show books
         const filteredBooks = convertedBooks.filter(book => 
-          book.ratingsCount === 0 || book.ratingsCount >= 10
+          book.ratingsCount === 0 || book.ratingsCount >= 5
         );
 
         setData(filteredBooks);
@@ -79,5 +80,5 @@ export function usePopularBooks(maxResults: number = 10) {
 }
 
 export function useBestsellers(maxResults: number = 20) {
-  return useGoogleBooks('bestsellers', maxResults);
+  return useGoogleBooks('popular fiction', maxResults);
 }

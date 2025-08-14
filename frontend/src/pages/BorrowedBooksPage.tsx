@@ -61,7 +61,10 @@ const BorrowedBooksPage: React.FC = () => {
     }
   };
 
-  const isBookRead = (book: BorrowedBookResponse) => book.read || readBooks.has(book.id!);
+  const isBookRead = (book: BorrowedBookResponse) => {
+    if (!book) return false;
+    return book.read || readBooks.has(book.id!);
+  };
 
   const renderBookCover = (book: BorrowedBookResponse) => {
     if (book.cover) {
@@ -102,7 +105,7 @@ const BorrowedBooksPage: React.FC = () => {
     backdropFilter: 'blur(10px)',
     padding: '16px',
     borderRadius: '12px',
-    border: isBookRead(books[0]) ? '2px solid #4CAF50' : '1px solid #E6D7C3',
+    border: '1px solid #E6D7C3',
     boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
     transition: 'all 0.3s ease',
     height: '100%',

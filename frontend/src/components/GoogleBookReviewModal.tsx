@@ -6,7 +6,7 @@ import {
   Close as CloseIcon,
   Send as SendIcon
 } from '@mui/icons-material';
-import { GoogleBook } from '../hooks/useGoogleBooks';
+import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 
 interface GoogleBookReviewModalProps {
   book: GoogleBook | null;
@@ -81,9 +81,18 @@ const GoogleBookReviewModal: React.FC<GoogleBookReviewModalProps> = ({
               e.currentTarget.style.transform = 'scale(1)';
             }
           }}
-          onClick={() => {
+          onClick={(e) => {
             if (interactive) {
-              setRating(i);
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const starWidth = rect.width;
+              
+              // If clicked on left half, give half star, right half gives full star
+              if (clickX < starWidth / 2) {
+                setRating(i - 0.5);
+              } else {
+                setRating(i);
+              }
             }
           }}
         >

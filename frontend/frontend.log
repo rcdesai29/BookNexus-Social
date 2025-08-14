@@ -1,0 +1,1139 @@
+
+> frontend@0.1.0 start
+> react-scripts start
+
+(node:88721) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:88721) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:88721) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view frontend in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.7.148:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 361:22:  'Star' is not defined  react/jsx-no-undef
+  Line 496:24:  'Star' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used    @typescript-eslint/no-unused-vars
+  Line 8:3:   'Typography' is defined but never used  @typescript-eslint/no-unused-vars
+
+ERROR in [eslint] 
+src/pages/HomePage.tsx
+  Line 361:22:  'Star' is not defined  react/jsx-no-undef
+  Line 496:24:  'Star' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+ERROR in src/pages/HomePage.tsx:361:22
+TS2304: Cannot find name 'Star'.
+    359 |                 ) : (
+    360 |                   <div style={{ ...cardStyle, textAlign: 'center' }}>
+  > 361 |                     <Star style={{ color: '#FFD700', fontSize: '48px', marginBottom: '12px' }} />
+        |                      ^^^^
+    362 |                     <p style={{ color: '#6A5E4D' }}>No favorites yet</p>
+    363 |                   </div>
+    364 |                 )}
+
+ERROR in src/pages/HomePage.tsx:496:24
+TS2304: Cannot find name 'Star'.
+    494 |                   {book.averageRating && book.averageRating > 0 && (
+    495 |                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+  > 496 |                       <Star style={{ color: '#FFD700', fontSize: '16px', marginRight: '4px' }} />
+        |                        ^^^^
+    497 |                       <span style={{ fontSize: '14px', color: '#6A5E4D' }}>
+    498 |                         {book.averageRating.toFixed(1)} ({book.ratingsCount || 0} ratings)
+    499 |                       </span>
+
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 362:22:  'Star' is not defined  react/jsx-no-undef
+  Line 497:24:  'Star' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used    @typescript-eslint/no-unused-vars
+  Line 8:3:   'Typography' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 21:8:  'StarRating' is defined but never used  @typescript-eslint/no-unused-vars
+
+ERROR in [eslint] 
+src/pages/HomePage.tsx
+  Line 362:22:  'Star' is not defined  react/jsx-no-undef
+  Line 497:24:  'Star' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+ERROR in src/pages/HomePage.tsx:362:22
+TS2304: Cannot find name 'Star'.
+    360 |                 ) : (
+    361 |                   <div style={{ ...cardStyle, textAlign: 'center' }}>
+  > 362 |                     <Star style={{ color: '#FFD700', fontSize: '48px', marginBottom: '12px' }} />
+        |                      ^^^^
+    363 |                     <p style={{ color: '#6A5E4D' }}>No favorites yet</p>
+    364 |                   </div>
+    365 |                 )}
+
+ERROR in src/pages/HomePage.tsx:497:24
+TS2304: Cannot find name 'Star'.
+    495 |                   {book.averageRating && book.averageRating > 0 && (
+    496 |                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+  > 497 |                       <Star style={{ color: '#FFD700', fontSize: '16px', marginRight: '4px' }} />
+        |                        ^^^^
+    498 |                       <span style={{ fontSize: '14px', color: '#6A5E4D' }}>
+    499 |                         {book.averageRating.toFixed(1)} ({book.ratingsCount || 0} ratings)
+    500 |                       </span>
+
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 497:24:  'Star' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used    @typescript-eslint/no-unused-vars
+  Line 8:3:   'Typography' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 21:8:  'StarRating' is defined but never used  @typescript-eslint/no-unused-vars
+
+ERROR in [eslint] 
+src/pages/HomePage.tsx
+  Line 497:24:  'Star' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+ERROR in src/pages/HomePage.tsx:497:24
+TS2304: Cannot find name 'Star'.
+    495 |                   {book.averageRating && book.averageRating > 0 && (
+    496 |                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+  > 497 |                       <Star style={{ color: '#FFD700', fontSize: '16px', marginRight: '4px' }} />
+        |                        ^^^^
+    498 |                       <span style={{ fontSize: '14px', color: '#6A5E4D' }}>
+    499 |                         {book.averageRating.toFixed(1)} ({book.ratingsCount || 0} ratings)
+    500 |                       </span>
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used    @typescript-eslint/no-unused-vars
+  Line 8:3:   'Typography' is defined but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used    @typescript-eslint/no-unused-vars
+  Line 8:3:   'Typography' is defined but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/components/GoogleBookCard.tsx
+  Line 72:10:  'StarIcon' is not defined        react/jsx-no-undef
+  Line 81:10:  'StarHalfIcon' is not defined    react/jsx-no-undef
+  Line 91:10:  'StarBorderIcon' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+WARNING in [eslint] 
+src/components/GoogleBookCard.tsx
+  Line 8:8:   'StarRating' is defined but never used         @typescript-eslint/no-unused-vars
+  Line 25:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+ERROR in [eslint] 
+src/components/GoogleBookCard.tsx
+  Line 72:10:  'StarIcon' is not defined        react/jsx-no-undef
+  Line 81:10:  'StarHalfIcon' is not defined    react/jsx-no-undef
+  Line 91:10:  'StarBorderIcon' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error and 1 warning
+ERROR in src/components/GoogleBookCard.tsx:72:10
+TS2304: Cannot find name 'StarIcon'.
+    70 |     for (let i = 0; i < fullStars; i++) {
+    71 |       stars.push(
+  > 72 |         <StarIcon
+       |          ^^^^^^^^
+    73 |           key={`full-${i}`}
+    74 |           style={{ color: '#FFD700', fontSize: starSize }}
+    75 |         />
+
+ERROR in src/components/GoogleBookCard.tsx:81:10
+TS2304: Cannot find name 'StarHalfIcon'.
+    79 |     if (hasHalfStar) {
+    80 |       stars.push(
+  > 81 |         <StarHalfIcon
+       |          ^^^^^^^^^^^^
+    82 |           key="half"
+    83 |           style={{ color: '#FFD700', fontSize: starSize }}
+    84 |         />
+
+ERROR in src/components/GoogleBookCard.tsx:91:10
+TS2304: Cannot find name 'StarBorderIcon'.
+    89 |     for (let i = 0; i < emptyStars; i++) {
+    90 |       stars.push(
+  > 91 |         <StarBorderIcon
+       |          ^^^^^^^^^^^^^^
+    92 |           key={`empty-${i}`}
+    93 |           style={{ color: '#D3D3D3', fontSize: starSize }}
+    94 |         />
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/GoogleBookCard.tsx
+  Line 8:8:   'StarRating' is defined but never used         @typescript-eslint/no-unused-vars
+  Line 25:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/GoogleBookCard.tsx
+  Line 8:8:   'StarRating' is defined but never used         @typescript-eslint/no-unused-vars
+  Line 25:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+ERROR in src/components/GoogleBookCard.tsx:155:16
+TS2304: Cannot find name 'renderStars'.
+    153 |           <div style={{ marginBottom: isSmall ? '8px' : '12px' }}>
+    154 |             <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginBottom: '2px' }}>
+  > 155 |               {renderStars(book.averageRating)}
+        |                ^^^^^^^^^^^
+    156 |               <span style={{ 
+    157 |                 color: '#6A5E4D', 
+    158 |                 fontSize: isSmall ? '9px' : '12px', 
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/GoogleBookCard.tsx
+  Line 25:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/GoogleBookCard.tsx
+  Line 25:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/GoogleBookCard.tsx
+  Line 24:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/GoogleBookCard.tsx
+  Line 24:9:  'navigate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+ERROR in src/components/GoogleBookCard.tsx:24:20
+TS2552: Cannot find name 'useNavigate'. Did you mean 'navigate'?
+    22 |   style = {}
+    23 | }) => {
+  > 24 |   const navigate = useNavigate();
+       |                    ^^^^^^^^^^^
+    25 |   const [isHovered, setIsHovered] = useState(false);
+    26 |   const isSmall = style.padding === '12px';
+    27 |
+
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/App.tsx
+  Line 20:8:  'TestAPI' is defined but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/App.tsx
+  Line 20:8:  'TestAPI' is defined but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 14:10:  'useGoogleBooksSimple' is defined but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 14:10:  'useGoogleBooksSimple' is defined but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+ERROR in src/pages/HomePage.tsx:32:93
+TS2304: Cannot find name 'useGoogleBooks'.
+    30 |   
+    31 |   // Always fetch discovery books (works for guests too)
+  > 32 |   const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooks('bestsellers', 20);
+       |                                                                                             ^^^^^^^^^^^^^^
+    33 |   
+    34 |   // Get currently reading book (first borrowed book) - only for logged in users
+    35 |   const currentlyReading = isLoggedIn ? borrowedBooks?.content?.[0] : null;
+
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/App.tsx
+  Line 35:43:  'TestAPI' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+ERROR in [eslint] 
+src/App.tsx
+  Line 35:43:  'TestAPI' is not defined  react/jsx-no-undef
+
+Search for the keywords to learn more about each error.
+
+webpack compiled with 1 error
+ERROR in src/App.tsx:35:43
+TS2304: Cannot find name 'TestAPI'.
+    33 |         <Route path="/home" element={<HomePage />} />
+    34 |         <Route path="/search" element={<SearchPage />} />
+  > 35 |         <Route path="/test-api" element={<TestAPI />} />
+       |                                           ^^^^^^^
+    36 |         
+    37 |         {/* Protected routes */}
+    38 |         <Route path="/books" element={
+
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 16:10:  'directApiService' is defined but never used                                                  @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 16:10:  'directApiService' is defined but never used                                                  @typescript-eslint/no-unused-vars
+  Line 69:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 69:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 70:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+ERROR in src/pages/SearchPage.tsx:57:35
+TS2304: Cannot find name 'GoogleBooksService'.
+    55 |
+    56 |       // Search Google Books API
+  > 57 |       const googleResults = await GoogleBooksService.searchBooks(searchQuery, 20);
+       |                                   ^^^^^^^^^^^^^^^^^^
+    58 |       const convertedGoogleBooks = (googleResults.items || []).map(book => 
+    59 |         GoogleBooksService.convertGoogleBookToBookFormat(book)
+    60 |       );
+
+ERROR in src/pages/SearchPage.tsx:58:68
+TS7006: Parameter 'book' implicitly has an 'any' type.
+    56 |       // Search Google Books API
+    57 |       const googleResults = await GoogleBooksService.searchBooks(searchQuery, 20);
+  > 58 |       const convertedGoogleBooks = (googleResults.items || []).map(book => 
+       |                                                                    ^^^^
+    59 |         GoogleBooksService.convertGoogleBookToBookFormat(book)
+    60 |       );
+    61 |
+
+ERROR in src/pages/SearchPage.tsx:59:9
+TS2304: Cannot find name 'GoogleBooksService'.
+    57 |       const googleResults = await GoogleBooksService.searchBooks(searchQuery, 20);
+    58 |       const convertedGoogleBooks = (googleResults.items || []).map(book => 
+  > 59 |         GoogleBooksService.convertGoogleBookToBookFormat(book)
+       |         ^^^^^^^^^^^^^^^^^^
+    60 |       );
+    61 |
+    62 |       // Filter Google Books to avoid duplicates and low-quality results
+
+ERROR in src/pages/SearchPage.tsx:63:63
+TS7006: Parameter 'book' implicitly has an 'any' type.
+    61 |
+    62 |       // Filter Google Books to avoid duplicates and low-quality results
+  > 63 |       const filteredGoogleBooks = convertedGoogleBooks.filter(book => {
+       |                                                               ^^^^
+    64 |         // Remove books with very low rating counts (but be more lenient)
+    65 |         if (book.ratingsCount > 0 && book.ratingsCount < 5) return false;
+    66 |         
+
+ERROR in src/pages/SearchPage.tsx:82:36
+TS7006: Parameter 'book' implicitly has an 'any' type.
+    80 |       const combined = [
+    81 |         ...filteredLocalBooks.map(book => ({ ...book, source: 'local' })),
+  > 82 |         ...filteredGoogleBooks.map(book => ({ ...book, source: 'google' }))
+       |                                    ^^^^
+    83 |       ];
+    84 |
+    85 |       // Sort by relevance (exact matches first, then partial matches)
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+ERROR in src/pages/SearchPage.tsx:83:63
+TS7006: Parameter 'book' implicitly has an 'any' type.
+    81 |
+    82 |       // Filter Google Books to avoid duplicates and low-quality results
+  > 83 |       const filteredGoogleBooks = convertedGoogleBooks.filter(book => {
+       |                                                               ^^^^
+    84 |         // Remove books with very low rating counts (but be more lenient)
+    85 |         if (book.ratingsCount > 0 && book.ratingsCount < 5) return false;
+    86 |         
+
+ERROR in src/pages/SearchPage.tsx:102:36
+TS7006: Parameter 'book' implicitly has an 'any' type.
+    100 |       const combined = [
+    101 |         ...filteredLocalBooks.map(book => ({ ...book, source: 'local' })),
+  > 102 |         ...filteredGoogleBooks.map(book => ({ ...book, source: 'google' }))
+        |                                    ^^^^
+    103 |       ];
+    104 |
+    105 |       // Sort by relevance (exact matches first, then partial matches)
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+ERROR in src/pages/SearchPage.tsx:102:36
+TS7006: Parameter 'book' implicitly has an 'any' type.
+    100 |       const combined = [
+    101 |         ...filteredLocalBooks.map(book => ({ ...book, source: 'local' })),
+  > 102 |         ...filteredGoogleBooks.map(book => ({ ...book, source: 'google' }))
+        |                                    ^^^^
+    103 |       ];
+    104 |
+    105 |       // Sort by relevance (exact matches first, then partial matches)
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 15:10:  'useGoogleBooksSimple' is defined but never used                                              @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:17:  'TrendingIcon' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 11:3:   'TrendingUp' is defined but never used                                                        @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 11:3:   'TrendingUp' is defined but never used                                                        @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 88:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 88:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 88:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 88:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 88:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 88:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 18:10:  'tokenService' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 18:10:  'tokenService' is defined but never used                                                      @typescript-eslint/no-unused-vars
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/GoogleBookCard.tsx
+  Line 8:10:  'tokenService' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/GoogleBookCard.tsx
+  Line 8:10:  'tokenService' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:  'GoogleBookDetailsModal' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:  'GoogleBookDetailsModal' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used                @typescript-eslint/no-unused-vars
+  Line 21:8:  'GoogleBookDetailsModal' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 1:17:  'useState' is defined but never used                @typescript-eslint/no-unused-vars
+  Line 21:8:  'GoogleBookDetailsModal' is defined but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:   'GoogleBookDetailsModal' is defined but never used          @typescript-eslint/no-unused-vars
+  Line 36:10:  'selectedBook' is assigned a value but never used           @typescript-eslint/no-unused-vars
+  Line 36:24:  'setSelectedBook' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  Line 37:10:  'isDetailsModalOpen' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  Line 37:30:  'setIsDetailsModalOpen' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:   'GoogleBookDetailsModal' is defined but never used          @typescript-eslint/no-unused-vars
+  Line 36:10:  'selectedBook' is assigned a value but never used           @typescript-eslint/no-unused-vars
+  Line 36:24:  'setSelectedBook' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  Line 37:10:  'isDetailsModalOpen' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  Line 37:30:  'setIsDetailsModalOpen' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:   'GoogleBookDetailsModal' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 36:10:  'selectedBook' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  Line 37:10:  'isDetailsModalOpen' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  Line 40:9:   'handleBookDetailsClick' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  Line 45:9:   'handleCloseDetailsModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:   'GoogleBookDetailsModal' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 36:10:  'selectedBook' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  Line 37:10:  'isDetailsModalOpen' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  Line 40:9:   'handleBookDetailsClick' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  Line 45:9:   'handleCloseDetailsModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:   'GoogleBookDetailsModal' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 36:10:  'selectedBook' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  Line 37:10:  'isDetailsModalOpen' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  Line 45:9:   'handleCloseDetailsModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/HomePage.tsx
+  Line 21:8:   'GoogleBookDetailsModal' is defined but never used            @typescript-eslint/no-unused-vars
+  Line 36:10:  'selectedBook' is assigned a value but never used             @typescript-eslint/no-unused-vars
+  Line 37:10:  'isDetailsModalOpen' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  Line 45:9:   'handleCloseDetailsModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.

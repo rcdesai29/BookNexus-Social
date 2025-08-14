@@ -30,15 +30,21 @@ const ProfilePage: React.FC = () => {
   const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setError('No user ID provided');
+      setLoading(false);
+      return;
+    }
     
     const fetchProfile = async () => {
       try {
         setLoading(true);
+        setError(null);
         const profileData = await UserProfileService.getUserProfile(parseInt(userId));
         setProfile(profileData);
       } catch (err: any) {
-        setError(err?.body?.message || 'Failed to load profile');
+        console.error('Profile loading error:', err);
+        setError(err?.body?.message || err?.message || 'Failed to load profile');
       } finally {
         setLoading(false);
       }

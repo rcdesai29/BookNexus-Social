@@ -29,8 +29,8 @@ public class GoogleBookController {
     }
 
     @GetMapping("/{bookId}")
-    public ResponseEntity<GoogleBook> getBookById(@PathVariable String bookId) {
-        GoogleBook book = googleBookService.getBookById(bookId);
+    public ResponseEntity<GoogleBookDto> getBookById(@PathVariable String bookId) {
+        GoogleBookDto book = googleBookService.getBookById(bookId);
         if (book != null) {
             return ResponseEntity.ok(book);
         }

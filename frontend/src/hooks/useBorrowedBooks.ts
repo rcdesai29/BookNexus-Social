@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { PageResponseBorrowedBookResponse } from '../app/services/models/PageResponseBorrowedBookResponse';
 import { BookService } from '../app/services/services/BookService';
+import { tokenService } from '../services/tokenService';
 
 export function useBorrowedBooks(initialPage: number = 0, initialSize: number = 12) {
   const [page, setPage] = useState(initialPage);
@@ -10,6 +11,13 @@ export function useBorrowedBooks(initialPage: number = 0, initialSize: number = 
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
+    if (!tokenService.isLoggedIn()) {
+      setLoading(false);
+      setError(null);
+      setData(null);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     BookService.findAllBorrowedBooks(page, size)

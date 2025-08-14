@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoogleBookResponse {
-    private List<GoogleBook> items;
+    private List<GoogleBookDto> items;
     private Integer totalItems;
     private String kind;
 }

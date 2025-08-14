@@ -1,3 +1,4 @@
+import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
 export interface GoogleBookVolumeInfo {
@@ -30,7 +31,7 @@ export interface GoogleBooksResponse {
 }
 
 export class GoogleBooksService {
-  private static readonly BASE_URL = 'http://localhost:8088/api/v1/google-books';
+  private static readonly BASE_URL = '/google-books';
 
   /**
    * Search for books using Google Books API
@@ -46,15 +47,15 @@ export class GoogleBooksService {
       startIndex: startIndex.toString()
     });
 
-    const result = await __request<GoogleBooksResponse>({
+    const result = await __request(OpenAPI, {
       method: 'GET',
-      path: `${this.BASE_URL}/search?${queryParams.toString()}`,
+      url: `${this.BASE_URL}/search?${queryParams.toString()}`,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    return result;
+    return result as GoogleBooksResponse;
   }
 
   /**
@@ -69,15 +70,15 @@ export class GoogleBooksService {
       maxResults: maxResults.toString()
     });
 
-    const result = await __request<GoogleBooksResponse>({
+    const result = await __request(OpenAPI, {
       method: 'GET',
-      path: `${this.BASE_URL}/popular?${queryParams.toString()}`,
+      url: `${this.BASE_URL}/popular?${queryParams.toString()}`,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    return result;
+    return result as GoogleBooksResponse;
   }
 
   /**
@@ -90,30 +91,30 @@ export class GoogleBooksService {
       maxResults: maxResults.toString()
     });
 
-    const result = await __request<GoogleBooksResponse>({
+    const result = await __request(OpenAPI, {
       method: 'GET',
-      path: `${this.BASE_URL}/trending?${queryParams.toString()}`,
+      url: `${this.BASE_URL}/trending?${queryParams.toString()}`,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    return result;
+    return result as GoogleBooksResponse;
   }
 
   /**
    * Get book details by Google Books ID
    */
   public static async getBookById(bookId: string): Promise<GoogleBookItem> {
-    const result = await __request<GoogleBookItem>({
+    const result = await __request(OpenAPI, {
       method: 'GET',
-      path: `${this.BASE_URL}/${bookId}`,
+      url: `${this.BASE_URL}/${bookId}`,
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    return result;
+    return result as GoogleBookItem;
   }
 
   /**
