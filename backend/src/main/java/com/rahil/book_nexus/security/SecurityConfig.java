@@ -49,11 +49,14 @@ public class SecurityConfig {
                                 "/google-books/**",
                                 "/google-books/search",
                                 "/google-books/trending", 
-                                "/google-books/popular")
+                                "/google-books/popular",
+                                "/user-book-lists/test")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST,
-                                "/google-books/feedback",
-                                "/user-book-list/**")
+                                "/google-books/feedback")
+                        .authenticated()
+                        .requestMatchers(
+                                "/user-book-lists/**")
                         .authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

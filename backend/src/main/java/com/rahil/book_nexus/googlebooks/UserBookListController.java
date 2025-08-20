@@ -14,7 +14,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/user-book-lists")
+@RequestMapping("user-book-lists")
 @RequiredArgsConstructor
 @Tag(name = "User Book Lists")
 public class UserBookListController {
@@ -86,5 +86,10 @@ public class UserBookListController {
         User user = ((User) connectedUser.getPrincipal());
         List<UserBookList> read = googleBookIntegrationService.getUserBooksByListType(user, UserBookList.ListType.READ);
         return ResponseEntity.ok(read);
+    }
+    
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Controller is working!");
     }
 }

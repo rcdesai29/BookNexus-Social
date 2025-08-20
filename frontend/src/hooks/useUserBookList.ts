@@ -29,10 +29,12 @@ export function useUserBookList(listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'T
         // Fetch all books across all lists
         result = await UserBookListService.getAllUserBooks();
       }
-      
-      setData(result);
+      setData(result || []);
     } catch (err) {
+      console.error('Error fetching user books:', err);
       setError(err);
+      // Set empty array on error so user sees empty state instead of error
+      setData([]);
     } finally {
       setLoading(false);
     }

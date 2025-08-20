@@ -84,7 +84,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     }
   };
 
-  const handleAddToUserList = async (e: React.MouseEvent, listType: 'FAVORITE' | 'TBR') => {
+  const handleAddToUserList = async (e: React.MouseEvent, listType: 'read' | 'TBR') => {
     e.stopPropagation();
     
     if (!isLoggedIn) {
@@ -97,7 +97,9 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     setAddingToList(listType);
     
     try {
-      await UserBookListService.addGoogleBookToList(book.googleBookId, listType);
+      // Convert 'read' to 'READ' for the API call
+      const apiListType = listType === 'read' ? 'READ' : listType;
+      await UserBookListService.addGoogleBookToList(book.googleBookId, apiListType as 'READ' | 'TBR');
       setAddedToLists(prev => new Set([...prev, listType]));
       
       // Call the callback to refresh parent list if provided
@@ -133,7 +135,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     if (addedToLists.has(listType)) return '✓ Added';
     
     switch (listType) {
-      case 'FAVORITE': return 'Add to My Books';
+      case 'read': return 'Add to Read';
       case 'TBR': return 'Add to TBR';
       default: return 'Add';
     }
@@ -143,7 +145,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     if (addedToLists.has(listType)) return <CheckCircleIcon style={{ fontSize: '16px' }} />;
     
     switch (listType) {
-      case 'FAVORITE': return <AddIcon style={{ fontSize: '16px' }} />;
+      case 'read': return <AddIcon style={{ fontSize: '16px' }} />;
       case 'TBR': return <BookmarkAddIcon style={{ fontSize: '16px' }} />;
       default: return <AddIcon style={{ fontSize: '16px' }} />;
     }
@@ -153,7 +155,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     if (addedToLists.has(listType)) return '#4CAF50';
     
     switch (listType) {
-      case 'FAVORITE': return '#4CAF50';
+      case 'read': return '#4CAF50';
       case 'TBR': return '#2196F3';
       default: return '#D2691E';
     }
@@ -163,13 +165,13 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     if (addedToLists.has(listType)) return '#45a049';
     
     switch (listType) {
-      case 'FAVORITE': return '#45a049';
+      case 'read': return '#45a049';
       case 'TBR': return '#1976D2';
       default: return '#B85A1A';
     }
   };
 
-  const createActionButton = (listType: 'FAVORITE' | 'TBR') => {
+  const createActionButton = (listType: 'read' | 'TBR') => {
     const isDisabled = addingToList !== null;
     const backgroundColor = getButtonColor(listType);
     const hoverColor = getButtonHoverColor(listType);
@@ -288,7 +290,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {isLoggedIn ? (
           <>
-            {createActionButton('FAVORITE')}
+            {createActionButton('read')}
             {createActionButton('TBR')}
           </>
         ) : (

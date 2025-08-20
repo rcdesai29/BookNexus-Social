@@ -121,7 +121,8 @@ const MyBooksPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  // Only show error if it's a real error, not just an empty library
+  if (error && !Array.isArray(allBooks)) {
     return (
       <div style={{ 
         minHeight: '100vh', 
@@ -147,6 +148,22 @@ const MyBooksPage: React.FC = () => {
           <p style={{ color: '#6A5E4D' }}>
             {error.message || String(error)}
           </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              backgroundColor: '#D2691E',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              marginTop: '16px'
+            }}
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );

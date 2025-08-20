@@ -42,11 +42,16 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
   if (!book) return null;
 
   const renderBookCover = () => {
-    const coverUrl = isGoogleBook 
-      ? bookListItem.googleBook?.coverUrl 
-      : (book.cover && typeof book.cover === 'string' && book.cover.startsWith('http') 
-         ? `http://localhost:8088/api/v1/books/cover/${book.id}` 
-         : `data:image/jpeg;base64,${book.cover}`);
+    let coverUrl: string | undefined;
+    
+    if (isGoogleBook) {
+      coverUrl = bookListItem.googleBook?.coverUrl;
+    } else if (bookListItem.book?.cover) {
+      const cover = bookListItem.book.cover;
+      coverUrl = typeof cover === 'string' && cover.startsWith('http') 
+        ? `http://localhost:8088/api/v1/books/cover/${bookListItem.book.id}` 
+        : `data:image/jpeg;base64,${cover}`;
+    }
 
     return (
       <div style={{ marginBottom: '12px', position: 'relative' }}>

@@ -83,7 +83,7 @@ public class GoogleBookIntegrationService {
      * Get all books in a specific list for a user
      */
     public List<UserBookList> getUserBooksByListType(User user, UserBookList.ListType listType) {
-        return userBookListRepository.findUserBooksByListType(user, listType);
+        return userBookListRepository.findByUserAndListTypeAndIsActiveTrue(user, listType);
     }
     
     /**

@@ -48,7 +48,7 @@ export class UserBookListService {
     ): Promise<UserBookList> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: `/api/v1/user-book-lists/google-books/${googleBookId}/add`,
+            url: `/user-book-lists/google-books/${googleBookId}/add`,
             query: {
                 'listType': listType,
             },
@@ -68,7 +68,7 @@ export class UserBookListService {
     ): Promise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: `/api/v1/user-book-lists/google-books/${googleBookId}/remove`,
+            url: `/user-book-lists/google-books/${googleBookId}/remove`,
             query: {
                 'listType': listType,
             },
@@ -86,7 +86,7 @@ export class UserBookListService {
     ): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: `/api/v1/user-book-lists/list-type/${listType}`,
+            url: `/user-book-lists/list-type/${listType}`,
         });
     }
 
@@ -98,7 +98,7 @@ export class UserBookListService {
     public static async getAllUserBooks(): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user-book-lists/all',
+            url: '/user-book-lists/all',
         });
     }
 
@@ -110,7 +110,7 @@ export class UserBookListService {
     public static async getFavorites(): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user-book-lists/favorites',
+            url: '/user-book-lists/favorites',
         });
     }
 
@@ -122,7 +122,7 @@ export class UserBookListService {
     public static async getCurrentlyReading(): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user-book-lists/currently-reading',
+            url: '/user-book-lists/currently-reading',
         });
     }
 
@@ -134,7 +134,7 @@ export class UserBookListService {
     public static async getTBR(): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user-book-lists/tbr',
+            url: '/user-book-lists/tbr',
         });
     }
 
@@ -146,7 +146,7 @@ export class UserBookListService {
     public static async getRead(): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user-book-lists/read',
+            url: '/user-book-lists/read',
         });
     }
 }
