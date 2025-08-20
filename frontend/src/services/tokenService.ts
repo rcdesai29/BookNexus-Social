@@ -1,9 +1,20 @@
 const TOKEN_KEY = 'auth_token';
 
+// Helper function to dispatch auth state change events
+const dispatchAuthChange = () => {
+  window.dispatchEvent(new CustomEvent('authStateChange'));
+};
+
 export const tokenService = {
-  setToken: (token: string) => localStorage.setItem(TOKEN_KEY, token),
+  setToken: (token: string) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    dispatchAuthChange();
+  },
   getToken: () => localStorage.getItem(TOKEN_KEY),
-  removeToken: () => localStorage.removeItem(TOKEN_KEY),
+  removeToken: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    dispatchAuthChange();
+  },
   isLoggedIn: () => !!localStorage.getItem(TOKEN_KEY),
   getUser: () => {
     const token = localStorage.getItem(TOKEN_KEY);

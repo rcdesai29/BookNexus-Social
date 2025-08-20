@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CircularProgress,
-  Alert
+  Alert,
+  Button,
+  Box
 } from '@mui/material';
 import {
   Coffee,
@@ -16,39 +18,46 @@ import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
 import { useGoogleBooksSimple } from '../hooks/useGoogleBooksSimple';
 import { UserBookListService } from '../app/services/services/UserBookListService';
+import { useAuth } from '../hooks/useAuth';
 
 const BookListPage: React.FC = () => {
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+  
   const { data: allBooks, loading: allBooksLoading, error: allBooksError, page, setPage, size, setSize } = useBooks();
+  
+  // Only fetch user data if logged in
   const { data: borrowedBooks, loading: borrowedLoading } = useBorrowedBooks();
   const { data: myBooks, loading: myBooksLoading } = useMyBooks();
   const { data: readBooks, loading: readBooksLoading } = useReadBooks();
   
   // Use Google Books for discovery
   const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooksSimple('bestsellers', 20);
-  
-  const navigate = useNavigate();
 
-  // Get currently reading book (first borrowed book)
-  const currentlyReading = borrowedBooks?.content?.[0];
+  // Get currently reading book (first borrowed book) - only for logged in users
+  const currentlyReading = isLoggedIn ? borrowedBooks?.content?.[0] : null;
 
-  // Get to-read books (my books that aren't borrowed or read)
-  const toReadBooks = myBooks?.content?.filter(book => 
+  // Get to-read books (my books that aren't borrowed or read) - only for logged in users
+  const toReadBooks = isLoggedIn ? (myBooks?.content?.filter(book => 
     !borrowedBooks?.content?.some(borrowed => borrowed.id === book.id) &&
     !readBooks?.content?.some(read => read.id === book.id)
-  ).slice(0, 4) || [];
+  ).slice(0, 4) || []) : [];
 
-  // Get favorite books (read books, first 4)
-  const favoriteBooks: any[] = [];
+  // Get favorite books (read books, first 4) - only for logged in users
+  const favoriteBooks = isLoggedIn ? (readBooks?.content?.slice(0, 4) || []) : [];
 
   // Handle adding Google Books to user lists
   const handleAddToUserList = async (googleBookId: string, listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+
     try {
       await UserBookListService.addGoogleBookToList(googleBookId, listType);
-      // You could add a success notification here
       console.log(`Added book ${googleBookId} to ${listType} list`);
     } catch (error) {
       console.error('Failed to add book to list:', error);
-      // You could add an error notification here
     }
   };
 
@@ -129,7 +138,7 @@ const BookListPage: React.FC = () => {
             fontWeight: 700,
             marginBottom: '16px'
           }}>
-            Welcome to Your Literary Haven
+            {isLoggedIn ? 'Welcome Back to Your Literary Haven' : 'Welcome to BookNexus'}
           </h1>
           <p style={{
             fontSize: '20px',
@@ -137,21 +146,72 @@ const BookListPage: React.FC = () => {
             maxWidth: '600px',
             margin: '0 auto'
           }}>
-            Discover, track, and share your reading journey in our cozy digital bookstore
+            {isLoggedIn 
+              ? 'Continue your reading journey in our cozy digital bookstore'
+              : 'Discover, track, and share your reading journey. Join our community of book lovers!'
+            }
           </p>
+          {!isLoggedIn && (
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap', mt: 3 }}>
+              <Button
+                variant="contained"
+                onClick={() => navigate('/register')}
+                sx={{
+                  background: 'linear-gradient(45deg, #B8956A, #D2A441)',
+                  color: 'white',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 500,
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  boxShadow: '0 2px 10px rgba(184, 149, 106, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #9D7F56, #B8956A)',
+                    boxShadow: '0 4px 15px rgba(184, 149, 106, 0.4)'
+                  }
+                }}
+              >
+                Create Account
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => navigate('/login')}
+                sx={{
+                  color: 'white',
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 500,
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: '8px',
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: 'white'
+                  }
+                }}
+              >
+                Sign In
+              </Button>
+            </Box>
+          )}
         </div>
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
-        {/* 2-Column Layout */}
+        {/* 2-Column Layout for logged-in users, single column for guests */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: isLoggedIn ? '1fr 1fr' : '1fr',
           gap: '32px',
           marginBottom: '48px'
         }}>
           
-          {/* LEFT COLUMN — Currently Reading & To Read */}
+          {/* LEFT COLUMN — Currently Reading & To Read (only for logged in users) */}
+          {isLoggedIn && (
           <div>
             {/* Currently Reading Section */}
             <div style={{ marginBottom: '32px' }}>
@@ -265,8 +325,10 @@ const BookListPage: React.FC = () => {
               )}
             </div>
           </div>
+          )}
 
-          {/* RIGHT COLUMN — Favorites & Discover */}
+          {/* RIGHT COLUMN — Favorites & Quick Actions (only for logged in) */}
+          {isLoggedIn && (
           <div>
             {/* Favorites Section */}
             <div style={{ marginBottom: '32px' }}>
@@ -337,6 +399,7 @@ const BookListPage: React.FC = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* All Books Section */}
@@ -456,32 +519,50 @@ const BookListPage: React.FC = () => {
 
                   {/* Action Buttons */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <button
-                      style={{
-                        ...buttonStyle,
-                        fontSize: '12px',
-                        padding: '8px',
-                        backgroundColor: '#4CAF50'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
-                      onClick={() => handleAddToUserList(book.id, 'FAVORITE')}
-                    >
-                      Add to Favorites
-                    </button>
-                    <button
-                      style={{
-                        ...buttonStyle,
-                        fontSize: '12px',
-                        padding: '8px',
-                        backgroundColor: '#2196F3'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
-                      onClick={() => handleAddToUserList(book.id, 'TBR')}
-                    >
-                      Add to TBR
-                    </button>
+                    {isLoggedIn ? (
+                      <>
+                        <button
+                          style={{
+                            ...buttonStyle,
+                            fontSize: '12px',
+                            padding: '8px',
+                            backgroundColor: '#4CAF50'
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+                          onClick={() => handleAddToUserList(book.id, 'FAVORITE')}
+                        >
+                          Add to Favorites
+                        </button>
+                        <button
+                          style={{
+                            ...buttonStyle,
+                            fontSize: '12px',
+                            padding: '8px',
+                            backgroundColor: '#2196F3'
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
+                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+                          onClick={() => handleAddToUserList(book.id, 'TBR')}
+                        >
+                          Add to TBR
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        style={{
+                          ...buttonStyle,
+                          fontSize: '12px',
+                          padding: '8px',
+                          backgroundColor: '#2196F3'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+                        onClick={() => navigate('/register')}
+                      >
+                        Sign up to Add
+                      </button>
+                    )}
                     <button
                       style={{
                         ...buttonStyle,

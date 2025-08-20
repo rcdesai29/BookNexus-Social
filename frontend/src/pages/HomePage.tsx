@@ -16,13 +16,14 @@ import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
 import { UserBookListService } from '../app/services/services/UserBookListService';
-import { tokenService } from '../services/tokenService';
+import { useAuth } from '../hooks/useAuth';
 import StarRating from '../components/StarRating';
-import GoogleBookDetailsModal from '../components/GoogleBookDetailsModal';
+import DiscoveryBookCard from '../components/DiscoveryBookCard';
+import UnifiedBookDetailsModal from '../components/UnifiedBookDetailsModal';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const isLoggedIn = tokenService.isLoggedIn();
+  const { isLoggedIn } = useAuth();
   
   // Only fetch user data if logged in
   const { data: borrowedBooks, loading: borrowedLoading } = useBorrowedBooks();
@@ -436,146 +437,13 @@ const HomePage: React.FC = () => {
               gap: '24px'
             }}>
               {discoverBooks.map((book: any) => (
-                <div 
+                <DiscoveryBookCard
                   key={book.id}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(10px)',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: '1px solid #E6D7C3',
-                    boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(75, 63, 48, 0.15)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
-                  }}
-                >
-                  {/* Book Cover */}
-                  <div style={{ marginBottom: '12px' }}>
-                    {book.cover ? (
-                      <img
-                        src={book.cover}
-                        alt={book.title}
-                        style={{
-                          width: '100%',
-                          height: '200px',
-                          objectFit: 'cover',
-                          borderRadius: '8px'
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '100%',
-                        height: '200px',
-                        background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '8px'
-                      }}>
-                        <MenuBook style={{ color: '#8B7355', fontSize: '48px' }} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Book Info */}
-                  <h3 style={{
-                    fontFamily: 'Playfair Display, serif',
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    color: '#4B3F30',
-                    marginBottom: '8px',
-                    lineHeight: 1.3,
-                    flex: 1
-                  }}>
-                    {book.title}
-                  </h3>
-                  <p style={{
-                    color: '#6A5E4D',
-                    fontSize: '14px',
-                    marginBottom: '8px'
-                  }}>
-                    by {book.authorName}
-                  </p>
-
-                  {/* Rating */}
-                  <div style={{ marginBottom: '12px' }}>
-                    <StarRating 
-                      rating={book.averageRating} 
-                      showCount={true}
-                      count={book.ratingsCount}
-                      size="small"
-                    />
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {isLoggedIn ? (
-                      <>
-                        <button
-                          style={{
-                            ...buttonStyle,
-                            fontSize: '12px',
-                            padding: '8px',
-                            backgroundColor: '#4CAF50'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
-                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
-                          onClick={() => handleAddToUserList(book.id, 'FAVORITE')}
-                        >
-                          Add to Favorites
-                        </button>
-                        <button
-                          style={{
-                            ...buttonStyle,
-                            fontSize: '12px',
-                            padding: '8px',
-                            backgroundColor: '#2196F3'
-                          }}
-                          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
-                          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
-                          onClick={() => handleAddToUserList(book.id, 'TBR')}
-                        >
-                          Add to TBR
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        style={{
-                          ...buttonStyle,
-                          fontSize: '12px',
-                          padding: '8px',
-                          backgroundColor: '#2196F3'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
-                        onClick={() => navigate('/register')}
-                      >
-                        Sign up to Add
-                      </button>
-                    )}
-                    <button
-                      style={{
-                        ...buttonStyle,
-                        fontSize: '12px',
-                        padding: '8px'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-                      onClick={() => handleBookDetailsClick(book)}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
+                  book={book}
+                  showRating={true}
+                  onViewDetails={handleBookDetailsClick}
+                  source="google"
+                />
               ))}
             </div>
           ) : (
@@ -591,10 +459,11 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* Book Details Modal */}
-      <GoogleBookDetailsModal
+      <UnifiedBookDetailsModal
         book={selectedBook}
         isOpen={isDetailsModalOpen}
         onClose={handleCloseDetailsModal}
+        context="discovery"
       />
     </div>
   );

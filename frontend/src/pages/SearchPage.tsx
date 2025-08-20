@@ -9,15 +9,17 @@ import {
   Clear as ClearIcon,
   Book as BookIcon
 } from '@mui/icons-material';
-import GoogleBookCard from '../components/GoogleBookCard';
-import GoogleBookReviewModal from '../components/GoogleBookReviewModal';
+import DiscoveryBookCard from '../components/DiscoveryBookCard';
+import UnifiedBookDetailsModal from '../components/UnifiedBookDetailsModal';
 import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 import { directApiService } from '../services/directApi';
 import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
 import { BookService } from '../app/services/services/BookService';
-import { tokenService } from '../services/tokenService';
+import { UserBookListService } from '../app/services/services/UserBookListService';
+import { useAuth } from '../hooks/useAuth';
 
 const SearchPage: React.FC = () => {
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
@@ -158,7 +160,7 @@ const SearchPage: React.FC = () => {
   // Review modal handlers
   const handleReviewClick = (book: GoogleBook) => {
     // Check if user is logged in
-    if (!tokenService.isLoggedIn()) {
+    if (!isLoggedIn) {
       // Redirect to login page for guests
       navigate('/login');
       return;
@@ -190,16 +192,33 @@ const SearchPage: React.FC = () => {
     }
   };
 
+  const handleAddToUserList = async (googleBookId: string, listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+    try {
+      await UserBookListService.addGoogleBookToList(googleBookId, listType);
+    } catch (error) {
+      console.error('Failed to add book to list:', error);
+    }
+  };
+
+  const handleViewDetails = (book: GoogleBook) => {
+    setSelectedBook(book);
+    setIsReviewModalOpen(true);
+  };
+
   // Render book card based on source
   const renderBookCard = (book: any) => {
     if (book.source === 'google') {
       return (
-        <GoogleBookCard
+        <DiscoveryBookCard
           key={book.googleBookId}
           book={book}
           showRating={true}
-          showReviewButton={true}
-          onReviewClick={handleReviewClick}
+          onViewDetails={handleViewDetails}
+          source="google"
         />
       );
     } else {
@@ -555,12 +574,12 @@ const SearchPage: React.FC = () => {
         )}
       </div>
 
-      {/* Google Book Review Modal */}
-      <GoogleBookReviewModal
+      {/* Book Details Modal */}
+      <UnifiedBookDetailsModal
         book={selectedBook}
         isOpen={isReviewModalOpen}
         onClose={handleCloseReviewModal}
-        onSubmitReview={handleSubmitReview}
+        context="discovery"
       />
     </div>
   );

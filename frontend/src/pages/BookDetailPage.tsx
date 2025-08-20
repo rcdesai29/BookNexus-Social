@@ -6,19 +6,17 @@ import type { BorrowedBookResponse } from '../app/services/models/BorrowedBookRe
 import { BookService } from '../app/services/services/BookService';
 import BookActions from '../components/BookActions';
 import BookFeedback from '../components/BookFeedback';
-import { tokenService } from '../services/tokenService';
+import { useAuth } from '../hooks/useAuth';
 
 const BookDetailPage: React.FC = () => {
+  const { isLoggedIn, user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [book, setBook] = useState<BookResponse | null>(null);
   const [borrowedBook, setBorrowedBook] = useState<BorrowedBookResponse | null>(null);
   const [readBook, setReadBook] = useState<BorrowedBookResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-
-  // Get current user info
-  const currentUser = tokenService.getUser();
-  const isOwner = !!(book && currentUser && book.owner === currentUser.name);
+  const isOwner = !!(book && user && book.owner === user.name);
   
   // Check if book is borrowed by current user
   const isBorrowed = !!borrowedBook;
@@ -36,7 +34,7 @@ const BookDetailPage: React.FC = () => {
         setBook(bookData);
         
         // Check if user is logged in before fetching status
-        if (tokenService.isLoggedIn()) {
+        if (isLoggedIn) {
           try {
             // Check if book is borrowed by current user
             const borrowedBooks = await BookService.findAllBorrowedBooks(0, 1000);

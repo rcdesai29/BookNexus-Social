@@ -21,34 +21,19 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
+import { useAuth } from '../hooks/useAuth';
 import { tokenService } from '../services/tokenService';
 
 const Navbar: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { isLoggedIn, user } = useAuth();
   const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const loggedIn = tokenService.isLoggedIn();
-      setIsLoggedIn(loggedIn);
-      if (loggedIn) {
-        setUser(tokenService.getUser());
-      }
-    };
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
-
   const handleLogout = () => {
     tokenService.removeToken();
-    setIsLoggedIn(false);
-    setUser(null);
     navigate('/login');
   };
 
@@ -63,7 +48,7 @@ const Navbar: React.FC = () => {
     { label: 'Home', to: '/', show: true },
     { label: 'Search', to: '/search', show: true },
     { label: 'My Books', to: '/my-books', show: isLoggedIn },
-    { label: 'Currently Reading', to: '/borrowed-books', show: isLoggedIn },
+    { label: 'Currently Reading', to: '/currently-reading', show: isLoggedIn },
     { label: 'TBR', to: '/tbr', show: isLoggedIn },
     { label: 'Read', to: '/read', show: isLoggedIn },
   ];

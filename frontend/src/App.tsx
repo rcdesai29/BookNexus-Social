@@ -54,6 +54,11 @@ function App() {
             <BorrowedBooksPage />
           </ProtectedRoute>
         } />
+        <Route path="/currently-reading" element={
+          <ProtectedRoute>
+            <BorrowedBooksPage />
+          </ProtectedRoute>
+        } />
         <Route path="/tbr" element={<ProtectedRoute><TBRPage /></ProtectedRoute>} />
         <Route path="/read" element={<ProtectedRoute><ReadPage /></ProtectedRoute>} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
