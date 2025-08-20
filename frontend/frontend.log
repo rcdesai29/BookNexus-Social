@@ -1203,3 +1203,90 @@ src/pages/SearchPage.tsx
 
 webpack compiled with 1 warning
 No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/BookListPage.tsx
+  Line 1:17:   'useState' is defined but never used              @typescript-eslint/no-unused-vars
+  Line 17:10:  'useGoogleBooksSimple' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 21:17:  'allBooks' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  Line 21:75:  'page' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  Line 21:81:  'setPage' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 21:90:  'size' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  Line 21:96:  'setSize' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/BookListPage.tsx
+  Line 1:17:   'useState' is defined but never used              @typescript-eslint/no-unused-vars
+  Line 17:10:  'useGoogleBooksSimple' is defined but never used  @typescript-eslint/no-unused-vars
+  Line 21:17:  'allBooks' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  Line 21:75:  'page' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  Line 21:81:  'setPage' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 21:90:  'size' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  Line 21:96:  'setSize' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+ERROR in src/pages/BookListPage.tsx:27:93
+TS2304: Cannot find name 'useGoogleBooks'.
+    25 |   
+    26 |   // Use Google Books for discovery
+  > 27 |   const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooks('popular fiction', 20);
+       |                                                                                             ^^^^^^^^^^^^^^
+    28 |   
+    29 |   const navigate = useNavigate();
+    30 |
+
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/pages/BookListPage.tsx
+  Line 1:17:   'useState' is defined but never used           @typescript-eslint/no-unused-vars
+  Line 21:17:  'allBooks' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  Line 21:75:  'page' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 21:81:  'setPage' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  Line 21:90:  'size' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 21:96:  'setSize' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/pages/BookListPage.tsx
+  Line 1:17:   'useState' is defined but never used           @typescript-eslint/no-unused-vars
+  Line 21:17:  'allBooks' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  Line 21:75:  'page' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 21:81:  'setPage' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  Line 21:90:  'size' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 21:96:  'setSize' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+src/pages/SearchPage.tsx
+  Line 89:40:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '&&' and '||'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 89:60:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+  Line 90:72:  Unexpected mix of '||' and '&&'. Use parentheses to clarify the intended order of operations  no-mixed-operators
+
+webpack compiled with 1 warning
+No issues found.

@@ -14,7 +14,7 @@ import { useBooks } from '../hooks/useBooks';
 import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
-import { useGoogleBooks } from '../hooks/useGoogleBooks';
+import { useGoogleBooksSimple } from '../hooks/useGoogleBooksSimple';
 import { UserBookListService } from '../app/services/services/UserBookListService';
 
 const BookListPage: React.FC = () => {
@@ -24,7 +24,7 @@ const BookListPage: React.FC = () => {
   const { data: readBooks, loading: readBooksLoading } = useReadBooks();
   
   // Use Google Books for discovery
-  const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooks('popular fiction', 20);
+  const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooksSimple('bestsellers', 20);
   
   const navigate = useNavigate();
 
