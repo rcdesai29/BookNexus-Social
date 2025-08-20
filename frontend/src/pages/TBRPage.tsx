@@ -1,121 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MenuBook, BookmarkAdd, RemoveCircle } from '@mui/icons-material';
-import type { BookResponse } from '../app/services/models/BookResponse';
-import { BookService } from '../app/services/services/BookService';
+import { BookmarkAdd } from '@mui/icons-material';
+import LibraryBookCard from '../components/LibraryBookCard';
+import UnifiedBookDetailsModal from '../components/UnifiedBookDetailsModal';
+import { useUserBookList } from '../hooks/useUserBookList';
+import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 
 // Note: This page shows books the user wants to read (To Be Read)
 // UI shows as "TBR" tab but internally still called "TBRPage"
 
 const TBRPage: React.FC = () => {
-  const [books, setBooks] = useState<BookResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const { data: tbrBooks, loading, error, refetch, moveToShelf, removeFromLibrary } = useUserBookList('TBR');
+  const [selectedBook, setSelectedBook] = useState<GoogleBook | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadTBRBooks();
-  }, []);
-
-  const loadTBRBooks = () => {
-    // TODO: Implement TBR API call
-    // For now, show empty state
-    setLoading(false);
+  const handleViewDetails = (book: any) => {
+    setSelectedBook(book);
+    setIsDetailsModalOpen(true);
   };
 
-  const handleBorrowBook = async (bookId: number) => {
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedBook(null);
+  };
+
+  const handleMoveToShelf = async (bookId: string, fromShelf: string, toShelf: string) => {
     try {
-      await BookService.borrowBook(bookId);
-      // Remove from TBR after borrowing
-      setBooks(books.filter(book => book.id !== bookId));
-      // Optionally navigate to borrowed books
-      navigate('/borrowed-books');
+      await moveToShelf(bookId, fromShelf, toShelf);
     } catch (error) {
-      console.error('Error borrowing book:', error);
+      console.error('Failed to move book:', error);
     }
   };
 
-  const handleRemoveFromTBR = async (bookId: number) => {
+  const handleRemoveFromLibrary = async (bookId: string) => {
     try {
-      // TODO: Implement remove from TBR functionality
-      setBooks(books.filter(book => book.id !== bookId));
+      await removeFromLibrary(bookId);
     } catch (error) {
-      console.error('Error removing from TBR:', error);
+      console.error('Failed to remove book:', error);
     }
   };
 
-  const renderBookCover = (book: BookResponse) => {
-    if (book.cover) {
-      return (
-        <img
-          src={typeof book.cover === 'string' && book.cover.startsWith('http') ? 
-               `http://localhost:8088/api/v1/books/cover/${book.id}` : 
-               `data:image/jpeg;base64,${book.cover}`}
-          alt={book.title}
-          style={{
-            width: '100%',
-            height: '200px',
-            objectFit: 'cover',
-            borderRadius: '8px',
-            marginBottom: '12px'
-          }}
-        />
-      );
-    }
-    return (
-      <div style={{
-        width: '100%',
-        height: '200px',
-        background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: '8px',
-        marginBottom: '12px'
-      }}>
-        <MenuBook style={{ color: '#8B7355', fontSize: '48px' }} />
-      </div>
-    );
-  };
-
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(10px)',
-    padding: '16px',
-    borderRadius: '12px',
-    border: '1px solid #E6D7C3',
-    boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
-    transition: 'all 0.3s ease',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column'
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#D2691E',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    padding: '8px 16px',
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    marginTop: 'auto'
-  };
-
-  const removeButtonStyle: React.CSSProperties = {
-    backgroundColor: 'transparent',
-    color: '#D2691E',
-    border: '1px solid #D2691E',
-    borderRadius: '6px',
-    padding: '8px 16px',
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    marginTop: '8px'
-  };
 
   if (loading) {
     return (
@@ -205,7 +130,7 @@ const TBRPage: React.FC = () => {
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
-        {books.length === 0 && !loading && (
+        {tbrBooks.length === 0 && !loading ? (
           <div style={{
             textAlign: 'center',
             padding: '64px 24px',
@@ -235,83 +160,50 @@ const TBRPage: React.FC = () => {
             </p>
             <button
               style={{
-                ...buttonStyle,
+                backgroundColor: '#D2691E',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
                 padding: '12px 24px',
-                fontSize: '16px'
+                fontSize: '16px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'background-color 0.2s'
               }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-              onClick={() => navigate('/books')}
+              onClick={() => navigate('/')}
             >
               Browse Books
             </button>
           </div>
-        )}
-
-        {books.length > 0 && (
-          <div className="book-list-grid">
-            {books.map(book => (
-              <div 
-                key={book.id}
-                style={cardStyle}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(75, 63, 48, 0.15)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
-                }}
-              >
-                {renderBookCover(book)}
-                <h3 style={{
-                  fontFamily: 'Playfair Display, serif',
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  color: '#4B3F30',
-                  marginBottom: '8px',
-                  lineHeight: 1.3
-                }}>
-                  {book.title}
-                </h3>
-                <p style={{
-                  color: '#6A5E4D',
-                  fontSize: '14px',
-                  marginBottom: '16px'
-                }}>
-                  by {book.authorName}
-                </p>
-                
-                <div style={{ marginTop: 'auto' }}>
-                  <button
-                    style={buttonStyle}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-                    onClick={() => book.id && handleBorrowBook(book.id)}
-                  >
-                    Borrow Now
-                  </button>
-                  <button
-                    style={removeButtonStyle}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = '#D2691E';
-                      e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = '#D2691E';
-                    }}
-                    onClick={() => book.id && handleRemoveFromTBR(book.id)}
-                  >
-                    <RemoveCircle style={{ fontSize: '16px', marginRight: '4px' }} />
-                    Remove
-                  </button>
-                </div>
-              </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: '24px'
+          }}>
+            {tbrBooks.map(bookItem => (
+              <LibraryBookCard
+                key={`${bookItem.id}-${bookItem.listType}`}
+                bookListItem={bookItem}
+                onViewDetails={handleViewDetails}
+                onMoveToShelf={handleMoveToShelf}
+                onRemoveFromLibrary={handleRemoveFromLibrary}
+                showShelfActions={true}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {/* Book Details Modal */}
+      <UnifiedBookDetailsModal
+        book={selectedBook}
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseDetailsModal}
+        context="library"
+      />
     </div>
   );
 };

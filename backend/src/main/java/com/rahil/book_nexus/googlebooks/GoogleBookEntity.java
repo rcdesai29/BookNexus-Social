@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Getter
 @Setter
@@ -16,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = "google_book")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class GoogleBookEntity extends BaseEntity {
 
     @Column(unique = true, nullable = false)

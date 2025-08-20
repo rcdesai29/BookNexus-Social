@@ -4,6 +4,15 @@ spring:
   servlet:
     multipart:
       max-file-size: 50MB
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    date-format: yyyy-MM-dd
+  jpa:
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
 
 server:
   servlet:

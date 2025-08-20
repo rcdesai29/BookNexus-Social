@@ -32,6 +32,8 @@ import com.rahil.book_nexus.feedback.Feedback;
 import com.rahil.book_nexus.history.BookTransactionHistory;
 import com.rahil.book_nexus.book.Book;
 import com.rahil.book_nexus.googlebooks.GoogleBookFeedback;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Getter
 @Setter
@@ -41,6 +43,7 @@ import com.rahil.book_nexus.googlebooks.GoogleBookFeedback;
 @Entity
 @Table(name = "_user")
 @EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails, Principal {
 
     @Id
@@ -62,15 +65,19 @@ public class User implements UserDetails, Principal {
     private List<Role> roles;
 
     @OneToMany(mappedBy = "owner")
+    @JsonIgnore
     private List<Book> books;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<BookTransactionHistory> histories;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Feedback> feedbacks;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<GoogleBookFeedback> googleBookFeedbacks;
 
     @CreatedDate

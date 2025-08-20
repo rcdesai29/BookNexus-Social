@@ -97,16 +97,28 @@ public class GoogleBookIntegrationService {
      * Save Google Book data to our database
      */
     private GoogleBookEntity saveGoogleBookToDatabase(GoogleBookDto googleBookDto, User user) {
+        // Truncate description if it's too long (limit is 2000 characters)
+        String description = googleBookDto.getDescription();
+        if (description != null && description.length() > 2000) {
+            description = description.substring(0, 1997) + "...";
+        }
+        
+        // Truncate categories if too long (limit is 100 characters)
+        String categories = googleBookDto.getCategories() != null ? String.join(", ", googleBookDto.getCategories()) : null;
+        if (categories != null && categories.length() > 100) {
+            categories = categories.substring(0, 97) + "...";
+        }
+        
         GoogleBookEntity googleBookEntity = GoogleBookEntity.builder()
                 .googleBookId(googleBookDto.getId())
                 .title(googleBookDto.getTitle())
                 .authorName(googleBookDto.getAuthors() != null && !googleBookDto.getAuthors().isEmpty() 
                         ? googleBookDto.getAuthors().get(0) : "Unknown Author")
-                .description(googleBookDto.getDescription())
+                .description(description)
                 .coverUrl(googleBookDto.getImageLinks() != null ? googleBookDto.getImageLinks().getThumbnail() : null)
                 .publishedDate(googleBookDto.getPublishedDate())
                 .pageCount(googleBookDto.getPageCount())
-                .categories(googleBookDto.getCategories() != null ? String.join(", ", googleBookDto.getCategories()) : null)
+                .categories(categories)
                 .averageRating(googleBookDto.getAverageRating())
                 .ratingsCount(googleBookDto.getRatingsCount())
                 .isbn13(googleBookDto.getIsbn13())

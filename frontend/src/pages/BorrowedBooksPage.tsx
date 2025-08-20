@@ -279,7 +279,7 @@ const BorrowedBooksPage: React.FC = () => {
               }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-              onClick={() => window.location.href = '/books'}
+              onClick={() => window.location.href = '/'}
             >
               Browse Books
             </button>

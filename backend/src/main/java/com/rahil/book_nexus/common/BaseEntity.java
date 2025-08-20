@@ -17,6 +17,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @MappedSuperclass
 @SuperBuilder
@@ -32,10 +33,12 @@ public class BaseEntity {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdDate;
 
     @LastModifiedDate
     @Column(insertable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate lastModifiedDate;
 
     @CreatedBy

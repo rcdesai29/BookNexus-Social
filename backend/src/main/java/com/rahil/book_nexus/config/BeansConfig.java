@@ -15,6 +15,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 @Configuration
 @RequiredArgsConstructor
@@ -56,7 +58,10 @@ public class BeansConfig {
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        return mapper;
     }
 
 }
