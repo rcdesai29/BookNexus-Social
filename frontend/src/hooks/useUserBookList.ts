@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { UserBookList, UserBookListService } from '../app/services/services/UserBookListService';
 import { useAuth } from './useAuth';
+import { tokenService } from '../services/tokenService';
 
 export function useUserBookList(listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') {
   const { isLoggedIn } = useAuth();
@@ -30,8 +31,17 @@ export function useUserBookList(listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'T
         result = await UserBookListService.getAllUserBooks();
       }
       setData(result || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching user books:', err);
+      
+      // Check if it's an authentication error (401/403)
+      if (err?.status === 401 || err?.status === 403 || 
+          (err?.message && (err.message.includes('Forbidden') || err.message.includes('Unauthorized')))) {
+        console.log('Authentication error detected, logging out user');
+        tokenService.logout();
+        return;
+      }
+      
       setError(err);
       // Set empty array on error so user sees empty state instead of error
       setData([]);
@@ -56,8 +66,17 @@ export function useUserBookList(listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'T
       await UserBookListService.addGoogleBookToList(bookId, toShelf as any);
       // Refresh data
       await fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to move book to shelf:', error);
+      
+      // Check if it's an authentication error (401/403)
+      if (error?.status === 401 || error?.status === 403 || 
+          (error?.message && (error.message.includes('Forbidden') || error.message.includes('Unauthorized')))) {
+        console.log('Authentication error detected, logging out user');
+        tokenService.logout();
+        return;
+      }
+      
       throw error;
     }
   };
@@ -75,8 +94,17 @@ export function useUserBookList(listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'T
         // Refresh data
         await fetchData();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to remove book from library:', error);
+      
+      // Check if it's an authentication error (401/403)
+      if (error?.status === 401 || error?.status === 403 || 
+          (error?.message && (error.message.includes('Forbidden') || error.message.includes('Unauthorized')))) {
+        console.log('Authentication error detected, logging out user');
+        tokenService.logout();
+        return;
+      }
+      
       throw error;
     }
   };

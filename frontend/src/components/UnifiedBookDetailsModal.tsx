@@ -9,6 +9,7 @@ import {
 } from '@mui/icons-material';
 import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
+import { UserBookListService } from '../app/services/services/UserBookListService';
 import { useAuth } from '../hooks/useAuth';
 
 interface UnifiedBookDetailsModalProps {
@@ -18,6 +19,8 @@ interface UnifiedBookDetailsModalProps {
   context?: 'discovery' | 'library'; // To show different action buttons
   existingUserRating?: number;
   existingUserReview?: string;
+  userBookListData?: any; // Full UserBookList object for progress and other data
+  onBookMoved?: () => void; // Callback when book is moved to different shelf
 }
 
 const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
@@ -26,7 +29,9 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   onClose,
   context = 'discovery',
   existingUserRating,
-  existingUserReview
+  existingUserReview,
+  userBookListData,
+  onBookMoved
 }) => {
   const { isLoggedIn } = useAuth();
   const [rating, setRating] = useState<number>(0);
@@ -36,6 +41,11 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   const [success, setSuccess] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [existingFeedback, setExistingFeedback] = useState<any>(null);
+  const [progress, setProgress] = useState<number>(0);
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
+  const [progressError, setProgressError] = useState<string | null>(null);
+  const [progressSuccess, setProgressSuccess] = useState(false);
+  const [bookMoved, setBookMoved] = useState(false);
 
   useEffect(() => {
     if (book && isOpen) {
@@ -43,11 +53,14 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
       setRating(existingUserRating || 0);
       setReview(existingUserReview || '');
       
+      // Load reading progress if available
+      setProgress(userBookListData?.readingProgress || 0);
+      
       if (isLoggedIn) {
         loadExistingFeedback();
       }
     }
-  }, [book, isOpen, isLoggedIn, existingUserRating, existingUserReview]);
+  }, [book, isOpen, isLoggedIn, existingUserRating, existingUserReview, userBookListData]);
 
   const loadExistingFeedback = async () => {
     if (!book?.googleBookId) return;
@@ -93,6 +106,41 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
       setError(err?.message || 'Failed to submit review');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleUpdateProgress = async (newProgress: number) => {
+    if (!book?.googleBookId || !isLoggedIn || newProgress < 0 || newProgress > 100) return;
+    
+    setIsUpdatingProgress(true);
+    setProgressError(null);
+    setProgressSuccess(false);
+    
+    try {
+      const updatedEntry = await UserBookListService.updateReadingProgress(book.googleBookId, newProgress);
+      setProgress(newProgress);
+      
+      // If progress reached 100%, the book was automatically moved to Read
+      if (newProgress === 100) {
+        setBookMoved(true);
+        setProgressSuccess(true);
+        // Notify parent component that the book was moved
+        if (onBookMoved) {
+          onBookMoved();
+        }
+        // Auto-close modal after a short delay
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        setProgressSuccess(true);
+        setTimeout(() => setProgressSuccess(false), 2000);
+      }
+    } catch (err: any) {
+      setProgressError(err?.message || 'Failed to update progress');
+      setTimeout(() => setProgressError(null), 3000);
+    } finally {
+      setIsUpdatingProgress(false);
     }
   };
 
@@ -302,7 +350,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                 </p>
               )}
               
-              {book.categories && book.categories.length > 0 && (
+              {book.categories && Array.isArray(book.categories) && book.categories.length > 0 && (
                 <p style={{ margin: '8px 0', fontSize: '14px' }}>
                   <strong>Categories:</strong> {book.categories.join(', ')}
                 </p>
@@ -315,6 +363,145 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
               )}
             </div>
           </div>
+          
+          {/* Reading Progress Section - Only for Currently Reading books */}
+          {isLoggedIn && userBookListData && userBookListData.listType === 'CURRENTLY_READING' && (
+            <div style={{ marginBottom: '24px', borderTop: '1px solid #E6D7C3', paddingTop: '24px' }}>
+              <h3 style={{ marginBottom: '16px', color: '#8B4513', fontSize: '18px' }}>
+                Reading Progress
+              </h3>
+              
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ color: '#6A5E4D', fontSize: '14px' }}>Progress</span>
+                  <span style={{ color: '#4B3F30', fontSize: '14px', fontWeight: 500 }}>
+                    {progress}%
+                  </span>
+                </div>
+                
+                {/* Progress Bar */}
+                <div style={{
+                  width: '100%',
+                  backgroundColor: '#F4E3C1',
+                  borderRadius: '8px',
+                  height: '12px',
+                  position: 'relative',
+                  cursor: 'pointer'
+                }} onClick={(e) => {
+                  if (isUpdatingProgress) return;
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const newProgress = Math.round((clickX / rect.width) * 100);
+                  handleUpdateProgress(Math.max(0, Math.min(100, newProgress)));
+                }}>
+                  <div style={{
+                    backgroundColor: '#FF9800',
+                    height: '12px',
+                    borderRadius: '8px',
+                    width: `${progress}%`,
+                    transition: 'width 0.3s ease',
+                    position: 'relative'
+                  }}>
+                    {/* Progress Handle */}
+                    <div style={{
+                      position: 'absolute',
+                      right: '-6px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#FF9800',
+                      border: '2px solid white',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }} />
+                  </div>
+                </div>
+                
+                <p style={{
+                  color: '#8B7355',
+                  fontSize: '12px',
+                  marginTop: '8px',
+                  fontStyle: 'italic'
+                }}>
+                  Click on the progress bar to update your reading progress
+                </p>
+              </div>
+
+              {/* Quick Progress Buttons */}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                {[25, 50, 75, 100].map(percent => (
+                  <button
+                    key={percent}
+                    onClick={() => handleUpdateProgress(percent)}
+                    disabled={isUpdatingProgress || progress === percent}
+                    style={{
+                      backgroundColor: progress === percent ? '#D2691E' : 'transparent',
+                      color: progress === percent ? 'white' : '#D2691E',
+                      border: '1px solid #D2691E',
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      cursor: isUpdatingProgress || progress === percent ? 'default' : 'pointer',
+                      transition: 'all 0.2s',
+                      opacity: isUpdatingProgress ? 0.5 : 1
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isUpdatingProgress && progress !== percent) {
+                        e.currentTarget.style.backgroundColor = '#D2691E';
+                        e.currentTarget.style.color = 'white';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (progress !== percent) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = '#D2691E';
+                      }
+                    }}
+                  >
+                    {percent}%
+                  </button>
+                ))}
+              </div>
+
+              {/* Progress Messages */}
+              {progressError && (
+                <div style={{
+                  backgroundColor: '#FEE2E2',
+                  color: '#DC2626',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  marginBottom: '8px'
+                }}>
+                  {progressError}
+                </div>
+              )}
+
+              {progressSuccess && (
+                <div style={{
+                  backgroundColor: '#D1FAE5',
+                  color: '#065F46',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  marginBottom: '8px'
+                }}>
+                  {bookMoved ? 
+                    '🎉 Congratulations! Book completed and moved to Read shelf!' : 
+                    'Progress updated successfully!'
+                  }
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Description */}
           {book.synopsis && book.synopsis !== 'No description available.' && (

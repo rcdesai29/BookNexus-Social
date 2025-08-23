@@ -14,6 +14,7 @@ import MyBooksPage from './pages/MyBooksPage';
 import ReadPage from './pages/ReadPage';
 import RegisterPage from './pages/RegisterPage';
 import TBRPage from './pages/TBRPage';
+import CurrentlyReadingPage from './pages/CurrentlyReadingPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
 import SearchPage from './pages/SearchPage';
@@ -56,7 +57,7 @@ function App() {
         } />
         <Route path="/currently-reading" element={
           <ProtectedRoute>
-            <BorrowedBooksPage />
+            <CurrentlyReadingPage />
           </ProtectedRoute>
         } />
         <Route path="/tbr" element={<ProtectedRoute><TBRPage /></ProtectedRoute>} />

@@ -88,6 +88,17 @@ public class UserBookListController {
         return ResponseEntity.ok(read);
     }
     
+    @PutMapping("/google-books/{googleBookId}/progress")
+    public ResponseEntity<UserBookList> updateReadingProgress(
+            @PathVariable String googleBookId,
+            @RequestParam Integer progress,
+            Authentication connectedUser) {
+        
+        User user = ((User) connectedUser.getPrincipal());
+        UserBookList updatedUserBookList = googleBookIntegrationService.updateReadingProgress(googleBookId, user, progress);
+        return ResponseEntity.ok(updatedUserBookList);
+    }
+    
     @GetMapping("/test")
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("Controller is working!");

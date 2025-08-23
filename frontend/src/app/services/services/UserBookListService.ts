@@ -149,4 +149,24 @@ export class UserBookListService {
             url: '/user-book-lists/read',
         });
     }
+
+    /**
+     * Update reading progress for a currently reading book
+     * @param googleBookId The Google Book ID
+     * @param progress Progress percentage (0-100)
+     * @returns UserBookList
+     * @throws ApiError
+     */
+    public static async updateReadingProgress(
+        googleBookId: string,
+        progress: number
+    ): Promise<UserBookList> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: `/user-book-lists/google-books/${googleBookId}/progress`,
+            query: {
+                'progress': progress,
+            },
+        });
+    }
 }

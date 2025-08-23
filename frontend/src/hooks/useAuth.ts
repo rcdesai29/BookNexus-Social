@@ -7,6 +7,12 @@ export function useAuth() {
 
   useEffect(() => {
     const checkAuthStatus = () => {
+      // Check if token is expired first
+      if (tokenService.isTokenExpired()) {
+        tokenService.logout();
+        return;
+      }
+      
       const loggedIn = tokenService.isLoggedIn();
       const currentUser = tokenService.getUser();
       

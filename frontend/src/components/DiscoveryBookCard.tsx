@@ -10,6 +10,7 @@ import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 import StarRating from './StarRating';
 import { useAuth } from '../hooks/useAuth';
 import { UserBookListService } from '../app/services/services/UserBookListService';
+import { tokenService } from '../services/tokenService';
 
 interface DiscoveryBookCardProps {
   book: GoogleBook;
@@ -116,8 +117,16 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
         });
       }, 2000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add book to list:', error);
+      
+      // Check if it's an authentication error (401/403)
+      if (error?.status === 401 || error?.status === 403 || 
+          (error?.message && (error.message.includes('Forbidden') || error.message.includes('Unauthorized')))) {
+        console.log('Authentication error detected, logging out user');
+        tokenService.logout();
+        return;
+      }
     } finally {
       setAddingToList(null);
     }

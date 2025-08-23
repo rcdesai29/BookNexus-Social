@@ -94,6 +94,77 @@ public class GoogleBookIntegrationService {
     }
     
     /**
+     * Get count of books read by a user
+     * This includes re-reads of the same book (each READ entry counts as 1)
+     */
+    public long getBooksReadCount(User user) {
+        return userBookListRepository.countUserBooksByListType(user, UserBookList.ListType.READ);
+    }
+    
+    /**
+     * Get count of books currently being read by a user
+     */
+    public long getCurrentlyReadingCount(User user) {
+        return userBookListRepository.countUserBooksByListType(user, UserBookList.ListType.CURRENTLY_READING);
+    }
+    
+    /**
+     * Update reading progress for a currently reading book
+     * Automatically moves book to "Read" when progress reaches 100%
+     */
+    @Transactional
+    public UserBookList updateReadingProgress(String googleBookId, User user, Integer progress) {
+        if (progress < 0 || progress > 100) {
+            throw new IllegalArgumentException("Progress must be between 0 and 100");
+        }
+        
+        Optional<GoogleBookEntity> googleBookEntity = googleBookEntityRepository.findByGoogleBookId(googleBookId);
+        if (googleBookEntity.isEmpty()) {
+            throw new IllegalArgumentException("Google Book not found in database: " + googleBookId);
+        }
+        
+        Optional<UserBookList> userBookList = userBookListRepository
+                .findByUserAndGoogleBookAndListTypeAndIsActiveTrue(user, googleBookEntity.get(), UserBookList.ListType.CURRENTLY_READING);
+        
+        if (userBookList.isEmpty()) {
+            throw new IllegalArgumentException("Book is not in user's Currently Reading list");
+        }
+        
+        UserBookList entry = userBookList.get();
+        entry.setReadingProgress(progress);
+        
+        // If progress reaches 100%, automatically move to "Read" shelf
+        if (progress == 100) {
+            // Check if user already has this book in "Read" list
+            Optional<UserBookList> existingReadEntry = userBookListRepository
+                    .findByUserAndGoogleBookAndListTypeAndIsActiveTrue(user, googleBookEntity.get(), UserBookList.ListType.READ);
+            
+            if (existingReadEntry.isEmpty()) {
+                // Create new "Read" entry
+                UserBookList readEntry = UserBookList.builder()
+                        .user(user)
+                        .googleBook(googleBookEntity.get())
+                        .listType(UserBookList.ListType.READ)
+                        .isActive(true)
+                        .userRating(entry.getUserRating()) // Preserve existing rating if any
+                        .userReview(entry.getUserReview()) // Preserve existing review if any
+                        .createdBy(user.getId())
+                        .build();
+                
+                userBookListRepository.save(readEntry);
+                log.info("Auto-moved Google Book {} to Read list for user {} (progress reached 100%)", googleBookId, user.getEmail());
+            }
+            
+            // Mark current "Currently Reading" entry as inactive
+            entry.setIsActive(false);
+            log.info("Marked Currently Reading entry as inactive for Google Book {} for user {}", googleBookId, user.getEmail());
+        }
+        
+        log.info("Updated reading progress for Google Book {} to {}% for user {}", googleBookId, progress, user.getEmail());
+        return userBookListRepository.save(entry);
+    }
+    
+    /**
      * Save Google Book data to our database
      */
     private GoogleBookEntity saveGoogleBookToDatabase(GoogleBookDto googleBookDto, User user) {
