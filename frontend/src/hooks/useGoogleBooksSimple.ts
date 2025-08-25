@@ -28,6 +28,12 @@ export function useGoogleBooksSimple(
   const [totalItems, setTotalItems] = useState<number>(0);
 
   useEffect(() => {
+    if (!query || query.trim() === '') {
+      setLoading(false);
+      setData([]);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     

@@ -9,7 +9,9 @@ export function useAuth() {
     const checkAuthStatus = () => {
       // Check if token is expired first
       if (tokenService.isTokenExpired()) {
-        tokenService.logout();
+        tokenService.silentLogout(); // Use silent logout to prevent infinite loops
+        setIsLoggedIn(false);
+        setUser(null);
         return;
       }
       

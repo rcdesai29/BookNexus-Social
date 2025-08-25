@@ -18,8 +18,10 @@ export const tokenService = {
   logout: () => {
     localStorage.removeItem(TOKEN_KEY);
     dispatchAuthChange();
-    // Redirect to login page
-    window.location.href = '/login';
+  },
+  silentLogout: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    // Don't dispatch auth change to prevent infinite loops
   },
   isLoggedIn: () => !!localStorage.getItem(TOKEN_KEY),
   getUser: () => {
