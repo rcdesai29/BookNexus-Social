@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MenuBook as MenuBookIcon,
@@ -10,6 +10,7 @@ import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 import StarRating from './StarRating';
 import { useAuth } from '../hooks/useAuth';
 import { UserBookListService } from '../app/services/services/UserBookListService';
+import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
 import { tokenService } from '../services/tokenService';
 
 interface DiscoveryBookCardProps {
@@ -33,6 +34,35 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
   const navigate = useNavigate();
   const [addingToList, setAddingToList] = useState<string | null>(null);
   const [addedToLists, setAddedToLists] = useState<Set<string>>(new Set());
+  const [appRating, setAppRating] = useState<number | null>(null);
+  const [appRatingCount, setAppRatingCount] = useState<number | null>(null);
+
+  // Fetch app ratings when component mounts or book changes
+  useEffect(() => {
+    const fetchAppRatings = async () => {
+      if (book.googleBookId) {
+        try {
+          const [rating, count] = await Promise.all([
+            GoogleBookFeedbackService.getAverageRating(book.googleBookId),
+            GoogleBookFeedbackService.getRatingCount(book.googleBookId)
+          ]);
+          setAppRating(rating);
+          setAppRatingCount(count);
+        } catch (error) {
+          console.error('Failed to fetch app ratings:', error);
+          // Fall back to Google ratings if app ratings fail
+          setAppRating(book.averageRating);
+          setAppRatingCount(book.ratingsCount);
+        }
+      } else {
+        // No Google Book ID, use Google ratings
+        setAppRating(book.averageRating);
+        setAppRatingCount(book.ratingsCount);
+      }
+    };
+
+    fetchAppRatings();
+  }, [book.googleBookId, book.averageRating, book.ratingsCount]);
 
   const renderBookCover = () => {
     return (
@@ -267,12 +297,12 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
       </p>
 
       {/* Rating */}
-      {showRating && (
+      {showRating && (appRating !== null && appRatingCount !== null) && (
         <div style={{ marginBottom: '12px' }}>
           <StarRating 
-            rating={book.averageRating} 
+            rating={appRating || 0} 
             showCount={true}
-            count={book.ratingsCount}
+            count={appRatingCount || 0}
             size="small"
           />
         </div>

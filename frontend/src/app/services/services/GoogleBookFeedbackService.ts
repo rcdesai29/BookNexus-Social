@@ -21,15 +21,13 @@ export interface GoogleBookFeedbackResponse {
 }
 
 export class GoogleBookFeedbackService {
-  private static readonly BASE_URL = 'http://localhost:8088/api/v1/google-books';
-
   /**
    * Save feedback for a Google Book
    */
   public static async saveFeedback(request: GoogleBookFeedbackRequest): Promise<number> {
     const result = await __request(OpenAPI, {
       method: 'POST',
-      url: `${this.BASE_URL}/feedback`,
+      url: '/google-books/feedback',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -46,7 +44,7 @@ export class GoogleBookFeedbackService {
   public static async getFeedbackByGoogleBookId(googleBookId: string): Promise<GoogleBookFeedbackResponse[]> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `${this.BASE_URL}/feedback/${googleBookId}`,
+      url: `/google-books/feedback/${googleBookId}`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -61,7 +59,7 @@ export class GoogleBookFeedbackService {
   public static async getAverageRating(googleBookId: string): Promise<number> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `${this.BASE_URL}/feedback/${googleBookId}/rating`,
+      url: `/google-books/feedback/${googleBookId}/rating`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -76,7 +74,7 @@ export class GoogleBookFeedbackService {
   public static async getRatingCount(googleBookId: string): Promise<number> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `${this.BASE_URL}/feedback/${googleBookId}/count`,
+      url: `/google-books/feedback/${googleBookId}/count`,
       headers: {
         'Content-Type': 'application/json',
       },

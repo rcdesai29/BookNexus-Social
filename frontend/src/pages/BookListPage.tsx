@@ -532,7 +532,7 @@ const BookListPage: React.FC = () => {
                           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
                           onClick={() => handleAddToUserList(book.id, 'FAVORITE')}
                         >
-                          Add to Favorites
+                          Add to Read
                         </button>
                         <button
                           style={{

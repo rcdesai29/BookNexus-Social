@@ -21,6 +21,7 @@ interface UnifiedBookDetailsModalProps {
   existingUserReview?: string;
   userBookListData?: any; // Full UserBookList object for progress and other data
   onBookMoved?: () => void; // Callback when book is moved to different shelf
+  onRatingUpdated?: (newRating: number, newCount: number) => void; // Callback when rating is updated
 }
 
 const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
@@ -31,7 +32,8 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   existingUserRating,
   existingUserReview,
   userBookListData,
-  onBookMoved
+  onBookMoved,
+  onRatingUpdated
 }) => {
   const { isLoggedIn } = useAuth();
   const [rating, setRating] = useState<number>(0);
@@ -46,6 +48,9 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   const [progressError, setProgressError] = useState<string | null>(null);
   const [progressSuccess, setProgressSuccess] = useState(false);
   const [bookMoved, setBookMoved] = useState(false);
+  const [updatedRating, setUpdatedRating] = useState<number | null>(null);
+  const [updatedRatingCount, setUpdatedRatingCount] = useState<number | null>(null);
+  const [allUserReviews, setAllUserReviews] = useState<any[]>([]);
 
   useEffect(() => {
     if (book && isOpen) {
@@ -66,14 +71,32 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
     if (!book?.googleBookId) return;
     
     try {
-      // You might want to add an API to get user's existing feedback
-      // For now, use the provided existing feedback
+      // Get all feedback for this book to find user's review
+      const allFeedback = await GoogleBookFeedbackService.getFeedbackByGoogleBookId(book.googleBookId);
+      
+      // Also get updated rating data
+      const [averageRating, ratingCount] = await Promise.all([
+        GoogleBookFeedbackService.getAverageRating(book.googleBookId),
+        GoogleBookFeedbackService.getRatingCount(book.googleBookId)
+      ]);
+      
+      setUpdatedRating(averageRating);
+      setUpdatedRatingCount(ratingCount);
+      setAllUserReviews(allFeedback || []);
+      
+      // Find the current user's feedback (this would need user ID matching)
+      // For now, use the provided existing feedback or the most recent one
       setExistingFeedback({
         rating: existingUserRating,
         review: existingUserReview
       });
     } catch (error) {
       console.error('Failed to load existing feedback:', error);
+      // Fallback to provided props
+      setExistingFeedback({
+        rating: existingUserRating,
+        review: existingUserReview
+      });
     }
   };
 
@@ -93,14 +116,29 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
         rating: rating,
         review: review
       });
+      
       setSuccess(true);
+      setShowReviewForm(false);
+      
+      // Update local feedback state immediately
+      setExistingFeedback({
+        rating: rating,
+        review: review
+      });
+      
+      // Reset form
       setRating(0);
       setReview('');
-      setShowReviewForm(false);
-      // Reload existing feedback
-      setTimeout(() => {
-        loadExistingFeedback();
+      
+      // Reload feedback and rating data from server
+      setTimeout(async () => {
+        await loadExistingFeedback();
         setSuccess(false);
+        
+        // Notify parent component of updated rating if callback provided
+        if (onRatingUpdated && updatedRating !== null && updatedRatingCount !== null) {
+          onRatingUpdated(updatedRating, updatedRatingCount);
+        }
       }, 1500);
     } catch (err: any) {
       setError(err?.message || 'Failed to submit review');
@@ -117,7 +155,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
     setProgressSuccess(false);
     
     try {
-      const updatedEntry = await UserBookListService.updateReadingProgress(book.googleBookId, newProgress);
+      await UserBookListService.updateReadingProgress(book.googleBookId, newProgress);
       setProgress(newProgress);
       
       // If progress reached 100%, the book was automatically moved to Read
@@ -327,13 +365,13 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
             
             {/* Book Info */}
             <div style={{ flex: 1 }}>
-              {book.averageRating > 0 && (
+              {(updatedRating ?? book.averageRating) > 0 && (
                 <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{ display: 'flex' }}>
-                    {renderStars(book.averageRating)}
+                    {renderStars(updatedRating ?? book.averageRating)}
                   </div>
                   <span style={{ fontSize: '14px', color: '#666' }}>
-                    {book.averageRating.toFixed(1)} ({book.ratingsCount || 0} ratings)
+                    {(updatedRating ?? book.averageRating).toFixed(1)} ({(updatedRatingCount ?? book.ratingsCount) || 0} ratings)
                   </span>
                 </div>
               )}
@@ -760,6 +798,78 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                   </div>
                 </form>
               )}
+            </div>
+          )}
+
+          {/* All User Reviews Section */}
+          {allUserReviews && allUserReviews.length > 0 && (
+            <div style={{ borderTop: '1px solid #E6D7C3', paddingTop: '24px', marginTop: '24px' }}>
+              <h3 style={{ marginBottom: '16px', color: '#8B4513', fontSize: '18px' }}>
+                User Reviews ({allUserReviews.length})
+              </h3>
+              
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                {allUserReviews.map((review, index) => (
+                  <div 
+                    key={index}
+                    style={{
+                      backgroundColor: '#F9F7F4',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #E6D7C3',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    {/* Review Header */}
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: '12px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{
+                          fontWeight: 600,
+                          color: '#4B3F30',
+                          fontSize: '14px'
+                        }}>
+                          {review.userName || 'Anonymous User'}
+                        </span>
+                        {review.rating && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {renderStars(review.rating, false, '14px')}
+                            <span style={{ fontSize: '12px', color: '#666' }}>
+                              {review.rating}/5
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {review.createdDate && (
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#8B7355',
+                          fontStyle: 'italic'
+                        }}>
+                          {new Date(review.createdDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Review Text */}
+                    {review.review && (
+                      <p style={{
+                        fontSize: '14px',
+                        lineHeight: '1.6',
+                        color: '#4B3F30',
+                        margin: 0,
+                        fontStyle: 'italic'
+                      }}>
+                        "{review.review}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

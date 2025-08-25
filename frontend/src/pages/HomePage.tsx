@@ -15,9 +15,7 @@ import { useGoogleBooksSimple } from '../hooks/useGoogleBooksSimple';
 import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
 import { useMyBooks } from '../hooks/useMyBooks';
 import { useReadBooks } from '../hooks/useReadBooks';
-import { UserBookListService } from '../app/services/services/UserBookListService';
 import { useAuth } from '../hooks/useAuth';
-import StarRating from '../components/StarRating';
 import DiscoveryBookCard from '../components/DiscoveryBookCard';
 import UnifiedBookDetailsModal from '../components/UnifiedBookDetailsModal';
 
@@ -36,6 +34,7 @@ const HomePage: React.FC = () => {
   // Modal state for book details
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [bookRatingUpdates, setBookRatingUpdates] = useState<{[key: string]: {rating: number, count: number}}>({});
 
   // Book details modal handlers
   const handleBookDetailsClick = (book: any) => {
@@ -46,6 +45,27 @@ const HomePage: React.FC = () => {
   const handleCloseDetailsModal = () => {
     setIsDetailsModalOpen(false);
     setSelectedBook(null);
+  };
+
+  const handleRatingUpdated = (newRating: number, newCount: number) => {
+    if (selectedBook?.googleBookId) {
+      setBookRatingUpdates(prev => ({
+        ...prev,
+        [selectedBook.googleBookId]: { rating: newRating, count: newCount }
+      }));
+    }
+  };
+
+  // Function to get updated rating for a book
+  const getBookRating = (book: any) => {
+    const update = bookRatingUpdates[book.googleBookId];
+    return update ? update.rating : book.averageRating;
+  };
+
+  // Function to get updated rating count for a book
+  const getBookRatingCount = (book: any) => {
+    const update = bookRatingUpdates[book.googleBookId];
+    return update ? update.count : book.ratingsCount;
   };
   
   // Get currently reading book (first borrowed book) - only for logged in users
@@ -60,20 +80,6 @@ const HomePage: React.FC = () => {
   // Get favorite books (read books, first 4) - only for logged in users
   const favoriteBooks = isLoggedIn ? (readBooks?.content?.slice(0, 4) || []) : [];
 
-  // Handle adding Google Books to user lists - only for logged in users
-  const handleAddToUserList = async (googleBookId: string, listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') => {
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      await UserBookListService.addGoogleBookToList(googleBookId, listType);
-      console.log(`Added book ${googleBookId} to ${listType} list`);
-    } catch (error) {
-      console.error('Failed to add book to list:', error);
-    }
-  };
 
   const renderBookCover = (book: any, style: React.CSSProperties = {}) => {
     if (book.cover) {
@@ -436,15 +442,24 @@ const HomePage: React.FC = () => {
               gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
               gap: '24px'
             }}>
-              {discoverBooks.map((book: any) => (
-                <DiscoveryBookCard
-                  key={book.id}
-                  book={book}
-                  showRating={true}
-                  onViewDetails={handleBookDetailsClick}
-                  source="google"
-                />
-              ))}
+              {discoverBooks.map((book: any) => {
+                // Create book with updated rating data
+                const bookWithUpdatedRating = {
+                  ...book,
+                  averageRating: getBookRating(book),
+                  ratingsCount: getBookRatingCount(book)
+                };
+
+                return (
+                  <DiscoveryBookCard
+                    key={book.id}
+                    book={bookWithUpdatedRating}
+                    showRating={true}
+                    onViewDetails={handleBookDetailsClick}
+                    source="google"
+                  />
+                );
+              })}
             </div>
           ) : (
             <div style={{ ...cardStyle, textAlign: 'center', padding: '48px' }}>
@@ -464,6 +479,7 @@ const HomePage: React.FC = () => {
         isOpen={isDetailsModalOpen}
         onClose={handleCloseDetailsModal}
         context="discovery"
+        onRatingUpdated={handleRatingUpdated}
       />
     </div>
   );
