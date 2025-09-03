@@ -1,5 +1,7 @@
 package com.rahil.book_nexus.googlebooks;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +20,12 @@ public interface GoogleBookFeedbackRepository extends JpaRepository<GoogleBookFe
     
     @Query("SELECT COUNT(f) FROM GoogleBookFeedback f WHERE f.googleBookId = :googleBookId")
     Long getRatingCountByGoogleBookId(@Param("googleBookId") String googleBookId);
+    
+    @Query("SELECT COUNT(f) FROM GoogleBookFeedback f WHERE f.user.id = :userId")
+    long countByUserId(@Param("userId") Integer userId);
+    
+    @Query("SELECT f FROM GoogleBookFeedback f WHERE f.user.id = :userId ORDER BY f.createdDate DESC")
+    Page<GoogleBookFeedback> findAllByUserIdOrderByCreatedDateDesc(@Param("userId") Integer userId, Pageable pageable);
     
     Optional<GoogleBookFeedback> findByGoogleBookIdAndUserId(String googleBookId, Integer userId);
 }

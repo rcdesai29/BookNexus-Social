@@ -47,4 +47,28 @@ export class FeedbackService {
             },
         });
     }
+    /**
+     * @param userId
+     * @param page
+     * @param size
+     * @returns PageResponseFeedbackResponse OK
+     * @throws ApiError
+     */
+    public static findAllFeedbacksByUser(
+        userId: number,
+        page?: number,
+        size: number = 10,
+    ): CancelablePromise<PageResponseFeedbackResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/feedbacks/user/{user-id}',
+            path: {
+                'user-id': userId,
+            },
+            query: {
+                'page': page,
+                'size': size,
+            },
+        });
+    }
 }

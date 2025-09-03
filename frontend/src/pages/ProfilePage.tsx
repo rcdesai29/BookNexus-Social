@@ -16,7 +16,10 @@ import {
   Check as FollowingIcon
 } from '@mui/icons-material';
 import { UserProfileService, UserProfileResponse } from '../app/services/services/UserProfileService';
+import { FeedbackService } from '../app/services/services/FeedbackService';
+import { FeedbackResponse } from '../app/services/models/FeedbackResponse';
 import { tokenService } from '../services/tokenService';
+import StarRating from '../components/StarRating';
 
 type UserProfile = UserProfileResponse;
 
@@ -28,6 +31,8 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+  const [recentReviews, setRecentReviews] = useState<FeedbackResponse[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   useEffect(() => {
     if (!userId) {
@@ -52,6 +57,24 @@ const ProfilePage: React.FC = () => {
 
     fetchProfile();
   }, [userId]);
+
+  const fetchRecentReviews = async (userIdNum: number) => {
+    try {
+      setReviewsLoading(true);
+      const reviewsData = await FeedbackService.findAllFeedbacksByUser(userIdNum, 0, 2);
+      setRecentReviews(reviewsData.content || []);
+    } catch (err: any) {
+      console.error('Error fetching reviews:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (profile && userId) {
+      fetchRecentReviews(parseInt(userId));
+    }
+  }, [profile, userId]);
 
   const handleFollow = async () => {
     if (!profile || !userId) return;
@@ -659,16 +682,137 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
             {activeTab === 2 && (
-              <div style={{
-                textAlign: 'center',
-                color: '#6A5E4D',
-                fontSize: '16px'
-              }}>
-                Reviews: {profile.reviewsCount || 0} reviews
-                <div style={{ marginTop: '16px' }}>
-                  <ReviewIcon style={{ color: '#8B7355', fontSize: '48px' }} />
-                  <p style={{ marginTop: '8px' }}>Book reviews will be displayed here</p>
+              <div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontSize: '24px',
+                    color: '#4B3F30',
+                    margin: 0
+                  }}>
+                    Recent Reviews
+                  </h3>
+                  <span style={{
+                    color: '#6A5E4D',
+                    fontSize: '14px'
+                  }}>
+                    {profile.reviewsCount || 0} total reviews
+                  </span>
                 </div>
+
+                {reviewsLoading ? (
+                  <div style={{
+                    textAlign: 'center',
+                    color: '#6A5E4D',
+                    padding: '32px'
+                  }}>
+                    Loading reviews...
+                  </div>
+                ) : recentReviews.length > 0 ? (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px'
+                  }}>
+                    {recentReviews.map((review, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                          borderRadius: '12px',
+                          padding: '20px',
+                          border: '1px solid #E6D7C3',
+                          boxShadow: '0 2px 8px rgba(75, 63, 48, 0.05)'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          gap: '16px',
+                          marginBottom: '12px'
+                        }}>
+                          {review.bookCover && (
+                            <img
+                              src={review.bookCover}
+                              alt={review.bookTitle}
+                              style={{
+                                width: '60px',
+                                height: '90px',
+                                objectFit: 'cover',
+                                borderRadius: '6px',
+                                border: '1px solid #E6D7C3'
+                              }}
+                            />
+                          )}
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{
+                              fontFamily: 'Playfair Display, serif',
+                              fontSize: '18px',
+                              color: '#4B3F30',
+                              margin: '0 0 4px 0',
+                              lineHeight: 1.2
+                            }}>
+                              {review.bookTitle}
+                            </h4>
+                            <p style={{
+                              color: '#6A5E4D',
+                              fontSize: '14px',
+                              margin: '0 0 8px 0'
+                            }}>
+                              by {review.bookAuthor}
+                            </p>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              marginBottom: '8px'
+                            }}>
+                              <StarRating 
+                                rating={review.rating || 0} 
+                                size="small" 
+                                color="#D2691E"
+                              />
+                              <span style={{
+                                color: '#6A5E4D',
+                                fontSize: '12px'
+                              }}>
+                                {review.createdDate && new Date(review.createdDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        {review.review && (
+                          <p style={{
+                            color: '#4B3F30',
+                            fontSize: '14px',
+                            lineHeight: 1.5,
+                            margin: '0',
+                            fontStyle: 'italic'
+                          }}>
+                            "{review.review}"
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{
+                    textAlign: 'center',
+                    color: '#6A5E4D',
+                    fontSize: '16px',
+                    padding: '32px'
+                  }}>
+                    <ReviewIcon style={{ color: '#8B7355', fontSize: '48px', marginBottom: '16px' }} />
+                    <p>No reviews yet</p>
+                    <p style={{ fontSize: '14px', marginTop: '8px' }}>
+                      Reviews will appear here when {profile.isOwnProfile ? 'you review' : `${profile.displayName || profile.fullName} reviews`} books
+                    </p>
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 3 && (

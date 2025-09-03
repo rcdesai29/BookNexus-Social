@@ -3,6 +3,7 @@ package com.rahil.book_nexus.user;
 import com.rahil.book_nexus.history.BookTransactionHistoryRepository;
 import com.rahil.book_nexus.feedback.FeedbackRepository;
 import com.rahil.book_nexus.googlebooks.GoogleBookIntegrationService;
+import com.rahil.book_nexus.googlebooks.GoogleBookFeedbackRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class UserProfileService {
     private final FollowRepository followRepository;
     private final BookTransactionHistoryRepository transactionHistoryRepository;
     private final FeedbackRepository feedbackRepository;
+    private final GoogleBookFeedbackRepository googleBookFeedbackRepository;
     private final GoogleBookIntegrationService googleBookIntegrationService;
 
     public UserProfileResponse getUserProfile(Integer userId, Authentication connectedUser) {
@@ -134,7 +136,9 @@ public class UserProfileService {
         // Calculate stats using Google Books system
         long booksRead = googleBookIntegrationService.getBooksReadCount(user);
         long currentlyReading = googleBookIntegrationService.getCurrentlyReadingCount(user);
-        long reviewsCount = feedbackRepository.countByUserId(user.getId());
+        long regularReviewsCount = feedbackRepository.countByUserId(user.getId());
+        long googleBookReviewsCount = googleBookFeedbackRepository.countByUserId(user.getId());
+        long reviewsCount = regularReviewsCount + googleBookReviewsCount;
         long followersCount = followRepository.countFollowersByUserId(user.getId());
         long followingCount = followRepository.countFollowingByUserId(user.getId());
 

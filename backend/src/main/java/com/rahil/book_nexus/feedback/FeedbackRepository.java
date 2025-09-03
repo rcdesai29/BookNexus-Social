@@ -14,6 +14,14 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
             """)
     Page<Feedback> findAllByBookId(@Param("bookId") Integer bookId, Pageable pageable);
 
+    @Query("""
+                        SELECT feedback
+                        FROM Feedback  feedback
+                        WHERE feedback.user.id = :userId
+                        ORDER BY feedback.createdDate DESC
+            """)
+    Page<Feedback> findAllByUserId(@Param("userId") Integer userId, Pageable pageable);
+
     @Query("SELECT COUNT(f) FROM Feedback f WHERE f.user.id = :userId")
     long countByUserId(@Param("userId") Integer userId);
 

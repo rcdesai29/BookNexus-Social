@@ -16,4 +16,9 @@ public class FeedbackResponse {
     private Double rating;
     private String review;
     private boolean ownFeedback;
+    private Integer bookId;
+    private String bookTitle;
+    private String bookAuthor;
+    private String bookCover;
+    private String createdDate;
 }

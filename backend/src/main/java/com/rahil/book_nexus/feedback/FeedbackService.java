@@ -5,6 +5,8 @@ import com.rahil.book_nexus.book.BookRepository;
 import com.rahil.book_nexus.common.PageResponse;
 import com.rahil.book_nexus.exception.OperationNotPermittedException;
 import com.rahil.book_nexus.user.User;
+import com.rahil.book_nexus.googlebooks.GoogleBookFeedback;
+import com.rahil.book_nexus.googlebooks.GoogleBookFeedbackRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,7 @@ public class FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final BookRepository bookRepository;
     private final FeedbackMapper feedbackMapper;
+    private final GoogleBookFeedbackRepository googleBookFeedbackRepository;
 
     public Integer save(FeedbackRequest request, Authentication connectedUser) {
         Book book = bookRepository.findById(request.bookId())
@@ -63,5 +69,58 @@ public class FeedbackService {
                 feedbacks.isFirst(),
                 feedbacks.isLast());
 
+    }
+
+    @Transactional
+    public PageResponse<FeedbackResponse> findAllFeedbacksByUser(Integer userId, int page, int size,
+            Authentication connectedUser) {
+        Integer requesterIdLocal = null;
+        if (connectedUser != null && connectedUser.getPrincipal() instanceof User u) {
+            requesterIdLocal = u.getId();
+        }
+        final Integer requesterId = requesterIdLocal;
+        
+        // Get all feedback from both sources without pagination first
+        List<Feedback> regularFeedbacks = feedbackRepository.findAllByUserId(userId, Pageable.unpaged()).getContent();
+        List<GoogleBookFeedback> googleBookFeedbacks = googleBookFeedbackRepository.findAllByUserIdOrderByCreatedDateDesc(userId, Pageable.unpaged()).getContent();
+        
+        // Convert to unified response format
+        List<FeedbackResponse> allFeedbacks = new ArrayList<>();
+        
+        // Add regular feedbacks
+        allFeedbacks.addAll(regularFeedbacks.stream()
+                .map(f -> feedbackMapper.toFeedbackResponse(f, requesterId))
+                .collect(Collectors.toList()));
+        
+        // Add Google Book feedbacks
+        allFeedbacks.addAll(googleBookFeedbacks.stream()
+                .map(f -> feedbackMapper.toFeedbackResponse(f, requesterId))
+                .collect(Collectors.toList()));
+        
+        // Sort by creation date (most recent first)
+        allFeedbacks.sort((a, b) -> {
+            if (a.getCreatedDate() == null && b.getCreatedDate() == null) return 0;
+            if (a.getCreatedDate() == null) return 1;
+            if (b.getCreatedDate() == null) return -1;
+            return b.getCreatedDate().compareTo(a.getCreatedDate());
+        });
+        
+        // Apply pagination manually
+        int totalElements = allFeedbacks.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        int start = page * size;
+        int end = Math.min(start + size, totalElements);
+        
+        List<FeedbackResponse> paginatedFeedbacks = start < totalElements ? 
+            allFeedbacks.subList(start, end) : new ArrayList<>();
+        
+        return new PageResponse<>(
+                paginatedFeedbacks,
+                page,
+                size,
+                totalElements,
+                totalPages,
+                page == 0,
+                page >= totalPages - 1);
     }
 }
