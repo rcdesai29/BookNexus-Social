@@ -51,6 +51,12 @@ public class UserProfileService {
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseGet(() -> createDefaultProfile(user));
 
+        // Check if displayName is being changed and if it's available
+        if (!profile.getDisplayName().equalsIgnoreCase(request.displayName()) && 
+            !isDisplayNameAvailable(request.displayName())) {
+            throw new IllegalArgumentException("Display name '" + request.displayName() + "' is already taken");
+        }
+
         // Update profile fields
         profile.setDisplayName(request.displayName());
         profile.setBio(request.bio());
@@ -118,10 +124,50 @@ public class UserProfileService {
         return followRepository.findFollowingByUserId(userId);
     }
 
+    public boolean isDisplayNameAvailable(String displayName) {
+        if (displayName == null || displayName.trim().isEmpty()) {
+            return false;
+        }
+        return !userProfileRepository.existsByDisplayNameIgnoreCase(displayName.trim());
+    }
+
+    public List<UserProfileResponse> searchUsersByDisplayName(String displayName, Authentication connectedUser) {
+        User currentUser = connectedUser != null ? (User) connectedUser.getPrincipal() : null;
+        
+        return userProfileRepository.findAll().stream()
+                .filter(profile -> profile.getDisplayName() != null && 
+                        profile.getDisplayName().toLowerCase().contains(displayName.toLowerCase()))
+                .filter(profile -> profile.getProfileVisibility() == UserProfile.ProfileVisibility.PUBLIC ||
+                        (currentUser != null && isFollowingOrSelf(currentUser, profile.getUser())))
+                .limit(20)
+                .map(profile -> buildProfileResponse(profile.getUser(), profile, currentUser, 
+                        currentUser != null && currentUser.getId().equals(profile.getUser().getId())))
+                .toList();
+    }
+
+    public UserProfileResponse getUserByDisplayName(String displayName, Authentication connectedUser) {
+        UserProfile profile = userProfileRepository.findByDisplayNameIgnoreCase(displayName)
+                .orElseThrow(() -> new EntityNotFoundException("User with display name '" + displayName + "' not found"));
+        
+        User currentUser = connectedUser != null ? (User) connectedUser.getPrincipal() : null;
+        boolean isOwnProfile = currentUser != null && currentUser.getId().equals(profile.getUser().getId());
+        
+        return buildProfileResponse(profile.getUser(), profile, currentUser, isOwnProfile);
+    }
+
+    private boolean isFollowingOrSelf(User currentUser, User targetUser) {
+        if (currentUser.getId().equals(targetUser.getId())) {
+            return true;
+        }
+        return followRepository.existsByFollowerIdAndFollowingId(currentUser.getId(), targetUser.getId());
+    }
+
     private UserProfile createDefaultProfile(User user) {
+        String uniqueDisplayName = generateUniqueDisplayName(user);
+        
         UserProfile profile = UserProfile.builder()
                 .user(user)
-                .displayName(user.getFullName())
+                .displayName(uniqueDisplayName)
                 .profileVisibility(UserProfile.ProfileVisibility.PUBLIC)
                 .activityVisibility(UserProfile.ActivityVisibility.PUBLIC)
                 .reviewsVisibility(UserProfile.ReviewsVisibility.PUBLIC)
@@ -129,6 +175,33 @@ public class UserProfileService {
                 .build();
 
         return userProfileRepository.save(profile);
+    }
+
+    private String generateUniqueDisplayName(User user) {
+        String baseName = sanitizeDisplayName(user.getFullName());
+        
+        if (baseName.isEmpty()) {
+            baseName = "user" + user.getId();
+        }
+        
+        String displayName = baseName;
+        int counter = 1;
+        
+        while (!isDisplayNameAvailable(displayName)) {
+            displayName = baseName + counter;
+            counter++;
+        }
+        
+        return displayName;
+    }
+
+    private String sanitizeDisplayName(String name) {
+        if (name == null) return "";
+        
+        return name.toLowerCase()
+                .replaceAll("[^a-zA-Z0-9._-]", "")
+                .replaceAll("\\s+", "")
+                .trim();
     }
 
     private UserProfileResponse buildProfileResponse(User user, UserProfile profile, User currentUser,

@@ -21,7 +21,7 @@ public class UserProfile extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(length = 100)
+    @Column(length = 100, unique = true, nullable = false)
     private String displayName;
 
     @Column(length = 500)

@@ -22,15 +22,34 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../hooks/useAuth';
+import { useCurrentUserProfile } from '../hooks/useCurrentUserProfile';
 import { tokenService } from '../services/tokenService';
 
 const Navbar: React.FC = () => {
   const { isLoggedIn, user } = useAuth();
+  const { userProfile } = useCurrentUserProfile();
   const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Get the display name - prefer userProfile.displayName, fallback to user.name or user.email
+  const getDisplayName = () => {
+    if (userProfile?.displayName) return userProfile.displayName;
+    if (user?.name) return user.name;
+    return user?.email || 'User';
+  };
+
+  // Get initials for avatar - prefer displayName, fallback to name or email
+  const getInitials = () => {
+    const displayName = getDisplayName();
+    const words = displayName.split(' ');
+    if (words.length >= 2) {
+      return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
+    }
+    return displayName.charAt(0).toUpperCase();
+  };
 
   const handleLogout = () => {
     tokenService.removeToken();
@@ -169,7 +188,7 @@ const Navbar: React.FC = () => {
                 fontSize: '1rem'
               }}
             >
-              {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+              {getInitials()}
             </Avatar>
             <Typography
               variant="body1"
@@ -188,7 +207,7 @@ const Navbar: React.FC = () => {
                 }
               }}
             >
-              {user?.name || user?.email || 'User'}
+              {getDisplayName()}
             </Typography>
           </Box>
         </>
@@ -341,7 +360,7 @@ const Navbar: React.FC = () => {
                     }
                   }}
                 >
-                  {user?.name || user?.email || 'User'}
+                  {getDisplayName()}
                 </Typography>
                 <Avatar
                   sx={{
@@ -355,7 +374,7 @@ const Navbar: React.FC = () => {
                   component={Link}
                   to={`/profile/${user?.id || 1}`}
                 >
-                  {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+                  {getInitials()}
                 </Avatar>
                 <Button
                   onClick={handleLogout}

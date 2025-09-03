@@ -61,4 +61,23 @@ public class UserProfileController {
             Authentication connectedUser) {
         return ResponseEntity.ok(userProfileService.getFollowing(userId, connectedUser));
     }
+
+    @GetMapping("/check-display-name/{displayName}")
+    public ResponseEntity<Boolean> isDisplayNameAvailable(@PathVariable String displayName) {
+        return ResponseEntity.ok(userProfileService.isDisplayNameAvailable(displayName));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserProfileResponse>> searchUsers(
+            @RequestParam String displayName,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(userProfileService.searchUsersByDisplayName(displayName, connectedUser));
+    }
+
+    @GetMapping("/by-display-name/{displayName}")
+    public ResponseEntity<UserProfileResponse> getUserByDisplayName(
+            @PathVariable String displayName,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(userProfileService.getUserByDisplayName(displayName, connectedUser));
+    }
 }

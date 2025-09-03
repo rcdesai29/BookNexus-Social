@@ -3,10 +3,14 @@ package com.rahil.book_nexus.user;
 import com.rahil.book_nexus.user.UserProfile.ActivityVisibility;
 import com.rahil.book_nexus.user.UserProfile.ProfileVisibility;
 import com.rahil.book_nexus.user.UserProfile.ReviewsVisibility;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UserProfileRequest(
-    @Size(max = 100, message = "Display name must be 100 characters or less")
+    @NotBlank(message = "Display name is required")
+    @Size(min = 3, max = 30, message = "Display name must be between 3 and 30 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9._-]+$", message = "Display name can only contain letters, numbers, dots, underscores, and hyphens")
     String displayName,
     
     @Size(max = 500, message = "Bio must be 500 characters or less")
