@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -36,6 +37,10 @@ public class GoogleBookFeedback extends BaseEntity {
     
     @Column(length = 2000)
     private String review;
+    
+    @Builder.Default
+    @Column(name = "is_anonymous", columnDefinition = "boolean default false", nullable = true)  
+    private Boolean isAnonymous = false;
     
     @ManyToOne
     @JoinColumn(name = "user_id")

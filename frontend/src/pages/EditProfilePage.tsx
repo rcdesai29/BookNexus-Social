@@ -42,9 +42,6 @@ const EditProfilePage: React.FC = () => {
     twitterHandle: '',
     instagramHandle: '',
     goodreadsHandle: '',
-    profileVisibility: 'PUBLIC',
-    activityVisibility: 'PUBLIC',
-    reviewsVisibility: 'PUBLIC',
     annualReadingGoal: undefined,
     preferredFormat: '',
     readingSpeed: ''
@@ -66,9 +63,6 @@ const EditProfilePage: React.FC = () => {
           twitterHandle: profileData.twitterHandle || '',
           instagramHandle: profileData.instagramHandle || '',
           goodreadsHandle: profileData.goodreadsHandle || '',
-          profileVisibility: profileData.profileVisibility as 'PUBLIC' | 'PRIVATE' | 'FOLLOWERS_ONLY',
-          activityVisibility: profileData.activityVisibility as 'PUBLIC' | 'PRIVATE' | 'FOLLOWERS_ONLY',
-          reviewsVisibility: profileData.reviewsVisibility as 'PUBLIC' | 'PRIVATE' | 'FOLLOWERS_ONLY',
           annualReadingGoal: profileData.annualReadingGoal || undefined,
           preferredFormat: profileData.preferredFormat || '',
           readingSpeed: profileData.readingSpeed || ''
@@ -158,8 +152,13 @@ const EditProfilePage: React.FC = () => {
                 fullWidth
                 label="Display Name"
                 value={formData.displayName}
-                onChange={(e) => handleInputChange('displayName', e.target.value)}
-                helperText="How others will see your name"
+                disabled
+                helperText="Display name cannot be changed after initial setup"
+                sx={{
+                  '& .MuiInputBase-input.Mui-disabled': {
+                    WebkitTextFillColor: 'rgba(0, 0, 0, 0.7)',
+                  }
+                }}
               />
             </Box>
 
@@ -277,54 +276,6 @@ const EditProfilePage: React.FC = () => {
               </FormControl>
             </Box>
 
-            {/* Privacy Settings */}
-            <Box>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Privacy Settings
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Box>
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr 1fr' }, gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel>Profile Visibility</InputLabel>
-                <Select
-                  value={formData.profileVisibility}
-                  label="Profile Visibility"
-                  onChange={(e) => handleInputChange('profileVisibility', e.target.value)}
-                >
-                  <MenuItem value="PUBLIC">Public</MenuItem>
-                  <MenuItem value="PRIVATE">Private</MenuItem>
-                  <MenuItem value="FOLLOWERS_ONLY">Followers Only</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth>
-                <InputLabel>Activity Visibility</InputLabel>
-                <Select
-                  value={formData.activityVisibility}
-                  label="Activity Visibility"
-                  onChange={(e) => handleInputChange('activityVisibility', e.target.value)}
-                >
-                  <MenuItem value="PUBLIC">Public</MenuItem>
-                  <MenuItem value="PRIVATE">Private</MenuItem>
-                  <MenuItem value="FOLLOWERS_ONLY">Followers Only</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth>
-                <InputLabel>Reviews Visibility</InputLabel>
-                <Select
-                  value={formData.reviewsVisibility}
-                  label="Reviews Visibility"
-                  onChange={(e) => handleInputChange('reviewsVisibility', e.target.value)}
-                >
-                  <MenuItem value="PUBLIC">Public</MenuItem>
-                  <MenuItem value="PRIVATE">Private</MenuItem>
-                  <MenuItem value="FOLLOWERS_ONLY">Followers Only</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
 
             {/* Action Buttons */}
             <Box>

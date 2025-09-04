@@ -7,6 +7,7 @@ export interface GoogleBookFeedbackRequest {
   authorName: string;
   rating: number;
   review: string;
+  isAnonymous?: boolean;
 }
 
 export interface GoogleBookFeedbackResponse {
@@ -16,8 +17,10 @@ export interface GoogleBookFeedbackResponse {
   authorName: string;
   rating: number;
   review: string;
-  userName: string;
+  displayName: string;
   createdDate: string;
+  isAnonymous: boolean;
+  userId?: string;
 }
 
 export class GoogleBookFeedbackService {

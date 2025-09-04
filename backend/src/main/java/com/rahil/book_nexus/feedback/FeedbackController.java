@@ -6,9 +6,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,5 +47,21 @@ public class FeedbackController {
             @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             Authentication connectedUser) {
         return ResponseEntity.ok(service.findAllFeedbacksByUser(userId, page, size, connectedUser));
+    }
+
+    @PutMapping("/{feedback-id}")
+    public ResponseEntity<Integer> updateFeedback(
+            @PathVariable("feedback-id") Integer feedbackId,
+            @Valid @RequestBody FeedbackRequest request,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(service.update(feedbackId, request, connectedUser));
+    }
+
+    @DeleteMapping("/{feedback-id}")
+    public ResponseEntity<Void> deleteFeedback(
+            @PathVariable("feedback-id") Integer feedbackId,
+            Authentication connectedUser) {
+        service.delete(feedbackId, connectedUser);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -66,6 +66,7 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { label: 'Home', to: '/', show: true },
     { label: 'Search', to: '/search', show: true },
+    { label: 'Find Friends', to: '/find-friends', show: true },
     { label: 'My Books', to: '/my-books', show: isLoggedIn },
     { label: 'Currently Reading', to: '/currently-reading', show: isLoggedIn },
     { label: 'TBR', to: '/tbr', show: isLoggedIn },

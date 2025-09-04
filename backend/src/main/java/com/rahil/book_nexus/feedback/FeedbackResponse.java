@@ -13,6 +13,7 @@ import lombok.Setter;
 @Builder
 public class FeedbackResponse {
 
+    private Integer id;
     private Double rating;
     private String review;
     private boolean ownFeedback;
@@ -21,4 +22,7 @@ public class FeedbackResponse {
     private String bookAuthor;
     private String bookCover;
     private String createdDate;
+    private String displayName;
+    private String userId;
+    private boolean isAnonymous;
 }

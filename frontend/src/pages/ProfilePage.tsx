@@ -445,7 +445,7 @@ const ProfilePage: React.FC = () => {
               )}
 
               {/* Social Links */}
-              {(profile.twitterHandle || profile.instagramHandle) && (
+              {(profile.twitterHandle || profile.instagramHandle || profile.goodreadsHandle) && (
                 <div style={{ marginBottom: '16px' }}>
                   {profile.twitterHandle && (
                     <button
@@ -509,6 +509,106 @@ const ProfilePage: React.FC = () => {
                       </span>
                     </button>
                   )}
+                  {profile.goodreadsHandle && (
+                    <button
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                        borderRadius: '6px',
+                        border: '1px solid #E6D7C3',
+                        marginRight: '8px',
+                        marginBottom: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        e.currentTarget.style.borderColor = '#D2691E';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                        e.currentTarget.style.borderColor = '#E6D7C3';
+                      }}
+                      onClick={() => window.open(`https://goodreads.com/user/show/${profile.goodreadsHandle}`, '_blank')}
+                    >
+                      <BookIcon style={{ color: '#8B7355', fontSize: '16px' }} />
+                      <span style={{ color: '#4B3F30', fontSize: '14px' }}>
+                        {profile.goodreadsHandle}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Reading Preferences */}
+              {(profile.annualReadingGoal || profile.preferredFormat || profile.readingSpeed) && (
+                <div style={{ marginBottom: '16px' }}>
+                  <h4 style={{
+                    fontFamily: 'Playfair Display, serif',
+                    fontSize: '16px',
+                    color: '#4B3F30',
+                    marginBottom: '12px',
+                    fontWeight: 600
+                  }}>
+                    Reading Preferences
+                  </h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {profile.annualReadingGoal && (
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 12px',
+                        backgroundColor: 'rgba(210, 105, 30, 0.1)',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(210, 105, 30, 0.3)'
+                      }}>
+                        <StarIcon style={{ color: '#D2691E', fontSize: '14px' }} />
+                        <span style={{ color: '#4B3F30', fontSize: '12px', fontWeight: 500 }}>
+                          Goal: {profile.annualReadingGoal} books/year
+                        </span>
+                      </div>
+                    )}
+                    {profile.preferredFormat && (
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 12px',
+                        backgroundColor: 'rgba(210, 105, 30, 0.1)',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(210, 105, 30, 0.3)'
+                      }}>
+                        <BookIcon style={{ color: '#D2691E', fontSize: '14px' }} />
+                        <span style={{ color: '#4B3F30', fontSize: '12px', fontWeight: 500 }}>
+                          {profile.preferredFormat === 'PHYSICAL' && 'Physical Books'}
+                          {profile.preferredFormat === 'EBOOK' && 'E-Books'}
+                          {profile.preferredFormat === 'AUDIOBOOK' && 'Audiobooks'}
+                        </span>
+                      </div>
+                    )}
+                    {profile.readingSpeed && (
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 12px',
+                        backgroundColor: 'rgba(210, 105, 30, 0.1)',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(210, 105, 30, 0.3)'
+                      }}>
+                        <PersonIcon style={{ color: '#D2691E', fontSize: '14px' }} />
+                        <span style={{ color: '#4B3F30', fontSize: '12px', fontWeight: 500 }}>
+                          {profile.readingSpeed === 'FAST' && 'Fast Reader'}
+                          {profile.readingSpeed === 'AVERAGE' && 'Average Reader'}
+                          {profile.readingSpeed === 'SLOW' && 'Slow Reader'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

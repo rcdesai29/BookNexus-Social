@@ -51,14 +51,12 @@ public class UserProfileService {
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseGet(() -> createDefaultProfile(user));
 
-        // Check if displayName is being changed and if it's available
-        if (!profile.getDisplayName().equalsIgnoreCase(request.displayName()) && 
-            !isDisplayNameAvailable(request.displayName())) {
-            throw new IllegalArgumentException("Display name '" + request.displayName() + "' is already taken");
+        // Display name cannot be changed after initial setup
+        if (!profile.getDisplayName().equalsIgnoreCase(request.displayName())) {
+            throw new IllegalArgumentException("Display name cannot be changed after initial setup");
         }
 
-        // Update profile fields
-        profile.setDisplayName(request.displayName());
+        // Update profile fields (displayName is not updated to prevent changes)
         profile.setBio(request.bio());
         profile.setLocation(request.location());
         profile.setWebsite(request.website());

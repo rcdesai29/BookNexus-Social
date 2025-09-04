@@ -35,8 +35,31 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
   const [showActions, setShowActions] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
 
-  // Determine which book data to use (local book or google book)
-  const book = bookListItem.book || bookListItem.googleBook;
+  // Determine which book data to use and normalize the structure
+  const book = (() => {
+    if (bookListItem.book) {
+      // Local book data
+      return bookListItem.book;
+    } else if (bookListItem.googleBook) {
+      // Google book data - normalize field names to match GoogleBook interface
+      return {
+        ...bookListItem.googleBook,
+        cover: bookListItem.googleBook.coverUrl || null,
+        synopsis: bookListItem.googleBook.description || 'No description available.',
+        // Ensure googleBookId is available
+        googleBookId: bookListItem.googleBook.googleBookId,
+        // Add missing fields with defaults
+        isbn: '',
+        publishedDate: '',
+        pageCount: 0,
+        categories: [],
+        averageRating: bookListItem.googleBook.averageRating || 0,
+        ratingsCount: bookListItem.googleBook.ratingsCount || 0,
+        isGoogleBook: true
+      };
+    }
+    return null;
+  })();
   const isGoogleBook = !!bookListItem.googleBook;
   
   if (!book) return null;

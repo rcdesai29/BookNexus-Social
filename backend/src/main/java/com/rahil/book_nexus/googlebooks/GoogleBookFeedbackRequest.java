@@ -30,4 +30,6 @@ public class GoogleBookFeedbackRequest {
     
     @NotBlank(message = "Review is required")
     private String review;
+    
+    private Boolean isAnonymous;
 }

@@ -123,4 +123,34 @@ public class FeedbackService {
                 page == 0,
                 page >= totalPages - 1);
     }
+
+    @Transactional
+    public Integer update(Integer feedbackId, FeedbackRequest request, Authentication connectedUser) {
+        User user = (User) connectedUser.getPrincipal();
+        Feedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new EntityNotFoundException("Feedback not found"));
+        
+        if (!feedback.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("You can only update your own feedback");
+        }
+        
+        feedback.setRating(request.rating());
+        feedback.setReview(request.review());
+        feedback.setAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false);
+        
+        return feedbackRepository.save(feedback).getId();
+    }
+
+    @Transactional
+    public void delete(Integer feedbackId, Authentication connectedUser) {
+        User user = (User) connectedUser.getPrincipal();
+        Feedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new EntityNotFoundException("Feedback not found"));
+        
+        if (!feedback.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("You can only delete your own feedback");
+        }
+        
+        feedbackRepository.delete(feedback);
+    }
 }

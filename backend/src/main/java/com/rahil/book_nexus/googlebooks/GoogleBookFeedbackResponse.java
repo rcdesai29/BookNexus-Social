@@ -18,6 +18,8 @@ public class GoogleBookFeedbackResponse {
     private String authorName;
     private Double rating;
     private String review;
-    private String userName;
+    private String displayName;
     private LocalDate createdDate;
+    private boolean isAnonymous;
+    private String userId;
 }

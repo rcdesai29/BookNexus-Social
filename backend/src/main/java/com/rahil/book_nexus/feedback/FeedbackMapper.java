@@ -2,16 +2,22 @@ package com.rahil.book_nexus.feedback;
 
 import com.rahil.book_nexus.book.Book;
 import com.rahil.book_nexus.googlebooks.GoogleBookFeedback;
+import com.rahil.book_nexus.user.UserProfileRepository;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class FeedbackMapper {
+
+    private final UserProfileRepository userProfileRepository;
     public Feedback toFeedback(FeedbackRequest request) {
         return Feedback.builder()
                 .rating(request.rating())
                 .review(request.review())
+                .isAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false)
                 .book(Book.builder()
                         .id(request.bookId())
                         .shareable(false)
@@ -21,7 +27,17 @@ public class FeedbackMapper {
     }
 
     public FeedbackResponse toFeedbackResponse(Feedback feedback, Integer id) {
+        String displayName;
+        if (feedback.isAnonymous()) {
+            displayName = "Anonymous";
+        } else {
+            displayName = userProfileRepository.findByUserId(feedback.getUser().getId())
+                    .map(profile -> profile.getDisplayName())
+                    .orElse(feedback.getUser().getFullName());
+        }
+                
         return FeedbackResponse.builder()
+                .id(feedback.getId())
                 .rating(feedback.getRating())
                 .review(feedback.getReview())
                 .ownFeedback(Objects.equals(feedback.getUser().getId(), id))
@@ -30,11 +46,24 @@ public class FeedbackMapper {
                 .bookAuthor(feedback.getBook().getAuthorName())
                 .bookCover(feedback.getBook().getBookCover())
                 .createdDate(feedback.getCreatedDate() != null ? feedback.getCreatedDate().toString() : null)
+                .displayName(displayName)
+                .userId(feedback.getUser().getId().toString())
+                .isAnonymous(feedback.isAnonymous())
                 .build();
     }
 
     public FeedbackResponse toFeedbackResponse(GoogleBookFeedback googleBookFeedback, Integer id) {
+        String displayName;
+        if (googleBookFeedback.isAnonymous()) {
+            displayName = "Anonymous";
+        } else {
+            displayName = userProfileRepository.findByUserId(googleBookFeedback.getUser().getId())
+                    .map(profile -> profile.getDisplayName())
+                    .orElse(googleBookFeedback.getUser().getFullName());
+        }
+                
         return FeedbackResponse.builder()
+                .id(googleBookFeedback.getId())
                 .rating(googleBookFeedback.getRating())
                 .review(googleBookFeedback.getReview())
                 .ownFeedback(Objects.equals(googleBookFeedback.getUser().getId(), id))
@@ -43,6 +72,9 @@ public class FeedbackMapper {
                 .bookAuthor(googleBookFeedback.getAuthorName())
                 .bookCover(null) // Google book covers would need to be fetched separately
                 .createdDate(googleBookFeedback.getCreatedDate() != null ? googleBookFeedback.getCreatedDate().toString() : null)
+                .displayName(displayName)
+                .userId(googleBookFeedback.getUser().getId().toString())
+                .isAnonymous(googleBookFeedback.isAnonymous())
                 .build();
     }
 }

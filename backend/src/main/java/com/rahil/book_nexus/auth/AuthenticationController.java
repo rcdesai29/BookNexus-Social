@@ -39,4 +39,10 @@ public class AuthenticationController {
         service.activateAccount(token);
         return ResponseEntity.ok("Account activated successfully");
     }
+
+    @PostMapping("/complete-setup")
+    public ResponseEntity<String> completeSetup(@RequestParam String token, @RequestParam String displayName) throws Exception {
+        service.completeAccountSetup(token, displayName);
+        return ResponseEntity.ok("Account setup completed successfully");
+    }
 }

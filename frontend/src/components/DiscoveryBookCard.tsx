@@ -110,6 +110,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
   };
 
   const handleCardClick = () => {
+    console.log('DiscoveryBookCard: Card clicked for book:', book);
     if (onViewDetails) {
       onViewDetails(book);
     }
@@ -164,6 +165,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('DiscoveryBookCard: View Details button clicked for book:', book);
     if (onViewDetails) {
       onViewDetails(book);
     }

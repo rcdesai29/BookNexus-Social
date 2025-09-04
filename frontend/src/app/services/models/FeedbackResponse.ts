@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type FeedbackResponse = {
+    id?: number;
     rating?: number;
     review?: string;
     ownFeedback?: boolean;
@@ -11,5 +12,8 @@ export type FeedbackResponse = {
     bookAuthor?: string;
     bookCover?: string;
     createdDate?: string;
+    displayName?: string;
+    userId?: string;
+    isAnonymous?: boolean;
 };
 

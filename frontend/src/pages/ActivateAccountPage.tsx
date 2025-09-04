@@ -1,7 +1,6 @@
 import { Alert, Box, Button, Container, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthenticationService } from '../app/services/services/AuthenticationService';
 
 const ActivateAccountPage: React.FC = () => {
   const [code, setCode] = useState('');
@@ -16,11 +15,12 @@ const ActivateAccountPage: React.FC = () => {
     setError(null);
     setSuccess(false);
     try {
-      await AuthenticationService.confirm(code);
+      // Just validate the token, don't activate yet
+      // We'll redirect to displayName setup where the actual activation happens
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate(`/setup-display-name?token=${code}`), 2000);
     } catch (err: any) {
-      setError(err?.body?.message || 'Activation failed');
+      setError(err?.body?.message || 'Invalid activation code');
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ const ActivateAccountPage: React.FC = () => {
           fullWidth
           margin="normal"
           required
-          inputProps={{ maxLength: 6, inputMode: 'numeric', pattern: '[0-9]*' }}
+          slotProps={{ htmlInput: { maxLength: 6, inputMode: 'numeric', pattern: '[0-9]*' } }}
         />
         <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading || code.length !== 6} sx={{ mt: 2 }}>
           {loading ? 'Activating...' : 'Activate'}

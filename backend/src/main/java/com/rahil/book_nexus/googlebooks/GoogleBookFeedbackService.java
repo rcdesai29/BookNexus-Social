@@ -1,6 +1,8 @@
 package com.rahil.book_nexus.googlebooks;
 
 import com.rahil.book_nexus.user.User;
+import com.rahil.book_nexus.user.UserProfileRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import java.util.Optional;
 public class GoogleBookFeedbackService {
 
     private final GoogleBookFeedbackRepository feedbackRepository;
+    private final UserProfileRepository userProfileRepository;
 
     public Integer saveFeedback(GoogleBookFeedbackRequest request, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
@@ -32,6 +35,7 @@ public class GoogleBookFeedbackService {
             feedback.setReview(request.getReview());
             feedback.setBookTitle(request.getBookTitle());
             feedback.setAuthorName(request.getAuthorName());
+            feedback.setIsAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false);
             
             GoogleBookFeedback savedFeedback = feedbackRepository.save(feedback);
             log.info("Updated Google Book feedback for user: {} and book: {}", 
@@ -45,6 +49,7 @@ public class GoogleBookFeedbackService {
                     .authorName(request.getAuthorName())
                     .rating(request.getRating())
                     .review(request.getReview())
+                    .isAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false)
                     .user(user)
                     .build();
             
@@ -73,6 +78,18 @@ public class GoogleBookFeedbackService {
     }
 
     private GoogleBookFeedbackResponse mapToResponse(GoogleBookFeedback feedback) {
+        String displayName;
+        Boolean isAnonymous = feedback.getIsAnonymous() != null ? feedback.getIsAnonymous() : false;
+        if (isAnonymous) {
+            displayName = "Anonymous";
+        } else if (feedback.getUser() != null) {
+            displayName = userProfileRepository.findByUserId(feedback.getUser().getId())
+                    .map(profile -> profile.getDisplayName())
+                    .orElse(feedback.getUser().getFullName());
+        } else {
+            displayName = "Unknown User";
+        }
+            
         return GoogleBookFeedbackResponse.builder()
                 .id(feedback.getId())
                 .googleBookId(feedback.getGoogleBookId())
@@ -80,8 +97,47 @@ public class GoogleBookFeedbackService {
                 .authorName(feedback.getAuthorName())
                 .rating(feedback.getRating())
                 .review(feedback.getReview())
-                .userName(feedback.getUser() != null ? feedback.getUser().getFullName() : "Unknown User")
+                .displayName(displayName)
                 .createdDate(feedback.getCreatedDate())
+                .isAnonymous(isAnonymous)
+                .userId(feedback.getUser() != null ? feedback.getUser().getId().toString() : null)
                 .build();
+    }
+
+    @Transactional
+    public Integer updateFeedback(Integer feedbackId, GoogleBookFeedbackRequest request, Authentication connectedUser) {
+        User user = (User) connectedUser.getPrincipal();
+        GoogleBookFeedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new EntityNotFoundException("Google Book feedback not found"));
+        
+        if (!feedback.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("You can only update your own feedback");
+        }
+        
+        feedback.setRating(request.getRating());
+        feedback.setReview(request.getReview());
+        feedback.setBookTitle(request.getBookTitle());
+        feedback.setAuthorName(request.getAuthorName());
+        feedback.setIsAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false);
+        
+        GoogleBookFeedback savedFeedback = feedbackRepository.save(feedback);
+        log.info("Updated Google Book feedback for user: {} and book: {}", 
+                user.getFullName(), request.getBookTitle());
+        return savedFeedback.getId();
+    }
+
+    @Transactional
+    public void deleteFeedback(Integer feedbackId, Authentication connectedUser) {
+        User user = (User) connectedUser.getPrincipal();
+        GoogleBookFeedback feedback = feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new EntityNotFoundException("Google Book feedback not found"));
+        
+        if (!feedback.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("You can only delete your own feedback");
+        }
+        
+        feedbackRepository.delete(feedback);
+        log.info("Deleted Google Book feedback for user: {} and book: {}", 
+                user.getFullName(), feedback.getBookTitle());
     }
 }

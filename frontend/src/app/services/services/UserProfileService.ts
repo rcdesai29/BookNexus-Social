@@ -170,4 +170,22 @@ export class UserProfileService {
             },
         });
     }
+
+    /**
+     * Search users by display name
+     * @param displayName
+     * @returns UserProfileResponse[] OK
+     * @throws ApiError
+     */
+    public static searchUsersByDisplayName(
+        displayName: string,
+    ): CancelablePromise<Array<UserProfileResponse>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/profiles/search',
+            query: {
+                'displayName': displayName,
+            },
+        });
+    }
 }

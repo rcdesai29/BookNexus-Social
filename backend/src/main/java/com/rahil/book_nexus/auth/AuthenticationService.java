@@ -22,6 +22,8 @@ import com.rahil.book_nexus.email.EmailTemplateName;
 import com.rahil.book_nexus.role.RoleRepository;
 import com.rahil.book_nexus.role.Role;
 import com.rahil.book_nexus.security.JwtService;
+import com.rahil.book_nexus.user.UserProfile;
+import com.rahil.book_nexus.user.UserProfileRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserProfileRepository userProfileRepository;
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
@@ -113,6 +116,44 @@ public class AuthenticationService {
         user.setAccountLocked(false);
         user.setEnabled(true);
         userRepository.save(user);
+        savedToken.setValidatedAt(LocalDate.now());
+        tokenRepository.save(savedToken);
+    }
+
+    @Transactional
+    public void completeAccountSetup(String token, String displayName) throws Exception {
+        Token savedToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new Exception("Token not found"));
+        
+        if (LocalDate.now().isAfter(savedToken.getExpiresAt())) {
+            throw new Exception("Token expired");
+        }
+        
+        var user = userRepository.findById(savedToken.getUser().getId())
+                .orElseThrow(() -> new Exception("User not found"));
+        
+        // Check if displayName is available
+        if (userProfileRepository.existsByDisplayNameIgnoreCase(displayName)) {
+            throw new Exception("Display name already taken");
+        }
+        
+        // Activate the user account
+        user.setAccountLocked(false);
+        user.setEnabled(true);
+        userRepository.save(user);
+        
+        // Create user profile with selected displayName
+        UserProfile profile = UserProfile.builder()
+                .user(user)
+                .displayName(displayName)
+                .profileVisibility(UserProfile.ProfileVisibility.PUBLIC)
+                .activityVisibility(UserProfile.ActivityVisibility.PUBLIC)
+                .reviewsVisibility(UserProfile.ReviewsVisibility.PUBLIC)
+                .createdBy(user.getId())
+                .build();
+        userProfileRepository.save(profile);
+        
+        // Mark token as used
         savedToken.setValidatedAt(LocalDate.now());
         tokenRepository.save(savedToken);
     }

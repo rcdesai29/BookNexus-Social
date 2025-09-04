@@ -38,6 +38,7 @@ const HomePage: React.FC = () => {
 
   // Book details modal handlers
   const handleBookDetailsClick = (book: any) => {
+    console.log('Opening book details modal for:', book);
     setSelectedBook(book);
     setIsDetailsModalOpen(true);
   };

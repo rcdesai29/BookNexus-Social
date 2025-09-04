@@ -82,4 +82,21 @@ public class GoogleBookController {
         Long ratingCount = feedbackService.getRatingCount(googleBookId);
         return ResponseEntity.ok(ratingCount);
     }
+
+    @PutMapping("/feedback/{feedbackId}")
+    public ResponseEntity<Integer> updateGoogleBookFeedback(
+            @PathVariable Integer feedbackId,
+            @Valid @RequestBody GoogleBookFeedbackRequest request,
+            Authentication connectedUser) {
+        Integer updatedId = feedbackService.updateFeedback(feedbackId, request, connectedUser);
+        return ResponseEntity.ok(updatedId);
+    }
+
+    @DeleteMapping("/feedback/{feedbackId}")
+    public ResponseEntity<Void> deleteGoogleBookFeedback(
+            @PathVariable Integer feedbackId,
+            Authentication connectedUser) {
+        feedbackService.deleteFeedback(feedbackId, connectedUser);
+        return ResponseEntity.noContent().build();
+    }
 }

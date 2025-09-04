@@ -31,6 +31,7 @@ import jakarta.persistence.JoinColumn;
 public class Feedback extends BaseEntity {
     private Double rating;
     private String review;
+    private boolean isAnonymous;
 
     @ManyToOne
     @JoinColumn(name = "book_id")

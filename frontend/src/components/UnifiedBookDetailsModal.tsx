@@ -38,6 +38,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   const { isLoggedIn } = useAuth();
   const [rating, setRating] = useState<number>(0);
   const [review, setReview] = useState<string>('');
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -114,7 +115,8 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
         bookTitle: book.title,
         authorName: book.authorName,
         rating: rating,
-        review: review
+        review: review,
+        isAnonymous: isAnonymous
       });
       
       setSuccess(true);
@@ -129,6 +131,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
       // Reset form
       setRating(0);
       setReview('');
+      setIsAnonymous(false);
       
       // Reload feedback and rating data from server
       setTimeout(async () => {
@@ -696,6 +699,29 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                     />
                   </div>
 
+                  {/* Anonymous checkbox */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: 'pointer',
+                      color: '#4B3F30',
+                      fontSize: '14px'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={isAnonymous}
+                        onChange={(e) => setIsAnonymous(e.target.checked)}
+                        style={{
+                          accentColor: '#D2691E',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      Post anonymously
+                    </label>
+                  </div>
+
                   {/* Error/Success Messages */}
                   {error && (
                     <div style={{
@@ -771,6 +797,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                         setShowReviewForm(false);
                         setRating(0);
                         setReview('');
+                        setIsAnonymous(false);
                         setError(null);
                       }}
                       style={{
@@ -833,7 +860,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                           color: '#4B3F30',
                           fontSize: '14px'
                         }}>
-                          {review.userName || 'Anonymous User'}
+                          {review.displayName || 'Anonymous User'}
                         </span>
                         {review.rating && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

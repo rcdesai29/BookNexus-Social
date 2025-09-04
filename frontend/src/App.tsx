@@ -18,6 +18,8 @@ import CurrentlyReadingPage from './pages/CurrentlyReadingPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
 import SearchPage from './pages/SearchPage';
+import DisplayNameSetupPage from './pages/DisplayNameSetupPage';
+import FindFriendsPage from './pages/FindFriendsPage';
 
 function App() {
   return (
@@ -28,11 +30,13 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/activate-account" element={<ActivateAccountPage />} />
+        <Route path="/setup-display-name" element={<DisplayNameSetupPage />} />
         
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/find-friends" element={<FindFriendsPage />} />
         
         {/* Protected routes */}
         <Route path="/books" element={

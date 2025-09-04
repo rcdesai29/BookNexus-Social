@@ -71,4 +71,42 @@ export class FeedbackService {
             },
         });
     }
+
+    /**
+     * @param feedbackId
+     * @param requestBody
+     * @returns number OK
+     * @throws ApiError
+     */
+    public static updateFeedback(
+        feedbackId: number,
+        requestBody: FeedbackRequest,
+    ): CancelablePromise<number> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/feedbacks/{feedback-id}',
+            path: {
+                'feedback-id': feedbackId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @param feedbackId
+     * @returns void
+     * @throws ApiError
+     */
+    public static deleteFeedback(
+        feedbackId: number,
+    ): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/feedbacks/{feedback-id}',
+            path: {
+                'feedback-id': feedbackId,
+            },
+        });
+    }
 }

@@ -6,5 +6,6 @@ export type FeedbackRequest = {
     rating?: number;
     review: string;
     bookId: number;
+    isAnonymous?: boolean;
 };
 
