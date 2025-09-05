@@ -3,7 +3,7 @@ import { UserBookList, UserBookListService } from '../app/services/services/User
 import { useAuth } from './useAuth';
 import { tokenService } from '../services/tokenService';
 
-export function useUserBookList(listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') {
+export function useUserBookList(listType?: 'CURRENTLY_READING' | 'TBR' | 'READ') {
   const { isLoggedIn } = useAuth();
   const [data, setData] = useState<UserBookList[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

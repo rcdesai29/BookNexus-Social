@@ -19,6 +19,7 @@ interface LibraryBookCardProps {
   onMoveToShelf?: (bookId: string, fromShelf: string, toShelf: string) => void;
   onRemoveFromLibrary?: (bookId: string) => void;
   onMarkAsFinished?: (bookId: string) => void;
+  onToggleFavorite?: (bookId: string, isFavorite: boolean) => void;
   style?: React.CSSProperties;
   showShelfActions?: boolean;
 }
@@ -29,6 +30,7 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
   onMoveToShelf,
   onRemoveFromLibrary,
   onMarkAsFinished,
+  onToggleFavorite,
   style = {},
   showShelfActions = true
 }) => {
@@ -119,6 +121,25 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
             ✓ {getReadCount()}
           </div>
         )}
+
+        {/* Favorite Star Badge */}
+        {bookListItem.isFavorite && (
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#FFD700',
+            borderRadius: '50%',
+            width: '28px',
+            height: '28px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 6px rgba(255, 215, 0, 0.4)'
+          }}>
+            <FavoriteIcon style={{ fontSize: '16px', color: '#B8860B' }} />
+          </div>
+        )}
       </div>
     );
   };
@@ -152,12 +173,6 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
           text: `Read ${getReadCount() > 1 ? `✓ ${getReadCount()}` : ''}`,
           color: '#4CAF50',
           lastCompleted: bookListItem.lastModifiedDate
-        };
-      case 'FAVORITE':
-        return {
-          icon: <FavoriteIcon style={{ fontSize: '16px', color: '#E91E63' }} />,
-          text: 'In My Books',
-          color: '#E91E63'
         };
       default:
         return {
@@ -223,6 +238,18 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
     const bookId = isGoogleBook ? bookListItem.googleBook?.googleBookId : bookListItem.book?.id?.toString();
     if (bookId) {
       await onMarkAsFinished(bookId);
+    }
+    setShowActions(false);
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onToggleFavorite) return;
+    
+    const bookId = isGoogleBook ? bookListItem.googleBook?.googleBookId : bookListItem.book?.id?.toString();
+    if (bookId) {
+      const isFavorite = bookListItem.isFavorite ?? false;
+      await onToggleFavorite(bookId, isFavorite);
     }
     setShowActions(false);
   };
@@ -356,6 +383,29 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
             </button>
           )}
           
+          {/* Toggle Favorite */}
+          <button
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              border: 'none',
+              background: 'none',
+              textAlign: 'left',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              color: bookListItem.isFavorite ? '#E91E63' : '#FFD700'
+            }}
+            onClick={handleToggleFavorite}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#F5F5F5'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <FavoriteIcon style={{ fontSize: '16px' }} />
+            {bookListItem.isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+          </button>
+
           {/* Remove from library */}
           <button
             style={{

@@ -22,6 +22,7 @@ import { UserProfileService, UserProfileResponse } from '../app/services/service
 import { FeedbackService } from '../app/services/services/FeedbackService';
 import { FeedbackResponse } from '../app/services/models/FeedbackResponse';
 import { GoogleBookFeedbackService, GoogleBookFeedbackResponse } from '../app/services/services/GoogleBookFeedbackService';
+import { UserBookListService, UserBookList } from '../app/services/services/UserBookListService';
 import StarRating from '../components/StarRating';
 
 type UserProfile = UserProfileResponse;
@@ -42,6 +43,9 @@ const ProfilePage: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [reviewToDelete, setReviewToDelete] = useState<FeedbackResponse | null>(null);
   const [editFormData, setEditFormData] = useState<{ rating: number; review: string; isAnonymous: boolean }>({ rating: 5, review: '', isAnonymous: false });
+  const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<UserBookList[]>([]);
+  const [readBooks, setReadBooks] = useState<UserBookList[]>([]);
+  const [booksLoading, setBooksLoading] = useState(false);
 
   useEffect(() => {
     if (!userId) {
@@ -332,6 +336,30 @@ const ProfilePage: React.FC = () => {
   const cancelDeleteReview = () => {
     setShowDeleteDialog(false);
     setReviewToDelete(null);
+  };
+
+  const fetchCurrentlyReadingBooks = async () => {
+    try {
+      setBooksLoading(true);
+      const response = await UserBookListService.getCurrentlyReading();
+      setCurrentlyReadingBooks(response || []);
+    } catch (error) {
+      console.error('Error fetching currently reading books:', error);
+    } finally {
+      setBooksLoading(false);
+    }
+  };
+
+  const fetchReadBooks = async () => {
+    try {
+      setBooksLoading(true);
+      const response = await UserBookListService.getRead();
+      setReadBooks(response || []);
+    } catch (error) {
+      console.error('Error fetching read books:', error);
+    } finally {
+      setBooksLoading(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -958,13 +986,19 @@ const ProfilePage: React.FC = () => {
           }}>
             <button
               style={tabStyle(activeTab === 0)}
-              onClick={() => setActiveTab(0)}
+              onClick={() => {
+                setActiveTab(0);
+                fetchCurrentlyReadingBooks();
+              }}
             >
               Currently Reading
             </button>
             <button
               style={tabStyle(activeTab === 1)}
-              onClick={() => setActiveTab(1)}
+              onClick={() => {
+                setActiveTab(1);
+                fetchReadBooks();
+              }}
             >
               Read Books
             </button>
@@ -991,29 +1025,174 @@ const ProfilePage: React.FC = () => {
           {/* Tab Content */}
           <div style={{ padding: '32px' }}>
             {activeTab === 0 && (
-              <div style={{
-                textAlign: 'center',
-                color: '#6A5E4D',
-                fontSize: '16px'
-              }}>
-                Currently reading: {profile.currentlyReading || 0} books
-                <div style={{ marginTop: '16px' }}>
-                  <BookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
-                  <p style={{ marginTop: '8px' }}>Reading activity will be displayed here</p>
-                </div>
+              <div>
+                <h3 style={{
+                  fontFamily: 'Playfair Display, serif',
+                  fontSize: '24px',
+                  color: '#4B3F30',
+                  marginBottom: '24px',
+                  textAlign: 'center'
+                }}>
+                  Currently Reading ({currentlyReadingBooks.length} books)
+                </h3>
+                {booksLoading ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div>Loading books...</div>
+                  </div>
+                ) : currentlyReadingBooks.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    color: '#6A5E4D',
+                    fontSize: '16px',
+                    padding: '40px'
+                  }}>
+                    <BookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                    <p style={{ marginTop: '8px' }}>No books currently being read</p>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: '20px'
+                  }}>
+                    {currentlyReadingBooks.map((bookList) => {
+                      const book = bookList.book || bookList.googleBook;
+                      const coverUrl = bookList.book?.cover || bookList.googleBook?.coverUrl;
+                      return (
+                        <div key={bookList.id} style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                          borderRadius: '12px',
+                          padding: '16px',
+                          border: '1px solid #E6D7C3',
+                          boxShadow: '0 2px 8px rgba(75, 63, 48, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{
+                            width: '120px',
+                            height: '180px',
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: '8px',
+                            margin: '0 auto 12px',
+                            backgroundImage: coverUrl ? `url(${coverUrl})` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            {!coverUrl && <BookIcon style={{ color: '#8B7355', fontSize: '40px' }} />}
+                          </div>
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: '#4B3F30',
+                            marginBottom: '4px',
+                            lineHeight: 1.3,
+                            height: '36px',
+                            overflow: 'hidden'
+                          }}>
+                            {book?.title}
+                          </h4>
+                          <p style={{
+                            fontSize: '12px',
+                            color: '#6A5E4D',
+                            margin: 0
+                          }}>
+                            by {book?.authorName}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 1 && (
-              <div style={{
-                textAlign: 'center',
-                color: '#6A5E4D',
-                fontSize: '16px'
-              }}>
-                Read: {profile.booksRead || 0} books
-                <div style={{ marginTop: '16px' }}>
-                  <BookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
-                  <p style={{ marginTop: '8px' }}>Completed books will be displayed here</p>
-                </div>
+              <div>
+                <h3 style={{
+                  fontFamily: 'Playfair Display, serif',
+                  fontSize: '24px',
+                  color: '#4B3F30',
+                  marginBottom: '24px',
+                  textAlign: 'center'
+                }}>
+                  Read Books ({readBooks.length} books)
+                </h3>
+                {booksLoading ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div>Loading books...</div>
+                  </div>
+                ) : readBooks.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    color: '#6A5E4D',
+                    fontSize: '16px',
+                    padding: '40px'
+                  }}>
+                    <BookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+                    <p style={{ marginTop: '8px' }}>No completed books yet</p>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: '20px'
+                  }}>
+                    {readBooks.map((bookList) => {
+                      const book = bookList.book || bookList.googleBook;
+                      const coverUrl = bookList.book?.cover || bookList.googleBook?.coverUrl;
+                      return (
+                        <div key={bookList.id} style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                          borderRadius: '12px',
+                          padding: '16px',
+                          border: '1px solid #E6D7C3',
+                          boxShadow: '0 2px 8px rgba(75, 63, 48, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{
+                            width: '120px',
+                            height: '180px',
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: '8px',
+                            margin: '0 auto 12px',
+                            backgroundImage: coverUrl ? `url(${coverUrl})` : 'none',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            {!coverUrl && <BookIcon style={{ color: '#8B7355', fontSize: '40px' }} />}
+                          </div>
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            color: '#4B3F30',
+                            marginBottom: '4px',
+                            lineHeight: 1.3,
+                            height: '36px',
+                            overflow: 'hidden'
+                          }}>
+                            {book?.title}
+                          </h4>
+                          <p style={{
+                            fontSize: '12px',
+                            color: '#6A5E4D',
+                            margin: 0
+                          }}>
+                            by {book?.authorName}
+                          </p>
+                          {bookList.userRating && (
+                            <div style={{ marginTop: '8px' }}>
+                              <StarRating rating={bookList.userRating} size="small" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 2 && (

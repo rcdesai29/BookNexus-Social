@@ -27,6 +27,12 @@ public interface UserBookListRepository extends JpaRepository<UserBookList, Long
     @Query("SELECT COUNT(ubl) FROM UserBookList ubl WHERE ubl.user = :user AND ubl.listType = :listType AND ubl.isActive = true")
     Long countUserBooksByListType(@Param("user") User user, @Param("listType") ListType listType);
     
+    @Query("SELECT ubl FROM UserBookList ubl WHERE ubl.user = :user AND ubl.isFavorite = true AND ubl.isActive = true ORDER BY ubl.createdDate DESC")
+    List<UserBookList> findUserFavoriteBooks(@Param("user") User user);
+    
+    @Query("SELECT COUNT(ubl) FROM UserBookList ubl WHERE ubl.user = :user AND ubl.isFavorite = true AND ubl.isActive = true")
+    Long countUserFavoriteBooks(@Param("user") User user);
+    
     boolean existsByUserAndBookAndListTypeAndIsActiveTrue(User user, Book book, ListType listType);
     
     boolean existsByUserAndGoogleBookAndListTypeAndIsActiveTrue(User user, com.rahil.book_nexus.googlebooks.GoogleBookEntity googleBook, ListType listType);

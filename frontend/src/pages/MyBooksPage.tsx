@@ -7,6 +7,7 @@ import {
 import LibraryBookCard from '../components/LibraryBookCard';
 import UnifiedBookDetailsModal from '../components/UnifiedBookDetailsModal';
 import { useUserBookList } from '../hooks/useUserBookList';
+import { UserBookListService } from '../app/services/services/UserBookListService';
 import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 
 const MyBooksPage: React.FC = () => {
@@ -16,10 +17,58 @@ const MyBooksPage: React.FC = () => {
   const [filterShelf, setFilterShelf] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Deduplicate books that might appear multiple times due to old FAVORITE entries
+  const deduplicatedBooks = allBooks.reduce((acc: any[], bookItem) => {
+    const book = bookItem.book || bookItem.googleBook;
+    const bookId = book?.id || (book as any)?.googleBookId;
+    
+    if (!bookId) return acc;
+    
+    const existingIndex = acc.findIndex(existing => {
+      const existingBook = existing.book || existing.googleBook;
+      const existingBookId = existingBook?.id || (existingBook as any)?.googleBookId;
+      return existingBookId === bookId;
+    });
+    
+    if (existingIndex === -1) {
+      // New book, add it
+      acc.push(bookItem);
+    } else {
+      // Book already exists, merge favorite status and keep the one with a proper list type
+      const existing = acc[existingIndex];
+      const hasProperListType = Boolean(bookItem.listType);
+      const existingHasProperListType = Boolean(existing.listType);
+      
+      if (hasProperListType && !existingHasProperListType) {
+        // Replace with the one that has a proper list type
+        acc[existingIndex] = {
+          ...bookItem,
+          isFavorite: bookItem.isFavorite || existing.isFavorite
+        };
+      } else if (!hasProperListType && existingHasProperListType) {
+        // Keep existing but merge favorite status
+        acc[existingIndex] = {
+          ...existing,
+          isFavorite: bookItem.isFavorite || existing.isFavorite
+        };
+      } else {
+        // Both have proper list types or both don't, keep existing and merge favorite status
+        acc[existingIndex] = {
+          ...existing,
+          isFavorite: bookItem.isFavorite || existing.isFavorite
+        };
+      }
+    }
+    
+    return acc;
+  }, []);
+
   // Filter books based on selected shelf and search term
-  const filteredBooks = allBooks.filter(bookItem => {
+  const filteredBooks = deduplicatedBooks.filter(bookItem => {
     // Filter by shelf
-    const shelfMatch = filterShelf === 'all' || bookItem.listType === filterShelf;
+    const shelfMatch = filterShelf === 'all' || 
+      bookItem.listType === filterShelf ||
+      (filterShelf === 'FAVORITE' && bookItem.isFavorite);
     
     // Filter by search term
     const book = bookItem.book || bookItem.googleBook;
@@ -64,18 +113,38 @@ const MyBooksPage: React.FC = () => {
     }
   };
 
+  const handleToggleFavorite = async (bookId: string, isFavorite: boolean) => {
+    try {
+      // Toggle favorite status
+      await UserBookListService.toggleFavorite(bookId);
+      // Refetch the data to update the UI
+      refetch();
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    }
+  };
+
   const getShelfCounts = () => {
     const counts = {
-      all: allBooks.length,
+      all: deduplicatedBooks.length,
       FAVORITE: 0,
       CURRENTLY_READING: 0,
       TBR: 0,
       READ: 0
     };
 
-    allBooks.forEach(book => {
+    deduplicatedBooks.forEach(book => {
+      // Count by list type (handle case conversion for READ)
       if (book.listType) {
-        counts[book.listType]++;
+        const listType = book.listType.toUpperCase();
+        if (counts.hasOwnProperty(listType)) {
+          counts[listType as keyof typeof counts]++;
+        }
+      }
+      
+      // Count favorites separately
+      if (book.isFavorite) {
+        counts.FAVORITE++;
       }
     });
 
@@ -322,6 +391,7 @@ const MyBooksPage: React.FC = () => {
                 onMoveToShelf={handleMoveToShelf}
                 onRemoveFromLibrary={handleRemoveFromLibrary}
                 onMarkAsFinished={handleMarkAsFinished}
+                onToggleFavorite={handleToggleFavorite}
                 showShelfActions={true}
               />
             ))}

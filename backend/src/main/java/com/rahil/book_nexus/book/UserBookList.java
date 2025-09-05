@@ -4,6 +4,7 @@ import com.rahil.book_nexus.common.BaseEntity;
 import com.rahil.book_nexus.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,8 +48,12 @@ public class UserBookList extends BaseEntity {
     // Track reading progress (0-100)
     private Integer readingProgress;
 
+    // Whether this book is marked as favorite by the user
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isFavorite = false;
+
     public enum ListType {
-        FAVORITE,           // My Books (favorites)
         CURRENTLY_READING,  // Currently Reading
         TBR,               // To Be Read
         READ               // Read

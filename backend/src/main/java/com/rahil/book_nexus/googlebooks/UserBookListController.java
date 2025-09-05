@@ -63,8 +63,18 @@ public class UserBookListController {
     @GetMapping("/favorites")
     public ResponseEntity<List<UserBookList>> getFavorites(Authentication connectedUser) {
         User user = ((User) connectedUser.getPrincipal());
-        List<UserBookList> favorites = googleBookIntegrationService.getUserBooksByListType(user, UserBookList.ListType.FAVORITE);
+        List<UserBookList> favorites = googleBookIntegrationService.getFavoriteBooks(user);
         return ResponseEntity.ok(favorites);
+    }
+    
+    @PostMapping("/google-books/{googleBookId}/toggle-favorite")
+    public ResponseEntity<UserBookList> toggleFavorite(
+            @PathVariable String googleBookId,
+            Authentication connectedUser) {
+        
+        User user = ((User) connectedUser.getPrincipal());
+        UserBookList updatedUserBookList = googleBookIntegrationService.toggleGoogleBookFavorite(googleBookId, user);
+        return ResponseEntity.ok(updatedUserBookList);
     }
     
     @GetMapping("/currently-reading")

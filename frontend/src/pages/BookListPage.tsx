@@ -47,7 +47,7 @@ const BookListPage: React.FC = () => {
   const favoriteBooks = isLoggedIn ? (readBooks?.content?.slice(0, 4) || []) : [];
 
   // Handle adding Google Books to user lists
-  const handleAddToUserList = async (googleBookId: string, listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') => {
+  const handleAddToUserList = async (googleBookId: string, listType: 'CURRENTLY_READING' | 'TBR' | 'READ') => {
     if (!isLoggedIn) {
       navigate('/login');
       return;
@@ -530,7 +530,7 @@ const BookListPage: React.FC = () => {
                           }}
                           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
                           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
-                          onClick={() => handleAddToUserList(book.id, 'FAVORITE')}
+                          onClick={() => handleAddToUserList(book.id, 'READ')}
                         >
                           Add to Read
                         </button>

@@ -109,6 +109,55 @@ public class GoogleBookIntegrationService {
     }
     
     /**
+     * Get all favorite books for a user
+     */
+    public List<UserBookList> getFavoriteBooks(User user) {
+        return userBookListRepository.findUserFavoriteBooks(user);
+    }
+    
+    /**
+     * Get count of favorite books by a user
+     */
+    public long getFavoriteBooksCount(User user) {
+        return userBookListRepository.countUserFavoriteBooks(user);
+    }
+    
+    /**
+     * Toggle favorite status for a Google Book
+     */
+    @Transactional
+    public UserBookList toggleGoogleBookFavorite(String googleBookId, User user) {
+        Optional<GoogleBookEntity> googleBookEntity = googleBookEntityRepository.findByGoogleBookId(googleBookId);
+        if (googleBookEntity.isEmpty()) {
+            throw new IllegalArgumentException("Google Book not found in database: " + googleBookId);
+        }
+        
+        // Find any existing entry for this book (regardless of list type)
+        List<UserBookList> existingEntries = userBookListRepository.findByUserAndIsActiveTrue(user)
+                .stream()
+                .filter(entry -> entry.getGoogleBook() != null && 
+                        googleBookId.equals(entry.getGoogleBook().getGoogleBookId()))
+                .toList();
+        
+        if (existingEntries.isEmpty()) {
+            throw new IllegalArgumentException("Book must be added to a list before it can be favorited");
+        }
+        
+        // Update ALL entries for this book to have the same favorite status
+        // This handles cases where there might be multiple entries from old FAVORITE list type
+        boolean newFavoriteStatus = !existingEntries.get(0).getIsFavorite();
+        
+        for (UserBookList entry : existingEntries) {
+            entry.setIsFavorite(newFavoriteStatus);
+            userBookListRepository.save(entry);
+        }
+        
+        log.info("Toggled favorite status for Google Book {} to {} for user {} ({} entries updated)", 
+                googleBookId, newFavoriteStatus, user.getEmail(), existingEntries.size());
+        return existingEntries.get(0); // Return the first entry
+    }
+    
+    /**
      * Update reading progress for a currently reading book
      * Automatically moves book to "Read" when progress reaches 100%
      */

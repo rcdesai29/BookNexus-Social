@@ -192,7 +192,7 @@ const SearchPage: React.FC = () => {
     }
   };
 
-  const handleAddToUserList = async (googleBookId: string, listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ') => {
+  const handleAddToUserList = async (googleBookId: string, listType: 'CURRENTLY_READING' | 'TBR' | 'READ') => {
     if (!isLoggedIn) {
       navigate('/login');
       return;

@@ -25,8 +25,9 @@ export interface UserBookList {
         averageRating?: number;
         ratingsCount?: number;
     };
-    listType?: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ';
+    listType?: 'CURRENTLY_READING' | 'TBR' | 'READ';
     isActive?: boolean;
+    isFavorite?: boolean;
     userRating?: number;
     userReview?: string;
     readingProgress?: number;
@@ -44,7 +45,7 @@ export class UserBookListService {
      */
     public static async addGoogleBookToList(
         googleBookId: string,
-        listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ'
+        listType: 'CURRENTLY_READING' | 'TBR' | 'READ'
     ): Promise<UserBookList> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -64,7 +65,7 @@ export class UserBookListService {
      */
     public static async removeGoogleBookFromList(
         googleBookId: string,
-        listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ'
+        listType: 'CURRENTLY_READING' | 'TBR' | 'READ'
     ): Promise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
@@ -82,7 +83,7 @@ export class UserBookListService {
      * @throws ApiError
      */
     public static async getUserBooksByListType(
-        listType: 'FAVORITE' | 'CURRENTLY_READING' | 'TBR' | 'READ'
+        listType: 'CURRENTLY_READING' | 'TBR' | 'READ'
     ): Promise<UserBookList[]> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -167,6 +168,19 @@ export class UserBookListService {
             query: {
                 'progress': progress,
             },
+        });
+    }
+
+    /**
+     * Toggle favorite status for a Google Book
+     * @param googleBookId The Google Book ID
+     * @returns UserBookList
+     * @throws ApiError
+     */
+    public static async toggleFavorite(googleBookId: string): Promise<UserBookList> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: `/user-book-lists/google-books/${googleBookId}/toggle-favorite`,
         });
     }
 }
