@@ -178,7 +178,7 @@ const DisplayNameSetupPage: React.FC = () => {
           </Button>
 
           <Typography variant="body2" sx={{ mt: 2, color: '#666' }}>
-            Don't worry - you can change this later in your profile settings.
+            <strong>Note:</strong> This is a one-time setup. Your display name cannot be changed once set, so choose carefully!
           </Typography>
         </Box>
       </Paper>

@@ -27,7 +27,6 @@ com/rahil/book_nexus/security/JwtFilter.class
 com/rahil/book_nexus/auth/AuthenticationRequest$AuthenticationRequestBuilder.class
 com/rahil/book_nexus/security/JwtService.class
 com/rahil/book_nexus/googlebooks/GoogleBookFeedbackRequest$GoogleBookFeedbackRequestBuilder.class
-com/rahil/book_nexus/feedback/FeedbackMapper.class
 com/rahil/book_nexus/feedback/FeedbackResponse.class
 com/rahil/book_nexus/book/UserBookList.class
 com/rahil/book_nexus/googlebooks/GoogleBookController.class

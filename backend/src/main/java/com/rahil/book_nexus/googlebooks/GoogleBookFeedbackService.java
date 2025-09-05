@@ -68,6 +68,14 @@ public class GoogleBookFeedbackService {
                 .toList();
     }
 
+    public List<GoogleBookFeedbackResponse> getFeedbackByUserId(Integer userId) {
+        List<GoogleBookFeedback> feedbacks = feedbackRepository.findByUserId(userId);
+        
+        return feedbacks.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public Double getAverageRating(String googleBookId) {
         return feedbackRepository.getAverageRatingByGoogleBookId(googleBookId)
                 .orElse(0.0);

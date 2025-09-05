@@ -99,4 +99,11 @@ public class GoogleBookController {
         feedbackService.deleteFeedback(feedbackId, connectedUser);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/feedback/user/{userId}")
+    public ResponseEntity<List<GoogleBookFeedbackResponse>> getFeedbackByUserId(
+            @PathVariable Integer userId) {
+        List<GoogleBookFeedbackResponse> feedbacks = feedbackService.getFeedbackByUserId(userId);
+        return ResponseEntity.ok(feedbacks);
+    }
 }

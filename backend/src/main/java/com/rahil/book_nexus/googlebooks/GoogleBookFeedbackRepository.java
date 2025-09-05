@@ -27,5 +27,8 @@ public interface GoogleBookFeedbackRepository extends JpaRepository<GoogleBookFe
     @Query("SELECT f FROM GoogleBookFeedback f WHERE f.user.id = :userId ORDER BY f.createdDate DESC")
     Page<GoogleBookFeedback> findAllByUserIdOrderByCreatedDateDesc(@Param("userId") Integer userId, Pageable pageable);
     
+    @Query("SELECT f FROM GoogleBookFeedback f WHERE f.user.id = :userId ORDER BY f.createdDate DESC")
+    List<GoogleBookFeedback> findByUserId(@Param("userId") Integer userId);
+    
     Optional<GoogleBookFeedback> findByGoogleBookIdAndUserId(String googleBookId, Integer userId);
 }

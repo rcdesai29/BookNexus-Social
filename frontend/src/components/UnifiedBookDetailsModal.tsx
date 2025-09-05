@@ -643,9 +643,16 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                     style={buttonStyle}
                     onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#B85A1A'}
                     onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#D2691E'}
-                    onClick={() => setShowReviewForm(true)}
+                    onClick={() => {
+                      setShowReviewForm(true);
+                      // Pre-populate form with existing review if it exists
+                      if (existingFeedback) {
+                        setRating(existingFeedback.rating || 0);
+                        setReview(existingFeedback.review || '');
+                      }
+                    }}
                   >
-                    Write a Review
+                    {existingFeedback && (existingFeedback.rating || existingFeedback.review) ? 'Edit Review' : 'Write a Review'}
                   </button>
                 </div>
               ) : (
@@ -786,7 +793,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                       ) : (
                         <>
                           <SendIcon style={{ fontSize: '16px' }} />
-                          Submit Review
+                          {existingFeedback && (existingFeedback.rating || existingFeedback.review) ? 'Update Review' : 'Submit Review'}
                         </>
                       )}
                     </button>

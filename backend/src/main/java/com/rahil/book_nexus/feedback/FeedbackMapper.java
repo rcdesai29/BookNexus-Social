@@ -54,7 +54,7 @@ public class FeedbackMapper {
 
     public FeedbackResponse toFeedbackResponse(GoogleBookFeedback googleBookFeedback, Integer id) {
         String displayName;
-        if (googleBookFeedback.isAnonymous()) {
+        if (googleBookFeedback.getIsAnonymous() != null && googleBookFeedback.getIsAnonymous()) {
             displayName = "Anonymous";
         } else {
             displayName = userProfileRepository.findByUserId(googleBookFeedback.getUser().getId())
@@ -74,7 +74,7 @@ public class FeedbackMapper {
                 .createdDate(googleBookFeedback.getCreatedDate() != null ? googleBookFeedback.getCreatedDate().toString() : null)
                 .displayName(displayName)
                 .userId(googleBookFeedback.getUser().getId().toString())
-                .isAnonymous(googleBookFeedback.isAnonymous())
+                .isAnonymous(googleBookFeedback.getIsAnonymous() != null ? googleBookFeedback.getIsAnonymous() : false)
                 .build();
     }
 }
