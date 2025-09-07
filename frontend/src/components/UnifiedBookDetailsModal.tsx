@@ -842,7 +842,18 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                 User Reviews ({allUserReviews.length})
               </h3>
               
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div 
+                className="reviews-scroll-container"
+                style={{ 
+                  maxHeight: '300px', 
+                  overflowY: 'auto',
+                  border: '1px solid #E6D7C3',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#D2691E #F4E3C1'
+                }}
+              >
                 {allUserReviews.map((review, index) => (
                   <div 
                     key={index}
@@ -904,6 +915,17 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                   </div>
                 ))}
               </div>
+              {allUserReviews.length > 2 && (
+                <p style={{
+                  color: '#8B7355',
+                  fontSize: '12px',
+                  marginTop: '8px',
+                  fontStyle: 'italic',
+                  textAlign: 'center'
+                }}>
+                  ↑↓ Scroll to see more reviews
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -913,6 +935,20 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        .reviews-scroll-container::-webkit-scrollbar {
+          width: 8px;
+        }
+        .reviews-scroll-container::-webkit-scrollbar-track {
+          background: #F4E3C1;
+          border-radius: 4px;
+        }
+        .reviews-scroll-container::-webkit-scrollbar-thumb {
+          background: #D2691E;
+          border-radius: 4px;
+        }
+        .reviews-scroll-container::-webkit-scrollbar-thumb:hover {
+          background: #B85A1A;
         }
       `}</style>
     </div>

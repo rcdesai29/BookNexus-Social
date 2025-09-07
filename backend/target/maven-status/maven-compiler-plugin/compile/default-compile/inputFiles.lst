@@ -20,7 +20,6 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/config/ApplicationAuditAware.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/config/BeansConfig.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/config/DataBootstrap.java
-/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/config/DatabaseCleanup.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/config/OpenApiConfig.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/config/WebConfig.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/email/EmailService.java

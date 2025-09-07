@@ -10,6 +10,8 @@ import {
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
   Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  StarHalf as StarHalfIcon,
   RateReview as ReviewIcon,
   People as PeopleIcon,
   Add as FollowIcon,
@@ -46,6 +48,57 @@ const ProfilePage: React.FC = () => {
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<UserBookList[]>([]);
   const [readBooks, setReadBooks] = useState<UserBookList[]>([]);
   const [booksLoading, setBooksLoading] = useState(false);
+
+  // Helper function to render interactive stars for editing
+  const renderStars = (rating: number, interactive: boolean = false, size: string = '16px') => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      let starIcon;
+      if (i <= rating) {
+        starIcon = <StarIcon style={{ color: '#FFD700', fontSize: size }} />;
+      } else if (i - 0.5 <= rating) {
+        starIcon = <StarHalfIcon style={{ color: '#FFD700', fontSize: size }} />;
+      } else {
+        starIcon = <StarBorderIcon style={{ color: '#D3D3D3', fontSize: size }} />;
+      }
+
+      stars.push(
+        <span
+          key={i}
+          style={{
+            cursor: interactive ? 'pointer' : 'default',
+            transition: 'transform 0.1s'
+          }}
+          onMouseOver={(e) => {
+            if (interactive) {
+              e.currentTarget.style.transform = 'scale(1.1)';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (interactive) {
+              e.currentTarget.style.transform = 'scale(1)';
+            }
+          }}
+          onClick={(e) => {
+            if (interactive) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const starWidth = rect.width;
+              
+              if (clickX < starWidth / 2) {
+                setEditFormData(prev => ({ ...prev, rating: i - 0.5 }));
+              } else {
+                setEditFormData(prev => ({ ...prev, rating: i }));
+              }
+            }
+          }}
+        >
+          {starIcon}
+        </span>
+      );
+    }
+    return stars;
+  };
 
   useEffect(() => {
     if (!userId) {
@@ -1364,23 +1417,12 @@ const ProfilePage: React.FC = () => {
                               {editingReview === review.id ? (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <span style={{ fontSize: '12px', color: '#6A5E4D' }}>Rating:</span>
-                                  <select
-                                    value={editFormData.rating}
-                                    onChange={(e) => setEditFormData(prev => ({ ...prev, rating: Number(e.target.value) }))}
-                                    style={{
-                                      padding: '4px 8px',
-                                      borderRadius: '4px',
-                                      border: '1px solid #E6D7C3',
-                                      fontSize: '12px',
-                                      backgroundColor: 'white'
-                                    }}
-                                  >
-                                    {[1, 2, 3, 4, 5].map(rating => (
-                                      <option key={rating} value={rating}>
-                                        {rating} star{rating !== 1 ? 's' : ''}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {renderStars(editFormData.rating, true, '18px')}
+                                    <span style={{ fontSize: '12px', color: '#6A5E4D', marginLeft: '8px' }}>
+                                      {editFormData.rating > 0 ? `${editFormData.rating} out of 5` : 'Select rating'}
+                                    </span>
+                                  </div>
                                 </div>
                               ) : (
                                 <StarRating 

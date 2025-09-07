@@ -317,7 +317,7 @@ const HomePage: React.FC = () => {
                         }}
                         onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                         onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        onClick={() => navigate(bookListItem.book ? `/books/${book?.id}` : `/google-books/${bookListItem.googleBook?.googleBookId}`)}
+                        onClick={() => handleBookDetailsClick(book)}
                       >
                         <div style={{
                           width: '140px',

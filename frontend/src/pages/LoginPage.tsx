@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
       if (response && response.token) {
         tokenService.setToken(response.token);
         setSuccess(true);
-        setTimeout(() => navigate('/books'), 1000);
+        setTimeout(() => navigate('/'), 1000);
       } else {
         setError('No token received from server');
       }
