@@ -26,6 +26,7 @@ import { FeedbackResponse } from '../app/services/models/FeedbackResponse';
 import { GoogleBookFeedbackService, GoogleBookFeedbackResponse } from '../app/services/services/GoogleBookFeedbackService';
 import { UserBookListService, UserBookList } from '../app/services/services/UserBookListService';
 import StarRating from '../components/StarRating';
+import FollowersFollowingModal from '../components/FollowersFollowingModal';
 
 type UserProfile = UserProfileResponse;
 
@@ -48,6 +49,8 @@ const ProfilePage: React.FC = () => {
   const [currentlyReadingBooks, setCurrentlyReadingBooks] = useState<UserBookList[]>([]);
   const [readBooks, setReadBooks] = useState<UserBookList[]>([]);
   const [booksLoading, setBooksLoading] = useState(false);
+  const [followersModalOpen, setFollowersModalOpen] = useState(false);
+  const [followingModalOpen, setFollowingModalOpen] = useState(false);
 
   // Helper function to render interactive stars for editing
   const renderStars = (rating: number, interactive: boolean = false, size: string = '16px') => {
@@ -969,7 +972,22 @@ const ProfilePage: React.FC = () => {
               Books Read
             </div>
           </div>
-          <div style={statsCardStyle}>
+          <div 
+            style={{
+              ...statsCardStyle,
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onClick={() => setFollowersModalOpen(true)}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(75, 63, 48, 0.15)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
+            }}
+          >
             <PersonIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
             <div style={{
               fontSize: '24px',
@@ -986,7 +1004,22 @@ const ProfilePage: React.FC = () => {
               Followers
             </div>
           </div>
-          <div style={statsCardStyle}>
+          <div 
+            style={{
+              ...statsCardStyle,
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onClick={() => setFollowingModalOpen(true)}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(75, 63, 48, 0.15)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(75, 63, 48, 0.1)';
+            }}
+          >
             <PeopleIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
             <div style={{
               fontSize: '24px',
@@ -1705,6 +1738,24 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Followers Modal */}
+      <FollowersFollowingModal
+        isOpen={followersModalOpen}
+        onClose={() => setFollowersModalOpen(false)}
+        userId={profile?.userId || 0}
+        type="followers"
+        title={`${profile?.displayName || 'User'}'s Followers`}
+      />
+
+      {/* Following Modal */}
+      <FollowersFollowingModal
+        isOpen={followingModalOpen}
+        onClose={() => setFollowingModalOpen(false)}
+        userId={profile?.userId || 0}
+        type="following"
+        title={`${profile?.displayName || 'User'} is Following`}
+      />
     </div>
   );
 };
