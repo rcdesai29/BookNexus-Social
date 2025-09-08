@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Close as CloseIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
   StarHalf as StarHalfIcon,
   Send as SendIcon,
-  MenuBook as MenuBookIcon
+  MenuBook as MenuBookIcon,
+  OpenInNew as OpenInNewIcon
 } from '@mui/icons-material';
 import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
@@ -37,6 +39,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   onRatingUpdated
 }) => {
   const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   const [rating, setRating] = useState<number>(0);
   const [review, setReview] = useState<string>('');
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
@@ -183,6 +186,14 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
       setTimeout(() => setProgressError(null), 3000);
     } finally {
       setIsUpdatingProgress(false);
+    }
+  };
+
+  const handleSeeFullPage = () => {
+    if (book?.googleBookId || book?.id) {
+      const bookId = book.googleBookId || book.id;
+      navigate(`/book/${bookId}`);
+      onClose(); // Close the modal when navigating to full page
     }
   };
 
@@ -404,6 +415,43 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                 </p>
               )}
             </div>
+          </div>
+          
+          {/* See Full Page Button */}
+          <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+            <button
+              style={{
+                backgroundColor: 'transparent',
+                color: '#8B4513',
+                border: '2px solid #8B4513',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                margin: '0 auto'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#8B4513';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 69, 19, 0.3)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#8B4513';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+              onClick={handleSeeFullPage}
+            >
+              <OpenInNewIcon style={{ fontSize: '16px' }} />
+              See Full Page
+            </button>
           </div>
           
           {/* Reading Progress Section - Only for Currently Reading books */}

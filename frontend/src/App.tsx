@@ -23,6 +23,7 @@ import EditProfilePage from './pages/EditProfilePage';
 import SearchPage from './pages/SearchPage';
 import DisplayNameSetupPage from './pages/DisplayNameSetupPage';
 import FindFriendsPage from './pages/FindFriendsPage';
+import BookDetailsPage from './pages/BookDetailsPage';
 
 function App() {
   useEffect(() => {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/find-friends" element={<FindFriendsPage />} />
+        <Route path="/book/:googleBookId" element={<BookDetailsPage />} />
         
         {/* Protected routes */}
         <Route path="/books" element={

@@ -8,6 +8,7 @@ export interface GoogleBook {
   isbn: string;
   synopsis: string;
   cover: string | null;
+  imageUrl: string | null; // Added for compatibility
   publishedDate?: string;
   pageCount?: number;
   categories?: string[];

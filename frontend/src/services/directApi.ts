@@ -52,5 +52,31 @@ export const directApiService = {
       console.error('Direct API call failed:', error);
       throw error;
     }
+  },
+
+  async getBookById(googleBookId: string): Promise<any> {
+    try {
+      const endpoint = `http://localhost:8088/api/v1/google-books/${googleBookId}`;
+      console.log('Making direct API call to get book by ID:', endpoint);
+      
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Book API Response:', data);
+      
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch book by ID:', error);
+      throw error;
+    }
   }
 };
