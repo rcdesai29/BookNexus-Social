@@ -31,7 +31,7 @@ public class Feedback extends BaseEntity {
     private String review;
     
     @Builder.Default
-    private Boolean isAnonymous = false;
+    private Boolean anonymous = false;
     
     // Google Book ID (required - every book has this)
     @Column(length = 100, nullable = false)

@@ -136,7 +136,7 @@ public class FeedbackService {
         
         feedback.setRating(request.rating());
         feedback.setReview(request.review());
-        feedback.setIsAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false);
+        feedback.setAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false);
         
         return feedbackRepository.save(feedback).getId();
     }

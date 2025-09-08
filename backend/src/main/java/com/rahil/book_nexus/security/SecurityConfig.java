@@ -33,6 +33,7 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/ws/**",
                                 "/websocket-test/**",
+                                "/api/websocket-test/**",
                                 "/v2/api-docs",
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",

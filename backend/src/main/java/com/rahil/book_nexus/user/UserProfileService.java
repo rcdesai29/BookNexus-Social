@@ -103,17 +103,60 @@ public class UserProfileService {
             ? followerProfile.getDisplayName() 
             : follower.getFullName();
         notificationService.sendNewFollowerNotification(following.getId().toString(), followerDisplayName);
+        
+        // Send real-time follower count updates to both users
+        int followingUserFollowerCount = (int) followRepository.countFollowersByUserId(following.getId());
+        int followingUserFollowingCount = (int) followRepository.countFollowingByUserId(following.getId());
+        int followerUserFollowerCount = (int) followRepository.countFollowersByUserId(follower.getId());
+        int followerUserFollowingCount = (int) followRepository.countFollowingByUserId(follower.getId());
+        
+        notificationService.sendFollowerCountUpdate(
+            following.getId().toString(), 
+            followingUserFollowerCount, 
+            followingUserFollowingCount
+        );
+        notificationService.sendFollowerCountUpdate(
+            follower.getId().toString(), 
+            followerUserFollowerCount, 
+            followerUserFollowingCount
+        );
     }
 
     public void unfollowUser(Integer targetUserId, Authentication connectedUser) {
         User follower = (User) connectedUser.getPrincipal();
+        User unfollowed = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (!followRepository.existsByFollowerIdAndFollowingId(follower.getId(), targetUserId)) {
             throw new IllegalArgumentException("You are not following this user");
         }
 
         followRepository.deleteByFollowerIdAndFollowingId(follower.getId(), targetUserId);
-        log.info("User {} unfollowed user {}", follower.getUsername(), targetUserId);
+        log.info("User {} unfollowed user {}", follower.getUsername(), unfollowed.getUsername());
+        
+        // Send unfollow notification to the unfollowed user
+        UserProfile unfollowerProfile = userProfileRepository.findByUserId(follower.getId()).orElse(null);
+        String unfollowerDisplayName = (unfollowerProfile != null && unfollowerProfile.getDisplayName() != null) 
+            ? unfollowerProfile.getDisplayName() 
+            : follower.getFullName();
+        notificationService.sendUnfollowNotification(unfollowed.getId().toString(), unfollowerDisplayName);
+        
+        // Send real-time follower count updates to both users
+        int unfollowedUserFollowerCount = (int) followRepository.countFollowersByUserId(unfollowed.getId());
+        int unfollowedUserFollowingCount = (int) followRepository.countFollowingByUserId(unfollowed.getId());
+        int unfollowerUserFollowerCount = (int) followRepository.countFollowersByUserId(follower.getId());
+        int unfollowerUserFollowingCount = (int) followRepository.countFollowingByUserId(follower.getId());
+        
+        notificationService.sendFollowerCountUpdate(
+            unfollowed.getId().toString(), 
+            unfollowedUserFollowerCount, 
+            unfollowedUserFollowingCount
+        );
+        notificationService.sendFollowerCountUpdate(
+            follower.getId().toString(), 
+            unfollowerUserFollowerCount, 
+            unfollowerUserFollowingCount
+        );
     }
 
     public List<User> getFollowers(Integer userId, Authentication connectedUser) {

@@ -28,8 +28,21 @@ const NotificationDisplay: React.FC = () => {
         return;
       }
 
-      // Only create popup notifications for certain types (optional)
-      if (wsMessage.type === 'URGENT' || wsMessage.type === 'SYSTEM_ALERT') {
+      // Handle FOLLOWER_COUNT_UPDATE separately (no popup, just update UI)
+      if (wsMessage.type === 'FOLLOWER_COUNT_UPDATE') {
+        // This could trigger a UI update event for profile pages
+        // For now, we'll log it and potentially dispatch an event
+        console.log('Follower count update received:', wsMessage.data);
+        
+        // Dispatch custom event for components to listen to
+        window.dispatchEvent(new CustomEvent('followerCountUpdate', { 
+          detail: wsMessage.data 
+        }));
+        return;
+      }
+
+      // Create popup notifications for all notification types except system ones
+      if (wsMessage.type && wsMessage.type !== 'CONNECTION_ESTABLISHED') {
         const notification: Notification = {
           id: `${Date.now()}-${Math.random()}`,
           type: wsMessage.type,
@@ -37,12 +50,12 @@ const NotificationDisplay: React.FC = () => {
           timestamp: wsMessage.timestamp || Date.now()
         };
 
-        setNotifications(prev => [notification, ...prev].slice(0, 3)); // Keep only last 3 urgent notifications
+        setNotifications(prev => [notification, ...prev].slice(0, 5)); // Keep only last 5 notifications
 
-        // Auto-remove notification after 5 seconds
+        // Auto-remove notification after 6 seconds
         setTimeout(() => {
           removeNotification(notification.id);
-        }, 5000);
+        }, 6000);
       }
     };
 
@@ -63,6 +76,8 @@ const NotificationDisplay: React.FC = () => {
     switch (type) {
       case 'NEW_FOLLOWER':
         return '👤';
+      case 'UNFOLLOWED':
+        return '👥';
       case 'NEW_REVIEW':
         return '⭐';
       case 'REVIEW_REPLY':
@@ -84,6 +99,8 @@ const NotificationDisplay: React.FC = () => {
     switch (type) {
       case 'NEW_FOLLOWER':
         return '#4CAF50';
+      case 'UNFOLLOWED':
+        return '#FF9800';
       case 'NEW_REVIEW':
         return '#FF9800';
       case 'REVIEW_REPLY':

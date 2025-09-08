@@ -28,7 +28,7 @@ public class FeedbackMapper {
 
     public FeedbackResponse toFeedbackResponse(Feedback feedback, Integer id) {
         String displayName;
-        if (feedback.getIsAnonymous()) {
+        if (feedback.getAnonymous() != null && feedback.getAnonymous()) {
             displayName = "Anonymous";
         } else {
             displayName = userProfileRepository.findByUserId(feedback.getUser().getId())
@@ -48,7 +48,7 @@ public class FeedbackMapper {
                 .createdDate(feedback.getCreatedDate() != null ? feedback.getCreatedDate().toString() : null)
                 .displayName(displayName)
                 .userId(feedback.getUser().getId().toString())
-                .isAnonymous(feedback.getIsAnonymous())
+                .isAnonymous(feedback.getAnonymous() != null && feedback.getAnonymous())
                 .build();
     }
 

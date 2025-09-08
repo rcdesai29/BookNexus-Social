@@ -36,6 +36,18 @@ public class WebSocketTestController {
         return ResponseEntity.ok("Activity update notification sent!");
     }
 
+    @PostMapping("/unfollow")
+    public ResponseEntity<String> testUnfollow() {
+        notificationService.sendUnfollowNotification("123", "TestUser");
+        return ResponseEntity.ok("Unfollow notification sent!");
+    }
+
+    @PostMapping("/follower-count-update")
+    public ResponseEntity<String> testFollowerCountUpdate() {
+        notificationService.sendFollowerCountUpdate("123", 150, 75);
+        return ResponseEntity.ok("Follower count update sent!");
+    }
+
     @GetMapping("/status")
     public ResponseEntity<String> getStatus() {
         int connections = notificationService.getActiveConnections();

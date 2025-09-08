@@ -59,7 +59,7 @@ public class ReviewDataMigration implements CommandLineRunner {
                     .authorName(googleFeedback.getAuthorName())
                     .rating(googleFeedback.getRating())
                     .review(googleFeedback.getReview())
-                    .isAnonymous(googleFeedback.getIsAnonymous() != null ? googleFeedback.getIsAnonymous() : false)
+                    .anonymous(googleFeedback.getIsAnonymous() != null ? googleFeedback.getIsAnonymous() : false)
                     .source(Feedback.ReviewSource.GOOGLE)
                     .user(googleFeedback.getUser())
                     .book(null) // No local book reference for Google reviews

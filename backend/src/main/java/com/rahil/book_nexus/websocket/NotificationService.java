@@ -12,7 +12,7 @@ public class NotificationService {
     private final NotificationWebSocketHandler webSocketHandler;
 
     /**
-     * Send a new follower notification
+     * Send a new follower notification (broadcast for now until user-specific routing is implemented)
      */
     public void sendNewFollowerNotification(String followedUserId, String followerDisplayName) {
         WebSocketMessage message = WebSocketMessage.notification(
@@ -22,6 +22,38 @@ public class NotificationService {
         
         webSocketHandler.broadcast(message);
         log.info("Sent new follower notification: {} -> {}", followerDisplayName, followedUserId);
+    }
+
+    /**
+     * Send unfollow notification (broadcast for now until user-specific routing is implemented)
+     */
+    public void sendUnfollowNotification(String unfollowedUserId, String unfollowerDisplayName) {
+        WebSocketMessage message = WebSocketMessage.notification(
+                "UNFOLLOWED", 
+                unfollowerDisplayName + " unfollowed you"
+        );
+        
+        webSocketHandler.broadcast(message);
+        log.info("Sent unfollow notification: {} -> {}", unfollowerDisplayName, unfollowedUserId);
+    }
+
+    /**
+     * Send real-time follower count update (broadcast for now until user-specific routing is implemented)
+     */
+    public void sendFollowerCountUpdate(String userId, int newFollowerCount, int newFollowingCount) {
+        WebSocketMessage message = WebSocketMessage.builder()
+                .type("FOLLOWER_COUNT_UPDATE")
+                .data(java.util.Map.of(
+                    "message", "Follower count updated",
+                    "followerCount", newFollowerCount,
+                    "followingCount", newFollowingCount,
+                    "userId", userId
+                ))
+                .build();
+        
+        webSocketHandler.broadcast(message);
+        log.info("Sent follower count update to user {}: followers={}, following={}", 
+                userId, newFollowerCount, newFollowingCount);
     }
 
     /**
