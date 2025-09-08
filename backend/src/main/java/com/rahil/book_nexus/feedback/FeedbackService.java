@@ -136,7 +136,7 @@ public class FeedbackService {
         
         feedback.setRating(request.rating());
         feedback.setReview(request.review());
-        feedback.setAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false);
+        feedback.setIsAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false);
         
         return feedbackRepository.save(feedback).getId();
     }
@@ -152,5 +152,13 @@ public class FeedbackService {
         }
         
         feedbackRepository.delete(feedback);
+    }
+    
+    public List<FeedbackResponse> findAllFeedbacksByGoogleBookId(String googleBookId) {
+        Page<Feedback> feedbacks = feedbackRepository.findAllByGoogleBookId(googleBookId, Pageable.unpaged());
+        
+        return feedbacks.getContent().stream()
+                .map(feedback -> feedbackMapper.toFeedbackResponse(feedback, feedback.getUser().getId()))
+                .collect(Collectors.toList());
     }
 }

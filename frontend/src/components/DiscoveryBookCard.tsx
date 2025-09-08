@@ -64,10 +64,17 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
     fetchAppRatings();
   }, [book.googleBookId, book.averageRating, book.ratingsCount]);
 
+  const [imageError, setImageError] = useState(false);
+
+  // Reset image error when book changes
+  useEffect(() => {
+    setImageError(false);
+  }, [book.cover]);
+
   const renderBookCover = () => {
     return (
       <div style={{ marginBottom: '12px' }}>
-        {book.cover ? (
+        {book.cover && !imageError ? (
           <img
             src={book.cover}
             alt={book.title}
@@ -77,6 +84,7 @@ const DiscoveryBookCard: React.FC<DiscoveryBookCardProps> = ({
               objectFit: 'cover',
               borderRadius: '8px'
             }}
+            onError={() => setImageError(true)}
           />
         ) : (
           <div style={{

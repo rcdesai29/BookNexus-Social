@@ -27,6 +27,7 @@ public class UserProfileService {
     private final FeedbackRepository feedbackRepository;
     private final GoogleBookFeedbackRepository googleBookFeedbackRepository;
     private final GoogleBookIntegrationService googleBookIntegrationService;
+    private final com.rahil.book_nexus.websocket.NotificationService notificationService;
 
     public UserProfileResponse getUserProfile(Integer userId, Authentication connectedUser) {
         User user = userRepository.findById(userId)
@@ -95,6 +96,13 @@ public class UserProfileService {
 
         followRepository.save(follow);
         log.info("User {} started following user {}", follower.getUsername(), following.getUsername());
+        
+        // Send notification to the followed user
+        UserProfile followerProfile = userProfileRepository.findByUserId(follower.getId()).orElse(null);
+        String followerDisplayName = (followerProfile != null && followerProfile.getDisplayName() != null) 
+            ? followerProfile.getDisplayName() 
+            : follower.getFullName();
+        notificationService.sendNewFollowerNotification(following.getId().toString(), followerDisplayName);
     }
 
     public void unfollowUser(Integer targetUserId, Authentication connectedUser) {

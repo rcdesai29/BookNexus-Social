@@ -1,8 +1,11 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import NotificationDisplay from './components/NotificationDisplay';
+import { initializeWebSocket } from './services/WebSocketService';
 import ActivateAccountPage from './pages/ActivateAccountPage';
 
 import HomePage from './pages/HomePage';
@@ -22,10 +25,16 @@ import DisplayNameSetupPage from './pages/DisplayNameSetupPage';
 import FindFriendsPage from './pages/FindFriendsPage';
 
 function App() {
+  useEffect(() => {
+    // Initialize WebSocket connection when app starts
+    initializeWebSocket();
+  }, []);
+
   return (
     <BrowserRouter>
       <CssBaseline />
       <Navbar />
+      <NotificationDisplay />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

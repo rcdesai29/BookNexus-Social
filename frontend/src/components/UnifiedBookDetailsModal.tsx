@@ -11,6 +11,7 @@ import { GoogleBook } from '../hooks/useGoogleBooksSimple';
 import { GoogleBookFeedbackService } from '../app/services/services/GoogleBookFeedbackService';
 import { UserBookListService } from '../app/services/services/UserBookListService';
 import { useAuth } from '../hooks/useAuth';
+import ReviewThread from './ReviewThread';
 
 interface UnifiedBookDetailsModalProps {
   book: GoogleBook | null;
@@ -835,7 +836,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
             </div>
           )}
 
-          {/* All User Reviews Section */}
+          {/* All User Reviews Section with Threading */}
           {allUserReviews && allUserReviews.length > 0 && (
             <div style={{ borderTop: '1px solid #E6D7C3', paddingTop: '24px', marginTop: '24px' }}>
               <h3 style={{ marginBottom: '16px', color: '#8B4513', fontSize: '18px' }}>
@@ -845,74 +846,25 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
               <div 
                 className="reviews-scroll-container"
                 style={{ 
-                  maxHeight: '300px', 
+                  maxHeight: '400px', 
                   overflowY: 'auto',
-                  border: '1px solid #E6D7C3',
-                  borderRadius: '8px',
-                  padding: '8px',
                   scrollbarWidth: 'thin',
                   scrollbarColor: '#D2691E #F4E3C1'
                 }}
               >
                 {allUserReviews.map((review, index) => (
-                  <div 
-                    key={index}
-                    style={{
-                      backgroundColor: '#F9F7F4',
-                      padding: '16px',
-                      borderRadius: '8px',
-                      border: '1px solid #E6D7C3',
-                      marginBottom: '16px'
-                    }}
-                  >
-                    {/* Review Header */}
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center',
-                      marginBottom: '12px'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{
-                          fontWeight: 600,
-                          color: '#4B3F30',
-                          fontSize: '14px'
-                        }}>
-                          {review.displayName || 'Anonymous User'}
-                        </span>
-                        {review.rating && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            {renderStars(review.rating, false, '14px')}
-                            <span style={{ fontSize: '12px', color: '#666' }}>
-                              {review.rating}/5
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      {review.createdDate && (
-                        <span style={{
-                          fontSize: '12px',
-                          color: '#8B7355',
-                          fontStyle: 'italic'
-                        }}>
-                          {new Date(review.createdDate).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Review Text */}
-                    {review.review && (
-                      <p style={{
-                        fontSize: '14px',
-                        lineHeight: '1.6',
-                        color: '#4B3F30',
-                        margin: 0,
-                        fontStyle: 'italic'
-                      }}>
-                        "{review.review}"
-                      </p>
-                    )}
-                  </div>
+                  <ReviewThread
+                    key={`${review.id || index}-${review.googleFeedbackId || 'local'}`}
+                    feedbackId={review.id}
+                    googleFeedbackId={review.googleFeedbackId}
+                    reviewTitle={book?.title || 'Book Review'}
+                    reviewAuthor={review.displayName || 'Anonymous User'}
+                    reviewText={review.review || ''}
+                    reviewDate={review.createdDate ? new Date(review.createdDate).toLocaleDateString() : ''}
+                    reviewRating={review.rating}
+                    isOwnReview={review.ownReview || false}
+                    isReviewAnonymous={review.isAnonymous || false}
+                  />
                 ))}
               </div>
               {allUserReviews.length > 2 && (

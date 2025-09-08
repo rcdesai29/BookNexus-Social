@@ -1,15 +1,13 @@
-import { Alert, Box, Button, CircularProgress, List, ListItem, ListItemText, Rating, TextField, Typography, FormControlLabel, Checkbox, IconButton, Menu, MenuItem } from '@mui/material';
-import { MoreVert as MoreVertIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Rating, TextField, Typography, FormControlLabel, Checkbox } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { FeedbackService } from '../app/services/services/FeedbackService';
-import { useAuth } from '../hooks/useAuth';
+import ReviewThread from './ReviewThread';
 
 interface BookFeedbackProps {
   bookId: number;
 }
 
 const BookFeedback: React.FC<BookFeedbackProps> = ({ bookId }) => {
-  const { user } = useAuth();
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +18,6 @@ const BookFeedback: React.FC<BookFeedbackProps> = ({ bookId }) => {
   const [success, setSuccess] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const fetchFeedbacks = () => {
     setLoading(true);
@@ -59,24 +56,6 @@ const BookFeedback: React.FC<BookFeedbackProps> = ({ bookId }) => {
     }
   };
 
-  const handleEdit = (feedback: any) => {
-    setEditingId(feedback.id);
-    setReview(feedback.review);
-    setRating(feedback.rating);
-    setIsAnonymous(feedback.isAnonymous || false);
-    setAnchorEl(null);
-  };
-
-  const handleDelete = async (feedbackId: number) => {
-    try {
-      await FeedbackService.deleteFeedback(feedbackId);
-      setSuccess(true);
-      fetchFeedbacks();
-    } catch (err: any) {
-      setSubmitError(err?.body?.message || 'Failed to delete feedback');
-    }
-    setAnchorEl(null);
-  };
 
   const handleCancel = () => {
     setEditingId(null);
@@ -90,57 +69,21 @@ const BookFeedback: React.FC<BookFeedbackProps> = ({ bookId }) => {
       <Typography variant="h6" gutterBottom>Reviews & Ratings</Typography>
       {loading && <CircularProgress />}
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <List>
+      <Box sx={{ mb: 3 }}>
         {feedbacks.map((fb, idx) => (
-          <ListItem key={idx} divider>
-            <ListItemText
-              primary={
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Rating value={fb.rating} readOnly />
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#3C2A1E' }}>
-                      by {fb.displayName || 'Anonymous'}
-                    </Typography>
-                    {fb.createdDate && (
-                      <Typography variant="caption" sx={{ color: '#8B7355' }}>
-                        • {new Date(fb.createdDate).toLocaleDateString()}
-                      </Typography>
-                    )}
-                  </Box>
-                  {fb.ownFeedback && user && (
-                    <>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => setAnchorEl(e.currentTarget)}
-                        sx={{ color: '#8B7355' }}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                      <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={() => setAnchorEl(null)}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                      >
-                        <MenuItem onClick={() => handleEdit(fb)}>
-                          <EditIcon sx={{ mr: 1 }} />
-                          Edit
-                        </MenuItem>
-                        <MenuItem onClick={() => handleDelete(fb.id)} sx={{ color: 'error.main' }}>
-                          <DeleteIcon sx={{ mr: 1 }} />
-                          Delete
-                        </MenuItem>
-                      </Menu>
-                    </>
-                  )}
-                </Box>
-              } 
-              secondary={fb.review}
-            />
-          </ListItem>
+          <ReviewThread
+            key={`${fb.id}-${idx}`}
+            feedbackId={fb.id}
+            reviewTitle={`Book Review`}
+            reviewAuthor={fb.displayName || 'Anonymous'}
+            reviewText={fb.review || ''}
+            reviewDate={fb.createdDate ? new Date(fb.createdDate).toLocaleDateString() : ''}
+            reviewRating={fb.rating}
+            isOwnReview={fb.ownFeedback || false}
+            isReviewAnonymous={fb.isAnonymous || false}
+          />
         ))}
-      </List>
+      </Box>
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
         <Typography variant="subtitle1">{editingId ? 'Edit Review' : 'Leave a Review'}</Typography>
         <Rating

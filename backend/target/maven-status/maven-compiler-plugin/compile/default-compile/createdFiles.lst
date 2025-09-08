@@ -35,7 +35,6 @@ com/rahil/book_nexus/googlebooks/GoogleBookDto$GoogleBookDtoBuilder.class
 com/rahil/book_nexus/googlebooks/GoogleBookEntity.class
 com/rahil/book_nexus/auth/AuthenticationController.class
 com/rahil/book_nexus/feedback/FeedbackRequest.class
-com/rahil/book_nexus/feedback/FeedbackService.class
 com/rahil/book_nexus/auth/AuthenticationResponse$AuthenticationResponseBuilder.class
 com/rahil/book_nexus/book/BookService.class
 com/rahil/book_nexus/book/BookRequest.class

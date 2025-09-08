@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.rahil.book_nexus.feedback.FeedbackService;
+import com.rahil.book_nexus.feedback.FeedbackResponse;
+import com.rahil.book_nexus.common.PageResponse;
 
 import java.util.List;
 
@@ -16,7 +19,8 @@ import java.util.List;
 public class GoogleBookController {
 
     private final GoogleBookService googleBookService;
-    private final GoogleBookFeedbackService feedbackService;
+    private final GoogleBookFeedbackService googleBookFeedbackService;
+    private final FeedbackService feedbackService;
 
     @GetMapping("/search")
     public ResponseEntity<GoogleBookResponse> searchBooks(
@@ -59,27 +63,27 @@ public class GoogleBookController {
             @Valid @RequestBody GoogleBookFeedbackRequest request,
             Authentication connectedUser) {
         
-        Integer feedbackId = feedbackService.saveFeedback(request, connectedUser);
+        Integer feedbackId = googleBookFeedbackService.saveFeedback(request, connectedUser);
         return ResponseEntity.ok(feedbackId);
     }
 
     @GetMapping("/feedback/{googleBookId}")
-    public ResponseEntity<List<GoogleBookFeedbackResponse>> getFeedbackByGoogleBookId(
+    public ResponseEntity<List<FeedbackResponse>> getFeedbackByGoogleBookId(
             @PathVariable String googleBookId) {
         
-        List<GoogleBookFeedbackResponse> feedbacks = feedbackService.getFeedbackByGoogleBookId(googleBookId);
+        List<FeedbackResponse> feedbacks = feedbackService.findAllFeedbacksByGoogleBookId(googleBookId);
         return ResponseEntity.ok(feedbacks);
     }
 
     @GetMapping("/feedback/{googleBookId}/rating")
     public ResponseEntity<Double> getAverageRating(@PathVariable String googleBookId) {
-        Double averageRating = feedbackService.getAverageRating(googleBookId);
+        Double averageRating = googleBookFeedbackService.getAverageRating(googleBookId);
         return ResponseEntity.ok(averageRating);
     }
 
     @GetMapping("/feedback/{googleBookId}/count")
     public ResponseEntity<Long> getRatingCount(@PathVariable String googleBookId) {
-        Long ratingCount = feedbackService.getRatingCount(googleBookId);
+        Long ratingCount = googleBookFeedbackService.getRatingCount(googleBookId);
         return ResponseEntity.ok(ratingCount);
     }
 
@@ -88,7 +92,7 @@ public class GoogleBookController {
             @PathVariable Integer feedbackId,
             @Valid @RequestBody GoogleBookFeedbackRequest request,
             Authentication connectedUser) {
-        Integer updatedId = feedbackService.updateFeedback(feedbackId, request, connectedUser);
+        Integer updatedId = googleBookFeedbackService.updateFeedback(feedbackId, request, connectedUser);
         return ResponseEntity.ok(updatedId);
     }
 
@@ -96,14 +100,17 @@ public class GoogleBookController {
     public ResponseEntity<Void> deleteGoogleBookFeedback(
             @PathVariable Integer feedbackId,
             Authentication connectedUser) {
-        feedbackService.deleteFeedback(feedbackId, connectedUser);
+        googleBookFeedbackService.deleteFeedback(feedbackId, connectedUser);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/feedback/user/{userId}")
-    public ResponseEntity<List<GoogleBookFeedbackResponse>> getFeedbackByUserId(
-            @PathVariable Integer userId) {
-        List<GoogleBookFeedbackResponse> feedbacks = feedbackService.getFeedbackByUserId(userId);
-        return ResponseEntity.ok(feedbacks);
+    public ResponseEntity<List<FeedbackResponse>> getFeedbackByUserId(
+            @PathVariable Integer userId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            Authentication connectedUser) {
+        PageResponse<FeedbackResponse> feedbackPage = feedbackService.findAllFeedbacksByUser(userId, page, size, connectedUser);
+        return ResponseEntity.ok(feedbackPage.getContent());
     }
 }

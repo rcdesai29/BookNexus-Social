@@ -55,3 +55,8 @@ application:
 
 server:
   port: 8088
+
+logging:
+  level:
+    com.rahil.book_nexus.feedback.ReviewReplyService: DEBUG
+    com.rahil.book_nexus.feedback.ReviewReplyController: DEBUG

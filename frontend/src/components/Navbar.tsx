@@ -24,6 +24,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../hooks/useAuth';
 import { useCurrentUserProfile } from '../hooks/useCurrentUserProfile';
 import { tokenService } from '../services/tokenService';
+import NotificationBell from './NotificationBell';
 
 const Navbar: React.FC = () => {
   const { isLoggedIn, user } = useAuth();
@@ -345,6 +346,7 @@ const Navbar: React.FC = () => {
             {/* Right: User Avatar/Login */}
             {isLoggedIn ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <NotificationBell />
                 <Typography
                   variant="body1"
                   component={Link}

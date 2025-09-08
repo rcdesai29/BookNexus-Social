@@ -28,7 +28,7 @@ public class FeedbackMapper {
 
     public FeedbackResponse toFeedbackResponse(Feedback feedback, Integer id) {
         String displayName;
-        if (feedback.isAnonymous()) {
+        if (feedback.getIsAnonymous()) {
             displayName = "Anonymous";
         } else {
             displayName = userProfileRepository.findByUserId(feedback.getUser().getId())
@@ -41,14 +41,14 @@ public class FeedbackMapper {
                 .rating(feedback.getRating())
                 .review(feedback.getReview())
                 .ownFeedback(Objects.equals(feedback.getUser().getId(), id))
-                .bookId(feedback.getBook().getId())
-                .bookTitle(feedback.getBook().getTitle())
-                .bookAuthor(feedback.getBook().getAuthorName())
-                .bookCover(feedback.getBook().getBookCover())
+                .bookId(feedback.getBook() != null ? feedback.getBook().getId() : null)
+                .bookTitle(feedback.getBook() != null ? feedback.getBook().getTitle() : feedback.getBookTitle())
+                .bookAuthor(feedback.getBook() != null ? feedback.getBook().getAuthorName() : feedback.getAuthorName())
+                .bookCover(feedback.getBook() != null ? feedback.getBook().getBookCover() : null)
                 .createdDate(feedback.getCreatedDate() != null ? feedback.getCreatedDate().toString() : null)
                 .displayName(displayName)
                 .userId(feedback.getUser().getId().toString())
-                .isAnonymous(feedback.isAnonymous())
+                .isAnonymous(feedback.getIsAnonymous())
                 .build();
     }
 

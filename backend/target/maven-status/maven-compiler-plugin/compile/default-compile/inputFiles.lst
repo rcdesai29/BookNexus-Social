@@ -33,6 +33,16 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/FeedbackRequest.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/FeedbackResponse.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/FeedbackService.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/Like.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/LikeController.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/LikeRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/LikeService.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/ReviewReply.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/ReviewReplyController.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/ReviewReplyRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/ReviewReplyRequest.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/ReviewReplyResponse.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/feedback/ReviewReplyService.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/file/FileStorageService.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/file/FileUtils.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/googlebooks/GoogleBookController.java
@@ -53,6 +63,7 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/handler/GlobalExceptionHandler.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/history/BookTransactionHistory.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/history/BookTransactionHistoryRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/migration/ReviewDataMigration.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/role/Role.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/role/RoleRepository.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/security/JwtFilter.java
@@ -71,3 +82,8 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileResponse.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/user/UserProfileService.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/user/UserRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/websocket/NotificationService.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/websocket/NotificationWebSocketHandler.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/websocket/WebSocketConfig.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/websocket/WebSocketMessage.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/websocket/WebSocketTestController.java

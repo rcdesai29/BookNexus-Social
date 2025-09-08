@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthenticationService } from '../app/services/services/AuthenticationService';
 import { tokenService } from '../services/tokenService';
+import { initializeWebSocket } from '../services/WebSocketService';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,6 +31,8 @@ const LoginPage: React.FC = () => {
       const response = await AuthenticationService.authenticate({ email, password });
       if (response && response.token) {
         tokenService.setToken(response.token);
+        // Initialize WebSocket connection after successful login
+        initializeWebSocket();
         setSuccess(true);
         setTimeout(() => navigate('/'), 1000);
       } else {
