@@ -17,7 +17,7 @@ public class FeedbackMapper {
         return Feedback.builder()
                 .rating(request.rating())
                 .review(request.review())
-                .isAnonymous(request.isAnonymous() != null ? request.isAnonymous() : false)
+                .anonymous(request.isAnonymous() != null ? request.isAnonymous() : false)
                 .book(Book.builder()
                         .id(request.bookId())
                         .shareable(false)

@@ -40,7 +40,7 @@ public class ReviewReplyService {
                 .replyText(request.getReplyText())
                 .parentFeedback(parentFeedback)
                 .user(user)
-                .isAnonymous(request.getIsAnonymous())
+                .isAnonymous(request.getIsAnonymous() != null ? request.getIsAnonymous() : false)
                 .build();
         
         // Set parent reply if it's a nested reply
@@ -176,7 +176,7 @@ public class ReviewReplyService {
                 .userId(reply.getIsAnonymous() ? null : reply.getUser().getId().toString())
                 .createdDate(reply.getCreatedDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")))
                 .ownReply(currentUser != null && currentUser.getId().equals(reply.getUser().getId()))
-                .isAnonymous(reply.getIsAnonymous())
+                .isAnonymous(reply.getIsAnonymous() != null ? reply.getIsAnonymous() : false)
                 .parentFeedbackId(reply.getParentFeedback().getId())
                 .parentGoogleFeedbackId(null) // No longer used
                 .parentReplyId(reply.getParentReply() != null ? reply.getParentReply().getId() : null)

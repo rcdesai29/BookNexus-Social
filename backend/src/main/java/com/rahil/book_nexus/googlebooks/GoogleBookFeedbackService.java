@@ -2,6 +2,7 @@ package com.rahil.book_nexus.googlebooks;
 
 import com.rahil.book_nexus.user.User;
 import com.rahil.book_nexus.user.UserProfileRepository;
+import com.rahil.book_nexus.websocket.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class GoogleBookFeedbackService {
 
     private final GoogleBookFeedbackRepository feedbackRepository;
     private final UserProfileRepository userProfileRepository;
+    private final NotificationService notificationService;
 
     public Integer saveFeedback(GoogleBookFeedbackRequest request, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
@@ -56,6 +58,13 @@ public class GoogleBookFeedbackService {
             GoogleBookFeedback savedFeedback = feedbackRepository.save(feedback);
             log.info("Created Google Book feedback for user: {} and book: {}", 
                     user.getFullName(), request.getBookTitle());
+            
+            // Send activity feed update for new review
+            String userDisplayName = userProfileRepository.findByUserId(user.getId())
+                .map(profile -> profile.getDisplayName())
+                .orElse(user.getFullName());
+            notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + request.getBookTitle() + "\"");
+            
             return savedFeedback.getId();
         }
     }
@@ -107,7 +116,7 @@ public class GoogleBookFeedbackService {
                 .review(feedback.getReview())
                 .displayName(displayName)
                 .createdDate(feedback.getCreatedDate())
-                .isAnonymous(isAnonymous)
+                .isAnonymous(isAnonymous != null ? isAnonymous : false)
                 .userId(feedback.getUser() != null ? feedback.getUser().getId().toString() : null)
                 .build();
     }

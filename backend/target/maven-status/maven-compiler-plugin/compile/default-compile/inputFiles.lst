@@ -63,7 +63,7 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/handler/GlobalExceptionHandler.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/history/BookTransactionHistory.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/history/BookTransactionHistoryRepository.java
-/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/migration/ReviewDataMigration.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/migration/GoogleBookFeedbackMigration.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/role/Role.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/role/RoleRepository.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/security/JwtFilter.java

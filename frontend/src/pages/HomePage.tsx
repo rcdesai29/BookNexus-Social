@@ -19,6 +19,7 @@ import { useAuth } from '../hooks/useAuth';
 import DiscoveryBookCard from '../components/DiscoveryBookCard';
 import UnifiedBookDetailsModal from '../components/UnifiedBookDetailsModal';
 import { UserBookListService } from '../app/services/services/UserBookListService';
+import FriendsFeed from '../components/FriendsFeed';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -406,6 +407,9 @@ const HomePage: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Friends Feed Section (only for logged-in users) */}
+        {isLoggedIn && <FriendsFeed />}
 
         {/* Discover Books Section (visible to all users) */}
         <div>

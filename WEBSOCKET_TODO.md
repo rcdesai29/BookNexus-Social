@@ -46,9 +46,14 @@ curl -X POST http://localhost:8088/api/v1/api/websocket-test/activity-update
 - Friend activity notifications
 
 ### 📱 Live Activity Feed  
-**Status:** ⏳ Planned
+**Status:** ✅ IMPLEMENTED & WORKING
+- [x] Backend activity notification service
+- [x] WebSocket activity feed updates  
+- [x] Frontend Friends feed component (`FriendsFeed.tsx`)
+- [x] Integration with home page layout (under My Favorites)
+- [x] Real-time follow/unfollow activity updates
+- [x] Live feed of friends' new reviews
 - [ ] Real-time updates when friends add books to lists
-- [ ] Live feed of friends' new reviews
 - [ ] Instant updates when friends complete books
 - [ ] Reading status changes (started/finished books)
 
@@ -67,10 +72,10 @@ curl -X POST http://localhost:8088/api/v1/api/websocket-test/activity-update
 - [ ] Reading streak notifications
 
 ### ⚡ Instant Follow/Unfollow Updates
-**Status:** ⏳ Planned
-- [ ] Real-time follower count updates
-- [ ] Instant follow/unfollow notifications
-- [ ] Live mutual friend connections
+**Status:** ✅ IMPLEMENTED & WORKING
+- [x] Real-time follower count updates
+- [x] Instant follow/unfollow notifications  
+- [x] Live mutual friend connections
 - [ ] Profile view activity (optional)
 
 ### 🎯 Live Book Recommendations

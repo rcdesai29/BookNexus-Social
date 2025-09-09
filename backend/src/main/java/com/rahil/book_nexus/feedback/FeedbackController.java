@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("feedbacks")
@@ -63,5 +64,37 @@ public class FeedbackController {
             Authentication connectedUser) {
         service.delete(feedbackId, connectedUser);
         return ResponseEntity.noContent().build();
+    }
+
+    // Google Book endpoints
+    @PostMapping("/google-book")
+    public ResponseEntity<Integer> saveGoogleBookReview(
+            @RequestParam("googleBookId") String googleBookId,
+            @RequestParam("bookTitle") String bookTitle,
+            @RequestParam("authorName") String authorName,
+            @RequestParam("rating") Double rating,
+            @RequestParam("review") String review,
+            @RequestParam(value = "isAnonymous", defaultValue = "false") Boolean isAnonymous,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(service.saveGoogleBookReview(googleBookId, bookTitle, authorName, rating, review, isAnonymous, connectedUser));
+    }
+
+    @GetMapping("/google-book/{google-book-id}")
+    public ResponseEntity<List<FeedbackResponse>> findAllFeedbacksByGoogleBookId(
+            @PathVariable("google-book-id") String googleBookId,
+            Authentication connectedUser) {
+        return ResponseEntity.ok(service.findAllFeedbacksByGoogleBookId(googleBookId, connectedUser));
+    }
+
+    @GetMapping("/google-book/{google-book-id}/rating")
+    public ResponseEntity<Double> getAverageRatingForGoogleBook(
+            @PathVariable("google-book-id") String googleBookId) {
+        return ResponseEntity.ok(service.getAverageRatingForGoogleBook(googleBookId));
+    }
+
+    @GetMapping("/google-book/{google-book-id}/count")
+    public ResponseEntity<Long> getRatingCountForGoogleBook(
+            @PathVariable("google-book-id") String googleBookId) {
+        return ResponseEntity.ok(service.getRatingCountForGoogleBook(googleBookId));
     }
 }

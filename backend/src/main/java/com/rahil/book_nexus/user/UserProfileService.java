@@ -104,6 +104,9 @@ public class UserProfileService {
             : follower.getFullName();
         notificationService.sendNewFollowerNotification(following.getId().toString(), followerDisplayName);
         
+        // Send activity feed update
+        notificationService.sendActivityFeedUpdate(followerDisplayName, "started following " + (userProfileRepository.findByUserId(following.getId()).map(p -> p.getDisplayName()).orElse(following.getFullName())));
+        
         // Send real-time follower count updates to both users
         int followingUserFollowerCount = (int) followRepository.countFollowersByUserId(following.getId());
         int followingUserFollowingCount = (int) followRepository.countFollowingByUserId(following.getId());
@@ -140,6 +143,9 @@ public class UserProfileService {
             ? unfollowerProfile.getDisplayName() 
             : follower.getFullName();
         notificationService.sendUnfollowNotification(unfollowed.getId().toString(), unfollowerDisplayName);
+        
+        // Send activity feed update  
+        notificationService.sendActivityFeedUpdate(unfollowerDisplayName, "unfollowed " + (userProfileRepository.findByUserId(unfollowed.getId()).map(p -> p.getDisplayName()).orElse(unfollowed.getFullName())));
         
         // Send real-time follower count updates to both users
         int unfollowedUserFollowerCount = (int) followRepository.countFollowersByUserId(unfollowed.getId());

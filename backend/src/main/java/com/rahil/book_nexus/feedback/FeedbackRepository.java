@@ -37,6 +37,13 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
             """)
     Page<Feedback> findAllByGoogleBookId(@Param("googleBookId") String googleBookId, Pageable pageable);
     
+    // Google Book rating queries
+    @Query("SELECT AVG(f.rating) FROM Feedback f WHERE f.googleBookId = :googleBookId")
+    Double findAverageRatingByGoogleBookId(@Param("googleBookId") String googleBookId);
+    
+    @Query("SELECT COUNT(f) FROM Feedback f WHERE f.googleBookId = :googleBookId")
+    Long countByGoogleBookId(@Param("googleBookId") String googleBookId);
+    
     // Migration helper method
     boolean existsByGoogleBookIdAndUserIdAndReviewAndRating(
         String googleBookId, 

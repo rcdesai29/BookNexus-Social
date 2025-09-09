@@ -5,8 +5,10 @@ import com.rahil.book_nexus.book.BookRepository;
 import com.rahil.book_nexus.common.PageResponse;
 import com.rahil.book_nexus.exception.OperationNotPermittedException;
 import com.rahil.book_nexus.user.User;
+import com.rahil.book_nexus.user.UserProfileRepository;
 import com.rahil.book_nexus.googlebooks.GoogleBookFeedback;
 import com.rahil.book_nexus.googlebooks.GoogleBookFeedbackRepository;
+import com.rahil.book_nexus.websocket.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,8 @@ public class FeedbackService {
     private final BookRepository bookRepository;
     private final FeedbackMapper feedbackMapper;
     private final GoogleBookFeedbackRepository googleBookFeedbackRepository;
+    private final NotificationService notificationService;
+    private final UserProfileRepository userProfileRepository;
 
     public Integer save(FeedbackRequest request, Authentication connectedUser) {
         Book book = bookRepository.findById(request.bookId())
@@ -44,7 +48,44 @@ public class FeedbackService {
         }
         Feedback feedback = feedbackMapper.toFeedback(request);
         feedback.setUser(user);
-        return feedbackRepository.save(feedback).getId();
+        Feedback savedFeedback = feedbackRepository.save(feedback);
+        
+        // Send activity feed update for new review
+        String userDisplayName = userProfileRepository.findByUserId(user.getId())
+            .map(profile -> profile.getDisplayName())
+            .orElse(user.getFullName());
+        notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + book.getTitle() + "\"");
+        
+        return savedFeedback.getId();
+    }
+
+    // Unified method for saving Google Book reviews
+    public Integer saveGoogleBookReview(String googleBookId, String bookTitle, String authorName, 
+                                        Double rating, String review, Boolean isAnonymous, Authentication connectedUser) {
+        User user = (User) connectedUser.getPrincipal();
+        
+        // Create unified feedback entry for Google Books
+        Feedback feedback = Feedback.builder()
+                .googleBookId(googleBookId)
+                .bookTitle(bookTitle)
+                .authorName(authorName)
+                .rating(rating)
+                .review(review)
+                .anonymous(isAnonymous != null ? isAnonymous : false)
+                .source(Feedback.ReviewSource.GOOGLE)
+                .user(user)
+                .book(null) // No local book reference for Google reviews
+                .build();
+        
+        Feedback savedFeedback = feedbackRepository.save(feedback);
+        
+        // Send activity feed update for new Google Book review
+        String userDisplayName = userProfileRepository.findByUserId(user.getId())
+            .map(profile -> profile.getDisplayName())
+            .orElse(user.getFullName());
+        notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + bookTitle + "\"");
+        
+        return savedFeedback.getId();
     }
 
     @Transactional
@@ -160,5 +201,30 @@ public class FeedbackService {
         return feedbacks.getContent().stream()
                 .map(feedback -> feedbackMapper.toFeedbackResponse(feedback, feedback.getUser().getId()))
                 .collect(Collectors.toList());
+    }
+
+    // Unified method for finding Google Book reviews with requester context
+    public List<FeedbackResponse> findAllFeedbacksByGoogleBookId(String googleBookId, Authentication connectedUser) {
+        Integer requesterIdLocal = null;
+        if (connectedUser != null && connectedUser.getPrincipal() instanceof User u) {
+            requesterIdLocal = u.getId();
+        }
+        final Integer requesterId = requesterIdLocal;
+
+        Page<Feedback> feedbacks = feedbackRepository.findAllByGoogleBookId(googleBookId, Pageable.unpaged());
+        
+        return feedbacks.getContent().stream()
+                .map(feedback -> feedbackMapper.toFeedbackResponse(feedback, requesterId))
+                .collect(Collectors.toList());
+    }
+
+    // Get average rating for Google Books
+    public Double getAverageRatingForGoogleBook(String googleBookId) {
+        return feedbackRepository.findAverageRatingByGoogleBookId(googleBookId);
+    }
+
+    // Get rating count for Google Books  
+    public Long getRatingCountForGoogleBook(String googleBookId) {
+        return feedbackRepository.countByGoogleBookId(googleBookId);
     }
 }
