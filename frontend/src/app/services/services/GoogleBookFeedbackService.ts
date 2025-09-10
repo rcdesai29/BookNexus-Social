@@ -1,5 +1,7 @@
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
+import type { PageResponseFeedbackResponse } from '../models/PageResponseFeedbackResponse';
+import type { FeedbackResponse } from '../models/FeedbackResponse';
 
 export interface GoogleBookFeedbackRequest {
   googleBookId: string;
@@ -28,14 +30,18 @@ export class GoogleBookFeedbackService {
    * Save feedback for a Google Book
    */
   public static async saveFeedback(request: GoogleBookFeedbackRequest): Promise<number> {
+    // Use formData option to properly send as form data
     const result = await __request(OpenAPI, {
       method: 'POST',
-      url: '/google-books/feedback',
-      headers: {
-        'Content-Type': 'application/json',
+      url: '/feedbacks/google-book',
+      formData: {
+        googleBookId: request.googleBookId,
+        bookTitle: request.bookTitle,
+        authorName: request.authorName,
+        rating: request.rating.toString(),
+        review: request.review,
+        isAnonymous: (request.isAnonymous || false).toString(),
       },
-      body: request,
-      mediaType: 'application/json',
     });
 
     return result as number;
@@ -47,7 +53,7 @@ export class GoogleBookFeedbackService {
   public static async getFeedbackByGoogleBookId(googleBookId: string): Promise<GoogleBookFeedbackResponse[]> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `/google-books/feedback/${googleBookId}`,
+      url: `/feedbacks/google-book/${googleBookId}`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -62,7 +68,7 @@ export class GoogleBookFeedbackService {
   public static async getAverageRating(googleBookId: string): Promise<number> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `/google-books/feedback/${googleBookId}/rating`,
+      url: `/feedbacks/google-book/${googleBookId}/rating`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -77,7 +83,7 @@ export class GoogleBookFeedbackService {
   public static async getRatingCount(googleBookId: string): Promise<number> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `/google-books/feedback/${googleBookId}/count`,
+      url: `/feedbacks/google-book/${googleBookId}/count`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -92,13 +98,30 @@ export class GoogleBookFeedbackService {
   public static async getFeedbackByUserId(userId: number): Promise<GoogleBookFeedbackResponse[]> {
     const result = await __request(OpenAPI, {
       method: 'GET',
-      url: `/google-books/feedback/user/${userId}`,
+      url: `/feedbacks/user/${userId}`,
       headers: {
         'Content-Type': 'application/json',
       },
-    });
+    }) as PageResponseFeedbackResponse;
 
-    return result as GoogleBookFeedbackResponse[];
+    // Convert FeedbackResponse items to GoogleBookFeedbackResponse format
+    // Since the unified system doesn't distinguish Google Book vs regular books in the response structure,
+    // we'll return all reviews but convert them to the expected format
+    const googleBookReviews: GoogleBookFeedbackResponse[] = (result.content || [])
+      .map((feedback: FeedbackResponse) => ({
+        id: feedback.id || 0,
+        googleBookId: '', // Not available in unified response - will need backend fix
+        bookTitle: feedback.bookTitle || '',
+        authorName: feedback.bookAuthor || '', // Use bookAuthor field
+        rating: feedback.rating || 0,
+        review: feedback.review || '',
+        displayName: feedback.displayName || (feedback.ownFeedback ? 'You' : 'Anonymous'),
+        createdDate: [2025, 9, 9], // Simplified date format
+        anonymous: feedback.isAnonymous || false, // Use isAnonymous field
+        userId: feedback.userId || userId.toString(),
+      }));
+
+    return googleBookReviews;
   }
 
   /**
@@ -107,7 +130,7 @@ export class GoogleBookFeedbackService {
   public static async updateFeedback(feedbackId: number, request: GoogleBookFeedbackRequest): Promise<number> {
     const result = await __request(OpenAPI, {
       method: 'PUT',
-      url: `/google-books/feedback/${feedbackId}`,
+      url: `/feedbacks/${feedbackId}`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -124,7 +147,7 @@ export class GoogleBookFeedbackService {
   public static async deleteFeedback(feedbackId: number): Promise<void> {
     await __request(OpenAPI, {
       method: 'DELETE',
-      url: `/google-books/feedback/${feedbackId}`,
+      url: `/feedbacks/${feedbackId}`,
       headers: {
         'Content-Type': 'application/json',
       },

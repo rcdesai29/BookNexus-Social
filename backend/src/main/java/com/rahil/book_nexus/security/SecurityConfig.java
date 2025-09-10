@@ -53,13 +53,18 @@ public class SecurityConfig {
                                 "/google-books/search",
                                 "/google-books/trending", 
                                 "/google-books/popular",
-                                "/user-book-lists/test")
+                                "/user-book-lists/test",
+                                "/admin/**")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/admin/cleanup-test-data")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/google-books/feedback")
                         .authenticated()
                         .requestMatchers(
-                                "/user-book-lists/**")
+                                "/user-book-lists/**",
+                                "/activity/**")
                         .authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

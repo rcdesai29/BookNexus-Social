@@ -4,6 +4,7 @@ import {
 } from '@mui/icons-material';
 import webSocketService, { WebSocketMessage } from '../services/WebSocketService';
 import { useAuth } from '../hooks/useAuth';
+import { profileService } from '../services/profileService';
 
 interface Notification {
   id: string;
@@ -13,9 +14,28 @@ interface Notification {
 }
 
 const NotificationDisplay: React.FC = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [currentUserDisplayName, setCurrentUserDisplayName] = useState<string>('');
+
+  // Fetch current user's display name
+  useEffect(() => {
+    const fetchCurrentUserDisplayName = async () => {
+      if (user?.id) {
+        try {
+          const profile = await profileService.getCurrentUserProfile();
+          setCurrentUserDisplayName(profile.displayName);
+        } catch (error) {
+          console.error('Failed to fetch user display name:', error);
+          // Fallback to email prefix or full name
+          setCurrentUserDisplayName(user?.email?.split('@')[0] || user?.name || '');
+        }
+      }
+    };
+
+    fetchCurrentUserDisplayName();
+  }, [user]);
 
   useEffect(() => {
     // Check connection status
@@ -43,10 +63,59 @@ const NotificationDisplay: React.FC = () => {
 
       // Create popup notifications for all notification types except system ones
       if (wsMessage.type && wsMessage.type !== 'CONNECTION_ESTABLISHED') {
+        const messageText = typeof wsMessage.data === 'string' ? wsMessage.data : JSON.stringify(wsMessage.data);
+        
+        // Extract user name from notification message and filter out self-notifications
+        const extractUserFromMessage = (message: string): string => {
+          // Try multiple patterns to extract the user name
+          // Pattern 1: "Name action verb" (e.g., "Rahil Desai finished reading")
+          let match = message.match(/^(.+?)\s+(added to|is currently|finished|started|wrote|removed from)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 2: "Name verb" (e.g., "Rahil Desai added", "rahildesai83 reviewed")
+          match = message.match(/^(.+?)\s+(added|finished|started|wrote|removed|reviewed)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 3: Just get everything before common action phrases
+          match = message.match(/^(.+?)\s+(to TBR|reading|to Read)/);
+          if (match) return match[1].trim();
+          
+          // Fallback: first two words (assuming "First Last")
+          match = message.match(/^(\w+\s+\w+)/);
+          return match ? match[1].trim() : 'Unknown User';
+        };
+        
+        const activityUserDisplayName = extractUserFromMessage(messageText);
+        const currentUserFullName = user?.name || '';
+        const currentUserEmail = user?.email?.split('@')[0] || '';
+        
+        console.log('Notification check:', {
+          messageText,
+          activityUserDisplayName,
+          currentUserFullName,
+          currentUserEmail,
+          currentUserDisplayName,
+          userObject: user,
+          isMatchFullName: activityUserDisplayName === currentUserFullName,
+          isMatchEmail: activityUserDisplayName === currentUserEmail,
+          isMatchDisplayName: activityUserDisplayName === currentUserDisplayName,
+          activityUserLength: activityUserDisplayName.length,
+          currentUserFullNameLength: currentUserFullName.length,
+          currentUserEmailLength: currentUserEmail.length
+        });
+        
+        // Skip notifications from yourself - check full name, email prefix, and display name
+        if (activityUserDisplayName === currentUserFullName || 
+            activityUserDisplayName === currentUserEmail ||
+            activityUserDisplayName === currentUserDisplayName) {
+          console.log('Ignoring self-notification popup from:', activityUserDisplayName);
+          return;
+        }
+        
         const notification: Notification = {
           id: `${Date.now()}-${Math.random()}`,
           type: wsMessage.type,
-          message: typeof wsMessage.data === 'string' ? wsMessage.data : JSON.stringify(wsMessage.data),
+          message: messageText,
           timestamp: wsMessage.timestamp || Date.now()
         };
 
@@ -66,7 +135,7 @@ const NotificationDisplay: React.FC = () => {
     return () => {
       webSocketService.unsubscribe('*', handleNotification);
     };
-  }, []);
+  }, [user, currentUserDisplayName]);
 
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));

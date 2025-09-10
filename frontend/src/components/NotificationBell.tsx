@@ -16,6 +16,8 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 import webSocketService, { WebSocketMessage } from '../services/WebSocketService';
+import { useAuth } from '../hooks/useAuth';
+import { profileService } from '../services/profileService';
 
 interface Notification {
   id: string;
@@ -26,10 +28,30 @@ interface Notification {
 }
 
 const NotificationBell: React.FC = () => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [currentUserDisplayName, setCurrentUserDisplayName] = useState<string>('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch current user's display name
+  useEffect(() => {
+    const fetchCurrentUserDisplayName = async () => {
+      if (user?.id) {
+        try {
+          const profile = await profileService.getCurrentUserProfile();
+          setCurrentUserDisplayName(profile.displayName);
+        } catch (error) {
+          console.error('Failed to fetch user display name:', error);
+          // Fallback to email prefix or full name
+          setCurrentUserDisplayName(user?.email?.split('@')[0] || user?.name || '');
+        }
+      }
+    };
+
+    fetchCurrentUserDisplayName();
+  }, [user]);
 
   useEffect(() => {
     // Subscribe to all notifications
@@ -38,17 +60,75 @@ const NotificationBell: React.FC = () => {
         return;
       }
 
-      // Create notification from WebSocket message
-      const notification: Notification = {
-        id: `${Date.now()}-${Math.random()}`,
-        type: wsMessage.type,
-        message: typeof wsMessage.data === 'string' ? wsMessage.data : JSON.stringify(wsMessage.data),
-        timestamp: wsMessage.timestamp || Date.now(),
-        read: false
-      };
+      // Handle FOLLOWER_COUNT_UPDATE separately (no notification, just update UI)
+      if (wsMessage.type === 'FOLLOWER_COUNT_UPDATE') {
+        // Dispatch custom event for components to listen to
+        window.dispatchEvent(new CustomEvent('followerCountUpdate', { 
+          detail: wsMessage.data 
+        }));
+        return;
+      }
 
-      setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50 notifications
-      setUnreadCount(prev => prev + 1);
+      // Create notification from WebSocket message
+      if (wsMessage.type && wsMessage.type !== 'CONNECTION_ESTABLISHED') {
+        const messageText = typeof wsMessage.data === 'string' ? wsMessage.data : JSON.stringify(wsMessage.data);
+        
+        // Extract user name from notification message and filter out self-notifications
+        const extractUserFromMessage = (message: string): string => {
+          // Try multiple patterns to extract the user name
+          // Pattern 1: "Name action verb" (e.g., "Rahil Desai finished reading")
+          let match = message.match(/^(.+?)\s+(added to|is currently|finished|started|wrote|removed from)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 2: "Name verb" (e.g., "Rahil Desai added", "rahildesai83 reviewed")
+          match = message.match(/^(.+?)\s+(added|finished|started|wrote|removed|reviewed)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 3: Just get everything before common action phrases
+          match = message.match(/^(.+?)\s+(to TBR|reading|to Read)/);
+          if (match) return match[1].trim();
+          
+          // Fallback: first two words (assuming "First Last")
+          match = message.match(/^(\w+\s+\w+)/);
+          return match ? match[1].trim() : 'Unknown User';
+        };
+        
+        const activityUserDisplayName = extractUserFromMessage(messageText);
+        const currentUserFullName = user?.name || '';
+        const currentUserEmail = user?.email?.split('@')[0] || '';
+        
+        console.log('NotificationBell check:', {
+          messageText,
+          activityUserDisplayName,
+          currentUserFullName,
+          currentUserEmail,
+          currentUserDisplayName,
+          userObject: user,
+          userKeys: user ? Object.keys(user) : [],
+          isMatchFullName: activityUserDisplayName === currentUserFullName,
+          isMatchEmail: activityUserDisplayName === currentUserEmail,
+          isMatchDisplayName: activityUserDisplayName === currentUserDisplayName
+        });
+        
+        // Skip notifications from yourself - check full name, email prefix, and display name
+        if (activityUserDisplayName === currentUserFullName || 
+            activityUserDisplayName === currentUserEmail ||
+            activityUserDisplayName === currentUserDisplayName) {
+          console.log('Ignoring self-notification in bell from:', activityUserDisplayName);
+          return;
+        }
+
+        const notification: Notification = {
+          id: `${Date.now()}-${Math.random()}`,
+          type: wsMessage.type,
+          message: messageText,
+          timestamp: wsMessage.timestamp || Date.now(),
+          read: false
+        };
+
+        setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50 notifications
+        setUnreadCount(prev => prev + 1);
+      }
     };
 
     // Subscribe to all message types
@@ -58,7 +138,7 @@ const NotificationBell: React.FC = () => {
     return () => {
       webSocketService.unsubscribe('*', handleNotification);
     };
-  }, []);
+  }, [user, currentUserDisplayName]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -54,7 +54,7 @@ public class FeedbackService {
         String userDisplayName = userProfileRepository.findByUserId(user.getId())
             .map(profile -> profile.getDisplayName())
             .orElse(user.getFullName());
-        notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + book.getTitle() + "\"");
+        notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + book.getTitle() + "\"", user, book.getTitle(), null);
         
         return savedFeedback.getId();
     }
@@ -83,7 +83,7 @@ public class FeedbackService {
         String userDisplayName = userProfileRepository.findByUserId(user.getId())
             .map(profile -> profile.getDisplayName())
             .orElse(user.getFullName());
-        notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + bookTitle + "\"");
+        notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + bookTitle + "\"", user, bookTitle, googleBookId);
         
         return savedFeedback.getId();
     }
@@ -121,22 +121,13 @@ public class FeedbackService {
         }
         final Integer requesterId = requesterIdLocal;
         
-        // Get all feedback from both sources without pagination first
-        List<Feedback> regularFeedbacks = feedbackRepository.findAllByUserId(userId, Pageable.unpaged()).getContent();
-        List<GoogleBookFeedback> googleBookFeedbacks = googleBookFeedbackRepository.findAllByUserIdOrderByCreatedDateDesc(userId, Pageable.unpaged()).getContent();
+        // Get all feedback from unified system only (no more duplicates)
+        List<Feedback> allUserFeedbacks = feedbackRepository.findAllByUserId(userId, Pageable.unpaged()).getContent();
         
-        // Convert to unified response format
-        List<FeedbackResponse> allFeedbacks = new ArrayList<>();
-        
-        // Add regular feedbacks
-        allFeedbacks.addAll(regularFeedbacks.stream()
+        // Convert to response format
+        List<FeedbackResponse> allFeedbacks = allUserFeedbacks.stream()
                 .map(f -> feedbackMapper.toFeedbackResponse(f, requesterId))
-                .collect(Collectors.toList()));
-        
-        // Add Google Book feedbacks
-        allFeedbacks.addAll(googleBookFeedbacks.stream()
-                .map(f -> feedbackMapper.toFeedbackResponse(f, requesterId))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
         
         // Sort by creation date (most recent first)
         allFeedbacks.sort((a, b) -> {

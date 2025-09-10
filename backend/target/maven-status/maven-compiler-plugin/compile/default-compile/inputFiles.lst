@@ -1,4 +1,12 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/BookNexusApiApplication.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/ActivityFeed.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/ActivityFeedController.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/ActivityFeedRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/ActivityFeedResponse.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/ActivityFeedService.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/UserActivityHidden.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/activity/UserActivityHiddenRepository.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/admin/AdminController.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/auth/AuthenticationController.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/auth/AuthenticationRequest.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/auth/AuthenticationResponse.java

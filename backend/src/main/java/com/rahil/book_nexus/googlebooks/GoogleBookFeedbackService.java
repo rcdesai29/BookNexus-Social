@@ -59,11 +59,11 @@ public class GoogleBookFeedbackService {
             log.info("Created Google Book feedback for user: {} and book: {}", 
                     user.getFullName(), request.getBookTitle());
             
-            // Send activity feed update for new review
+            // Send activity feed update for new review (with persistence)
             String userDisplayName = userProfileRepository.findByUserId(user.getId())
                 .map(profile -> profile.getDisplayName())
                 .orElse(user.getFullName());
-            notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + request.getBookTitle() + "\"");
+            notificationService.sendActivityFeedUpdate(userDisplayName, "reviewed \"" + request.getBookTitle() + "\"", user, request.getBookTitle(), request.getGoogleBookId());
             
             return savedFeedback.getId();
         }

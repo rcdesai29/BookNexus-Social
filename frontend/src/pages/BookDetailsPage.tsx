@@ -414,18 +414,18 @@ const BookDetailsPage: React.FC = () => {
                 marginBottom: '16px' 
               }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {renderStars(averageRating)}
+                  {renderStars(averageRating || 0)}
                   <span style={{ 
                     marginLeft: '8px', 
                     fontSize: '24px', 
                     fontWeight: 'bold',
                     color: '#4B3F30'
                   }}>
-                    {averageRating.toFixed(2)}
+                    {(averageRating || 0).toFixed(2)}
                   </span>
                 </div>
                 <div style={{ color: '#6A5E4D' }}>
-                  {ratingCount.toLocaleString()} ratings · {allReviews.length} reviews
+                  {(ratingCount || 0).toLocaleString()} ratings · {allReviews.length} reviews
                 </div>
               </div>
 

@@ -3,7 +3,13 @@ import {
   CircularProgress,
   Avatar,
   IconButton,
-  Tooltip
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
 } from '@mui/material';
 import {
   Group,
@@ -16,6 +22,7 @@ import {
   RateReview
 } from '@mui/icons-material';
 import { webSocketService } from '../services/WebSocketService';
+import { useAuth } from '../hooks/useAuth';
 
 interface ActivityFeedItem {
   id: string;
@@ -29,11 +36,105 @@ interface ActivityFeedItem {
   data?: any;
 }
 
+interface BackendActivityFeedItem {
+  id: number;
+  type: string;
+  message: string;
+  userDisplayName: string;
+  bookTitle?: string;
+  googleBookId?: string;
+  bookId?: number;
+  createdDate: string;
+}
+
 const FriendsFeed: React.FC = () => {
   const [activities, setActivities] = useState<ActivityFeedItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showAllActivities, setShowAllActivities] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const { isLoggedIn, user } = useAuth();
+
+  // Load historical activity data from API
+  const loadHistoricalActivity = async (loadAll: boolean = false) => {
+    if (!isLoggedIn || !user?.id) return;
+    
+    try {
+      setLoading(true);
+      const size = loadAll ? 50 : 10; // Load more if showing all activities
+      const response = await fetch(`http://localhost:8088/api/v1/activity/friends?page=0&size=${size}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const historicalActivities: ActivityFeedItem[] = data.content.map((item: BackendActivityFeedItem) => ({
+          id: item.id.toString(),
+          type: 'ACTIVITY_UPDATE',
+          message: item.message,
+          timestamp: new Date(item.createdDate),
+          user: {
+            displayName: item.userDisplayName,
+            avatarUrl: undefined
+          },
+          data: {
+            bookTitle: item.bookTitle,
+            googleBookId: item.googleBookId,
+            bookId: item.bookId
+          }
+        }));
+        
+        setActivities(historicalActivities);
+      } else if (response.status === 403 || response.status === 401) {
+        console.warn('Authentication required for activity feed');
+        // Show authentication-related message
+        setActivities([
+          {
+            id: '1',
+            type: 'NEW_REVIEW',
+            message: 'Please log in to see your friends\' activity',
+            timestamp: new Date(),
+            user: { displayName: 'System' }
+          }
+        ]);
+      } else {
+        console.warn('Failed to load historical activity:', response.status);
+        // Fall back to mock data if API fails
+        setActivities([
+          {
+            id: '1',
+            type: 'NEW_REVIEW',
+            message: 'Unable to load activity feed at this time',
+            timestamp: new Date(),
+            user: { displayName: 'System' }
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading historical activity:', error);
+      // Fall back to mock data if API fails
+      setActivities([
+        {
+          id: '1',
+          type: 'NEW_REVIEW',
+          message: 'Unable to load activity feed',
+          timestamp: new Date(),
+          user: { displayName: 'System' }
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    // Load historical activity on component mount
+    loadHistoricalActivity();
+
     // Subscribe to WebSocket activity updates
     const handleActivityUpdate = (message: any) => {
       console.log('Friends Feed received WebSocket message:', message);
@@ -46,13 +147,52 @@ const FriendsFeed: React.FC = () => {
           message.type === 'NEW_REVIEW' ||
           message.type === 'BOOK_RECOMMENDATION') {
         
+        const messageText = message.data?.message || message.data || message.message || 'New activity';
+        
+        // Extract user name from notification message with improved pattern matching
+        const extractUserFromMessage = (message: string): string => {
+          // Try multiple patterns to extract the user name
+          // Pattern 1: "Name action verb" (e.g., "Rahil Desai finished reading")
+          let match = message.match(/^(.+?)\s+(added to|is currently|finished|started|wrote|removed from)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 2: "Name verb" (e.g., "Rahil Desai added")
+          match = message.match(/^(.+?)\s+(added|finished|started|wrote|removed)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 3: Just get everything before common action phrases
+          match = message.match(/^(.+?)\s+(to TBR|reading|to Read)/);
+          if (match) return match[1].trim();
+          
+          // Fallback: first two words (assuming "First Last")
+          match = message.match(/^(\w+\s+\w+)/);
+          return match ? match[1].trim() : 'Unknown User';
+        };
+        
+        const activityUserDisplayName = extractUserFromMessage(messageText);
+        
+        // Filter out notifications from the current user
+        const currentUserDisplayName = user?.name || user?.email?.split('@')[0]; // Use name or email prefix
+        
+        console.log('FriendsFeed notification check:', {
+          messageText,
+          activityUserDisplayName,
+          currentUserDisplayName,
+          userObject: user
+        });
+        
+        if (activityUserDisplayName === currentUserDisplayName) {
+          console.log('Ignoring self-notification from:', activityUserDisplayName);
+          return; // Skip notifications from yourself
+        }
+        
         const newActivity: ActivityFeedItem = {
           id: Date.now().toString(),
           type: message.type,
-          message: message.data?.message || message.data || message.message || 'New activity',
+          message: messageText,
           timestamp: new Date(),
           user: {
-            displayName: extractUserFromMessage(message.data?.message || message.data || message.message || ''),
+            displayName: activityUserDisplayName,
             avatarUrl: undefined // Could be enhanced to include avatar URLs
           },
           data: message.data
@@ -69,44 +209,14 @@ const FriendsFeed: React.FC = () => {
       webSocketService.subscribe(type, handleActivityUpdate);
     });
 
-    // Load some initial mock activities
-    setActivities([
-      {
-        id: '1',
-        type: 'NEW_FOLLOWER',
-        message: 'rahildesai83 started following appleplayhouse',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-        user: { displayName: 'rahildesai83' }
-      },
-      {
-        id: '2', 
-        type: 'REVIEW_LIKE',
-        message: 'Someone liked your review of "The Four Winds"',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
-        user: { displayName: 'bookworm42' }
-      },
-      {
-        id: '3',
-        type: 'NEW_REVIEW',
-        message: 'appleplayhouse reviewed "Fear the Flames"',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        user: { displayName: 'appleplayhouse' }
-      }
-    ]);
-
     return () => {
       // Cleanup subscriptions
       messageTypes.forEach(type => {
         webSocketService.unsubscribe(type, handleActivityUpdate);
       });
     };
-  }, []);
+  }, [isLoggedIn, user?.id]);
 
-  const extractUserFromMessage = (message: string): string => {
-    // Extract display name from messages like "rahildesai83 started following..."
-    const match = message.match(/^(\w+)/);
-    return match ? match[1] : 'Unknown User';
-  };
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -155,6 +265,33 @@ const FriendsFeed: React.FC = () => {
     return `${diffInDays}d ago`;
   };
 
+  const handleClearFeed = async () => {
+    setClearing(true);
+    try {
+      const response = await fetch('http://localhost:8088/api/v1/activity/clear-friends-feed', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setActivities([]);
+        setClearConfirmOpen(false);
+        // You could show a success toast here instead of alert
+      } else {
+        console.error('Failed to clear friends feed');
+        // You could show an error toast here instead of alert
+      }
+    } catch (error) {
+      console.error('Error clearing friends feed:', error);
+      // You could show an error toast here instead of alert
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const cardStyle: React.CSSProperties = {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(10px)',
@@ -186,7 +323,7 @@ const FriendsFeed: React.FC = () => {
         </div>
       ) : activities.length > 0 ? (
         <div style={cardStyle}>
-          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: showAllActivities ? '500px' : '300px', overflowY: 'auto' }}>
             {activities.map((activity, index) => (
               <div
                 key={activity.id}
@@ -279,9 +416,21 @@ const FriendsFeed: React.FC = () => {
             ))}
           </div>
           
-          {/* View More Button */}
-          <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #E6D7C3' }}>
+          {/* Action Buttons */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: '12px', 
+            marginTop: '16px', 
+            paddingTop: '16px', 
+            borderTop: '1px solid #E6D7C3' 
+          }}>
             <button
+              onClick={() => {
+                const newShowAllState = !showAllActivities;
+                setShowAllActivities(newShowAllState);
+                loadHistoricalActivity(newShowAllState);
+              }}
               style={{
                 backgroundColor: 'transparent',
                 color: '#D2691E',
@@ -302,7 +451,33 @@ const FriendsFeed: React.FC = () => {
                 e.currentTarget.style.color = '#D2691E';
               }}
             >
-              View All Activity
+              {showAllActivities ? 'Show Recent' : 'View All Activity'}
+            </button>
+            
+            <button
+              onClick={() => setClearConfirmOpen(true)}
+              disabled={clearing}
+              style={{
+                backgroundColor: 'transparent',
+                color: '#D32F2F',
+                border: '1px solid #D32F2F',
+                borderRadius: '6px',
+                padding: '8px 16px',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#D32F2F';
+                e.currentTarget.style.color = 'white';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#D32F2F';
+              }}
+            >
+              {clearing ? 'Clearing...' : 'Clear Feed'}
             </button>
           </div>
         </div>
@@ -315,6 +490,40 @@ const FriendsFeed: React.FC = () => {
           </p>
         </div>
       )}
+      
+      {/* Clear Feed Confirmation Dialog */}
+      <Dialog
+        open={clearConfirmOpen}
+        onClose={() => setClearConfirmOpen(false)}
+        aria-labelledby="clear-feed-dialog-title"
+        aria-describedby="clear-feed-dialog-description"
+      >
+        <DialogTitle id="clear-feed-dialog-title" sx={{ color: '#4B3F30' }}>
+          Clear Friends Feed
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="clear-feed-dialog-description" sx={{ color: '#6A5E4D' }}>
+            Are you sure you want to clear your entire friends feed? This will hide all current activities from your view. You can always refresh the page to see new activities.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setClearConfirmOpen(false)} 
+            sx={{ color: '#8B7355' }}
+            disabled={clearing}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleClearFeed} 
+            sx={{ color: '#D32F2F' }}
+            disabled={clearing}
+            autoFocus
+          >
+            {clearing ? 'Clearing...' : 'Clear Feed'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

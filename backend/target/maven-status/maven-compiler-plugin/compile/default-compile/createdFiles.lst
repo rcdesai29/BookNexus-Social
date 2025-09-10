@@ -11,6 +11,7 @@ com/rahil/book_nexus/websocket/WebSocketMessage.class
 com/rahil/book_nexus/googlebooks/GoogleBookFeedback$GoogleBookFeedbackBuilderImpl.class
 com/rahil/book_nexus/exception/ActivationTokenException.class
 com/rahil/book_nexus/googlebooks/GoogleBookService.class
+com/rahil/book_nexus/googlebooks/GoogleBookIntegrationService$1.class
 com/rahil/book_nexus/common/PageResponse.class
 com/rahil/book_nexus/googlebooks/GoogleBookFeedbackRequest.class
 com/rahil/book_nexus/feedback/LikeController.class

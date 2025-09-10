@@ -1,8 +1,11 @@
 package com.rahil.book_nexus.googlebooks;
 
+import com.rahil.book_nexus.activity.ActivityFeed;
+import com.rahil.book_nexus.activity.ActivityFeedService;
 import com.rahil.book_nexus.book.UserBookList;
 import com.rahil.book_nexus.book.UserBookListRepository;
 import com.rahil.book_nexus.user.User;
+import com.rahil.book_nexus.websocket.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,8 @@ public class GoogleBookIntegrationService {
     private final GoogleBookService googleBookService;
     private final GoogleBookEntityRepository googleBookEntityRepository;
     private final UserBookListRepository userBookListRepository;
+    private final ActivityFeedService activityFeedService;
+    private final NotificationService notificationService;
     
     /**
      * Add a Google Book to a user's list
@@ -54,7 +59,12 @@ public class GoogleBookIntegrationService {
                 .createdBy(user.getId())
                 .build();
         
-        return userBookListRepository.save(userBookList);
+        UserBookList savedUserBookList = userBookListRepository.save(userBookList);
+        
+        // Create activity feed entry and send notification
+        createBookListActivity(user, googleBookEntity, listType, true);
+        
+        return savedUserBookList;
     }
     
     /**
@@ -75,6 +85,9 @@ public class GoogleBookIntegrationService {
             UserBookList entry = userBookList.get();
             entry.setIsActive(false);
             userBookListRepository.save(entry);
+            
+            // Don't create activity feed entries for removals - only show positive actions in friends feed
+            
             log.info("Removed Google Book {} from {} list for user {}", googleBookId, listType, user.getEmail());
         }
     }
@@ -201,6 +214,10 @@ public class GoogleBookIntegrationService {
                         .build();
                 
                 userBookListRepository.save(readEntry);
+                
+                // Create activity feed entry for marking book as read
+                createBookListActivity(user, googleBookEntity.get(), UserBookList.ListType.READ, true);
+                
                 log.info("Auto-moved Google Book {} to Read list for user {} (progress reached 100%)", googleBookId, user.getEmail());
             }
             
@@ -249,5 +266,86 @@ public class GoogleBookIntegrationService {
                 .build();
         
         return googleBookEntityRepository.save(googleBookEntity);
+    }
+    
+    /**
+     * Create activity feed entry and send notification for book list actions
+     */
+    private void createBookListActivity(User user, GoogleBookEntity googleBookEntity, UserBookList.ListType listType, boolean isAddition) {
+        // Only create activities for additions, not removals
+        if (!isAddition) {
+            return;
+        }
+        
+        String userDisplayName = user.getFirstName() + " " + user.getLastName();
+        String bookTitle = googleBookEntity.getTitle();
+        String action = getListActionMessage(listType);
+        String message = userDisplayName + " " + action + " \"" + bookTitle + "\"";
+        
+        ActivityFeed.ActivityType activityType = getActivityType(listType);
+        
+        // Save to activity feed
+        activityFeedService.saveActivity(
+            activityType,
+            message,
+            user,
+            userDisplayName,
+            null, // Regular book ID (not used for Google Books)
+            googleBookEntity.getGoogleBookId(),
+            bookTitle
+        );
+        
+        // Send real-time notification
+        sendBookListNotification(userDisplayName, action, bookTitle, activityType);
+        
+        log.info("Created activity feed entry: {}", message);
+    }
+    
+    /**
+     * Get the appropriate activity type based on list type
+     */
+    private ActivityFeed.ActivityType getActivityType(UserBookList.ListType listType) {
+        return switch (listType) {
+            case TBR -> ActivityFeed.ActivityType.BOOK_ADDED_TO_TBR;
+            case CURRENTLY_READING -> ActivityFeed.ActivityType.BOOK_ADDED_TO_CURRENTLY_READING;
+            case READ -> ActivityFeed.ActivityType.BOOK_MARKED_AS_READ;
+        };
+    }
+    
+    /**
+     * Get human-readable action message
+     */
+    private String getListActionMessage(UserBookList.ListType listType) {
+        return switch (listType) {
+            case TBR -> "added to TBR";
+            case CURRENTLY_READING -> "is currently reading";
+            case READ -> "finished reading";
+        };
+    }
+    
+    /**
+     * Get display name for list type
+     */
+    private String getListDisplayName(UserBookList.ListType listType) {
+        return switch (listType) {
+            case TBR -> "TBR";
+            case CURRENTLY_READING -> "Currently Reading";
+            case READ -> "Read";
+        };
+    }
+    
+    /**
+     * Send real-time notification for book list activity
+     */
+    private void sendBookListNotification(String userDisplayName, String action, String bookTitle, ActivityFeed.ActivityType activityType) {
+        String notificationType = switch (activityType) {
+            case BOOK_ADDED_TO_TBR -> "BOOK_ADDED_TO_TBR";
+            case BOOK_ADDED_TO_CURRENTLY_READING -> "BOOK_STARTED_READING";
+            case BOOK_MARKED_AS_READ -> "BOOK_FINISHED_READING";
+            default -> "BOOK_LIST_UPDATE";
+        };
+        
+        String message = userDisplayName + " " + action + " \"" + bookTitle + "\"";
+        notificationService.sendBookListNotification(notificationType, message);
     }
 }
