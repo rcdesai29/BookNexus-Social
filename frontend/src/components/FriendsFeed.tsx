@@ -266,8 +266,10 @@ const FriendsFeed: React.FC = () => {
   };
 
   const handleClearFeed = async () => {
+    console.log('🔥 handleClearFeed called');
     setClearing(true);
     try {
+      console.log('🔥 Making API call to clear feed...');
       const response = await fetch('http://localhost:8088/api/v1/activity/clear-friends-feed', {
         method: 'DELETE',
         headers: {
@@ -276,18 +278,28 @@ const FriendsFeed: React.FC = () => {
         }
       });
 
+      console.log('🔥 API response status:', response.status, response.ok);
+
       if (response.ok) {
+        console.log('🔥 API call successful, clearing local state...');
+        // Clear local state immediately for better UX
         setActivities([]);
         setClearConfirmOpen(false);
-        // You could show a success toast here instead of alert
+        
+        console.log('🔥 Reloading historical activity...');
+        // Reload data from API to reflect backend changes (hidden activities)
+        await loadHistoricalActivity(showAllActivities);
+        
+        console.log('🔥 Friends feed cleared successfully');
       } else {
-        console.error('Failed to clear friends feed');
-        // You could show an error toast here instead of alert
+        console.error('🔥 Failed to clear friends feed, status:', response.status);
+        const errorText = await response.text();
+        console.error('🔥 Error response:', errorText);
       }
     } catch (error) {
-      console.error('Error clearing friends feed:', error);
-      // You could show an error toast here instead of alert
+      console.error('🔥 Error clearing friends feed:', error);
     } finally {
+      console.log('🔥 Setting clearing to false');
       setClearing(false);
     }
   };

@@ -66,4 +66,18 @@ public interface ActivityFeedRepository extends JpaRepository<ActivityFeed, Inte
         ORDER BY a.createdDate DESC
     """)
     List<ActivityFeed> findFriendsActivitiesForClearing(@Param("userId") Integer userId);
+    
+    /**
+     * Get activities from specified users that aren't already hidden by the user
+     */
+    @Query("""
+        SELECT a FROM ActivityFeed a 
+        WHERE a.user.id IN :userIds
+        AND NOT EXISTS (
+            SELECT 1 FROM UserActivityHidden uah 
+            WHERE uah.user.id = :userId AND uah.activity.id = a.id
+        )
+        ORDER BY a.createdDate DESC
+    """)
+    List<ActivityFeed> findActivitiesFromUsersNotHidden(@Param("userIds") List<Integer> userIds, @Param("userId") Integer userId);
 }

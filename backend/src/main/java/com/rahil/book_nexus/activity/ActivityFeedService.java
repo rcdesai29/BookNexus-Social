@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -126,8 +125,31 @@ public class ActivityFeedService {
      */
     @Transactional
     public void clearFriendsFeedForUser(Integer userId) {
-        userActivityHiddenRepository.hideAllFriendsActivitiesForUser(userId);
-        log.info("Hidden all friends activities for user ID: {}", userId);
+        // Get all users that the current user follows
+        List<Integer> followedUserIds = followRepository.findFollowingIdsByFollowerId(userId);
+        
+        if (followedUserIds.isEmpty()) {
+            log.info("User ID: {} is not following anyone, no activities to hide", userId);
+            return;
+        }
+        
+        // Get all activities from followed users that aren't already hidden
+        List<ActivityFeed> activitiesToHide = activityFeedRepository.findActivitiesFromUsersNotHidden(followedUserIds, userId);
+        
+        // Create UserActivityHidden entries for each activity
+        List<UserActivityHidden> hiddenActivities = activitiesToHide.stream()
+            .map(activity -> UserActivityHidden.builder()
+                .user(User.builder().id(userId).build())
+                .activity(activity)
+                .hiddenAt(LocalDateTime.now())
+                .createdBy(userId)
+                .build())
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Batch save all hidden activities
+        userActivityHiddenRepository.saveAll(hiddenActivities);
+        
+        log.info("Hidden {} activities from friends for user ID: {}", hiddenActivities.size(), userId);
     }
     
     /**

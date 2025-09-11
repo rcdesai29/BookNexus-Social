@@ -3,9 +3,11 @@ package com.rahil.book_nexus.websocket;
 import com.rahil.book_nexus.activity.ActivityFeed;
 import com.rahil.book_nexus.activity.ActivityFeedService;
 import com.rahil.book_nexus.user.User;
+import com.rahil.book_nexus.user.FollowRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,9 +16,28 @@ public class NotificationService {
 
     private final NotificationWebSocketHandler webSocketHandler;
     private final ActivityFeedService activityFeedService;
+    private final FollowRepository followRepository;
 
     /**
-     * Send a new follower notification (broadcast for now until user-specific routing is implemented)
+     * Send notification to all followers of a specific user
+     */
+    private void sendToFollowers(Integer userId, WebSocketMessage message) {
+        List<User> followers = followRepository.findFollowersByUserId(userId);
+        for (User follower : followers) {
+            webSocketHandler.sendToUser(follower.getId().toString(), message);
+        }
+        log.info("Sent notification to {} followers of user {}", followers.size(), userId);
+    }
+
+    /**
+     * Send notification to a specific user only
+     */
+    private void sendToUser(String userId, WebSocketMessage message) {
+        webSocketHandler.sendToUser(userId, message);
+    }
+
+    /**
+     * Send a new follower notification to the followed user only
      */
     public void sendNewFollowerNotification(String followedUserId, String followerDisplayName) {
         WebSocketMessage message = WebSocketMessage.notification(
@@ -24,12 +45,12 @@ public class NotificationService {
                 followerDisplayName + " started following you!"
         );
         
-        webSocketHandler.broadcast(message);
+        sendToUser(followedUserId, message);
         log.info("Sent new follower notification: {} -> {}", followerDisplayName, followedUserId);
     }
 
     /**
-     * Send unfollow notification (broadcast for now until user-specific routing is implemented)
+     * Send unfollow notification to the unfollowed user only
      */
     public void sendUnfollowNotification(String unfollowedUserId, String unfollowerDisplayName) {
         WebSocketMessage message = WebSocketMessage.notification(
@@ -37,12 +58,12 @@ public class NotificationService {
                 unfollowerDisplayName + " unfollowed you"
         );
         
-        webSocketHandler.broadcast(message);
+        sendToUser(unfollowedUserId, message);
         log.info("Sent unfollow notification: {} -> {}", unfollowerDisplayName, unfollowedUserId);
     }
 
     /**
-     * Send real-time follower count update (broadcast for now until user-specific routing is implemented)
+     * Send real-time follower count update to specific user only
      */
     public void sendFollowerCountUpdate(String userId, int newFollowerCount, int newFollowingCount) {
         WebSocketMessage message = WebSocketMessage.builder()
@@ -55,13 +76,26 @@ public class NotificationService {
                 ))
                 .build();
         
-        webSocketHandler.broadcast(message);
+        sendToUser(userId, message);
         log.info("Sent follower count update to user {}: followers={}, following={}", 
                 userId, newFollowerCount, newFollowingCount);
     }
 
     /**
-     * Send a new review notification
+     * Send a new review notification to followers only
+     */
+    public void sendNewReviewNotification(String bookTitle, String reviewerDisplayName, User reviewer) {
+        WebSocketMessage message = WebSocketMessage.notification(
+                "NEW_REVIEW",
+                reviewerDisplayName + " reviewed \"" + bookTitle + "\""
+        );
+        
+        sendToFollowers(reviewer.getId(), message);
+        log.info("Sent new review notification to followers: {} reviewed {}", reviewerDisplayName, bookTitle);
+    }
+    
+    /**
+     * Legacy method for backward compatibility - sends to everyone
      */
     public void sendNewReviewNotification(String bookTitle, String reviewerDisplayName) {
         WebSocketMessage message = WebSocketMessage.notification(
@@ -70,7 +104,7 @@ public class NotificationService {
         );
         
         webSocketHandler.broadcast(message);
-        log.info("Sent new review notification: {} reviewed {}", reviewerDisplayName, bookTitle);
+        log.info("Sent new review notification (broadcast): {} reviewed {}", reviewerDisplayName, bookTitle);
     }
     
     /**
@@ -113,7 +147,8 @@ public class NotificationService {
     }
 
     /**
-     * Send activity feed update and persist to database
+     * Send activity feed update (no persistence, no user context)
+     * This is a fallback method - consider using the version with User parameter for targeted notifications
      */
     public void sendActivityFeedUpdate(String userDisplayName, String activity) {
         WebSocketMessage message = WebSocketMessage.notification(
@@ -121,20 +156,21 @@ public class NotificationService {
                 userDisplayName + " " + activity
         );
         
+        // Still broadcast for now since we don't have user context
         webSocketHandler.broadcast(message);
-        log.info("Sent activity update: {} {}", userDisplayName, activity);
+        log.info("Sent activity update (broadcast): {} {}", userDisplayName, activity);
     }
     
     /**
-     * Send activity feed update with persistence for specific user and book
+     * Send activity feed update with persistence for specific user and book - now targeted to followers only
      */
     public void sendActivityFeedUpdate(String userDisplayName, String activity, User user, String bookTitle, String googleBookId) {
-        // Send real-time update
+        // Send real-time update to followers only
         WebSocketMessage message = WebSocketMessage.notification(
                 "ACTIVITY_UPDATE",
                 userDisplayName + " " + activity
         );
-        webSocketHandler.broadcast(message);
+        sendToFollowers(user.getId(), message);
         
         // Persist to database
         activityFeedService.saveActivity(
@@ -147,7 +183,7 @@ public class NotificationService {
             bookTitle
         );
         
-        log.info("Sent and persisted activity update: {} {}", userDisplayName, activity);
+        log.info("Sent and persisted activity update to followers: {} {}", userDisplayName, activity);
     }
 
     /**
