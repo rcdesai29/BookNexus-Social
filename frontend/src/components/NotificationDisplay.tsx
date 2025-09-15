@@ -61,6 +61,11 @@ const NotificationDisplay: React.FC = () => {
         return;
       }
 
+      // Ignore user identification confirmation messages
+      if (wsMessage.type === 'USER_IDENTIFIED') {
+        return;
+      }
+
       // Create popup notifications for all notification types except system ones
       if (wsMessage.type && wsMessage.type !== 'CONNECTION_ESTABLISHED') {
         const messageText = typeof wsMessage.data === 'string' ? wsMessage.data : JSON.stringify(wsMessage.data);

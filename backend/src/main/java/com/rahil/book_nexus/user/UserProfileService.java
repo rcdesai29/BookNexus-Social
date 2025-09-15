@@ -102,7 +102,7 @@ public class UserProfileService {
         String followerDisplayName = (followerProfile != null && followerProfile.getDisplayName() != null) 
             ? followerProfile.getDisplayName() 
             : follower.getFullName();
-        notificationService.sendNewFollowerNotification(following.getId().toString(), followerDisplayName);
+        notificationService.sendNewFollowerNotification(following.getId().toString(), followerDisplayName, follower.getId());
         
         // Send activity feed update
         notificationService.sendActivityFeedUpdate(followerDisplayName, "started following " + (userProfileRepository.findByUserId(following.getId()).map(p -> p.getDisplayName()).orElse(following.getFullName())));
@@ -142,7 +142,7 @@ public class UserProfileService {
         String unfollowerDisplayName = (unfollowerProfile != null && unfollowerProfile.getDisplayName() != null) 
             ? unfollowerProfile.getDisplayName() 
             : follower.getFullName();
-        notificationService.sendUnfollowNotification(unfollowed.getId().toString(), unfollowerDisplayName);
+        notificationService.sendUnfollowNotification(unfollowed.getId().toString(), unfollowerDisplayName, follower.getId());
         
         // Send activity feed update  
         notificationService.sendActivityFeedUpdate(unfollowerDisplayName, "unfollowed " + (userProfileRepository.findByUserId(unfollowed.getId()).map(p -> p.getDisplayName()).orElse(unfollowed.getFullName())));

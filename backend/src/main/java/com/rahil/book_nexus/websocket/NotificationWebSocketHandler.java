@@ -10,7 +10,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
@@ -19,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     private final Set<WebSocketSession> sessions = new CopyOnWriteArraySet<>();
+    private final Map<String, WebSocketSession> userSessions = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -42,13 +45,41 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         sessions.remove(session);
+        
+        // Remove from user sessions map
+        String userId = (String) session.getAttributes().get("userId");
+        if (userId != null) {
+            userSessions.remove(userId);
+            log.info("User {} disconnected from WebSocket", userId);
+        }
+        
         log.info("WebSocket connection closed: {} with status: {}", session.getId(), status);
     }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         log.info("Received message from {}: {}", session.getId(), message.getPayload());
-        // Handle incoming messages if needed
+        
+        try {
+            // Parse the message to see if it's a user identification message
+            WebSocketMessage wsMessage = objectMapper.readValue(message.getPayload(), WebSocketMessage.class);
+            
+            if ("IDENTIFY_USER".equals(wsMessage.getType()) && wsMessage.getData() instanceof String) {
+                String userId = (String) wsMessage.getData();
+                session.getAttributes().put("userId", userId);
+                userSessions.put(userId, session);
+                log.info("User {} identified for WebSocket session {}", userId, session.getId());
+                
+                // Send confirmation
+                WebSocketMessage confirmation = WebSocketMessage.builder()
+                    .type("USER_IDENTIFIED")
+                    .data("User " + userId + " identified successfully")
+                    .build();
+                session.sendMessage(new TextMessage(objectMapper.writeValueAsString(confirmation)));
+            }
+        } catch (Exception e) {
+            log.error("Error processing WebSocket message", e);
+        }
     }
 
     @Override
@@ -88,9 +119,22 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
      * Send message to a specific user (if we can identify them by session)
      */
     public void sendToUser(String userId, WebSocketMessage message) {
-        // For now, this is a placeholder. In a real implementation, you'd need to
-        // associate sessions with user IDs during authentication
-        broadcast(message);
+        WebSocketSession userSession = userSessions.get(userId);
+        
+        if (userSession != null && userSession.isOpen()) {
+            try {
+                String messageJson = objectMapper.writeValueAsString(message);
+                userSession.sendMessage(new TextMessage(messageJson));
+                log.info("Sent targeted message to user {}: {}", userId, message.getType());
+            } catch (IOException e) {
+                log.error("Error sending message to user {}: {}", userId, e.getMessage());
+                // Remove dead session
+                userSessions.remove(userId);
+                sessions.remove(userSession);
+            }
+        } else {
+            log.debug("User {} not connected or session closed, message not sent: {}", userId, message.getType());
+        }
     }
 
     /**

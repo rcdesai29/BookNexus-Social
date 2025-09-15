@@ -2,8 +2,11 @@ package com.rahil.book_nexus.websocket;
 
 import com.rahil.book_nexus.activity.ActivityFeed;
 import com.rahil.book_nexus.activity.ActivityFeedService;
+import com.rahil.book_nexus.notification.PersistentNotification;
+import com.rahil.book_nexus.notification.PersistentNotificationRepository;
 import com.rahil.book_nexus.user.User;
 import com.rahil.book_nexus.user.FollowRepository;
+import com.rahil.book_nexus.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,8 @@ public class NotificationService {
     private final NotificationWebSocketHandler webSocketHandler;
     private final ActivityFeedService activityFeedService;
     private final FollowRepository followRepository;
+    private final PersistentNotificationRepository persistentNotificationRepository;
+    private final UserRepository userRepository;
 
     /**
      * Send notification to all followers of a specific user
@@ -39,27 +44,49 @@ public class NotificationService {
     /**
      * Send a new follower notification to the followed user only
      */
-    public void sendNewFollowerNotification(String followedUserId, String followerDisplayName) {
-        WebSocketMessage message = WebSocketMessage.notification(
-                "NEW_FOLLOWER", 
-                followerDisplayName + " started following you!"
+    public void sendNewFollowerNotification(String followedUserId, String followerDisplayName, Integer followerId) {
+        String message = followerDisplayName + " started following you!";
+        WebSocketMessage wsMessage = WebSocketMessage.notification("NEW_FOLLOWER", message);
+        
+        sendToUser(followedUserId, wsMessage);
+        
+        // Persist notification
+        persistNotification(
+            Integer.valueOf(followedUserId), 
+            followerId,
+            PersistentNotification.NotificationType.NEW_FOLLOWER, 
+            message,
+            "FOLLOW", 
+            followerId, 
+            null, 
+            null
         );
         
-        sendToUser(followedUserId, message);
-        log.info("Sent new follower notification: {} -> {}", followerDisplayName, followedUserId);
+        log.info("Sent and persisted new follower notification: {} -> {}", followerDisplayName, followedUserId);
     }
 
     /**
      * Send unfollow notification to the unfollowed user only
      */
-    public void sendUnfollowNotification(String unfollowedUserId, String unfollowerDisplayName) {
-        WebSocketMessage message = WebSocketMessage.notification(
-                "UNFOLLOWED", 
-                unfollowerDisplayName + " unfollowed you"
+    public void sendUnfollowNotification(String unfollowedUserId, String unfollowerDisplayName, Integer unfollowerId) {
+        String message = unfollowerDisplayName + " unfollowed you";
+        WebSocketMessage wsMessage = WebSocketMessage.notification("UNFOLLOWED", message);
+        
+        sendToUser(unfollowedUserId, wsMessage);
+        
+        // Persist notification
+        persistNotification(
+            Integer.valueOf(unfollowedUserId), 
+            unfollowerId,
+            PersistentNotification.NotificationType.UNFOLLOWED, 
+            message,
+            "UNFOLLOW", 
+            unfollowerId, 
+            null, 
+            null
         );
         
-        sendToUser(unfollowedUserId, message);
-        log.info("Sent unfollow notification: {} -> {}", unfollowerDisplayName, unfollowedUserId);
+        log.info("Sent and persisted unfollow notification: {} -> {}", unfollowerDisplayName, unfollowedUserId);
     }
 
     /**
@@ -123,14 +150,24 @@ public class NotificationService {
     /**
      * Send a review reply notification to a specific user
      */
-    public void sendReviewReplyNotificationToUser(Integer userId, String replyMessage) {
-        WebSocketMessage message = WebSocketMessage.notification(
-                "REVIEW_REPLY",
-                replyMessage
-        );
+    public void sendReviewReplyNotificationToUser(Integer userId, String replyMessage, Integer replyAuthorId, Integer reviewId) {
+        WebSocketMessage message = WebSocketMessage.notification("REVIEW_REPLY", replyMessage);
         
         webSocketHandler.sendToUser(userId.toString(), message);
-        log.info("Sent review reply notification to user {}: {}", userId, replyMessage);
+        
+        // Persist notification
+        persistNotification(
+            userId, 
+            replyAuthorId,
+            PersistentNotification.NotificationType.REVIEW_REPLY, 
+            replyMessage,
+            "REVIEW", 
+            reviewId, 
+            null, 
+            null
+        );
+        
+        log.info("Sent and persisted review reply notification to user {}: {}", userId, replyMessage);
     }
 
     /**
@@ -189,27 +226,47 @@ public class NotificationService {
     /**
      * Send a review like notification
      */
-    public void sendReviewLikeNotification(String userId, String likeMessage) {
-        WebSocketMessage message = WebSocketMessage.notification(
-                "REVIEW_LIKE",
-                likeMessage
+    public void sendReviewLikeNotification(String userId, String likeMessage, Integer likerUserId, Integer reviewId, String bookTitle) {
+        WebSocketMessage message = WebSocketMessage.notification("REVIEW_LIKE", likeMessage);
+        
+        webSocketHandler.sendToUser(userId, message);
+        
+        // Persist notification
+        persistNotification(
+            Integer.valueOf(userId), 
+            likerUserId,
+            PersistentNotification.NotificationType.REVIEW_LIKE, 
+            likeMessage,
+            "REVIEW", 
+            reviewId, 
+            bookTitle, 
+            null
         );
         
-        webSocketHandler.broadcast(message);
-        log.info("Sent review like notification to user {}: {}", userId, likeMessage);
+        log.info("Sent and persisted review like notification to user {}: {}", userId, likeMessage);
     }
 
     /**
      * Send a reply like notification
      */
-    public void sendReplyLikeNotification(String userId, String likeMessage) {
-        WebSocketMessage message = WebSocketMessage.notification(
-                "REPLY_LIKE",
-                likeMessage
+    public void sendReplyLikeNotification(String userId, String likeMessage, Integer likerUserId, Integer replyId) {
+        WebSocketMessage message = WebSocketMessage.notification("REPLY_LIKE", likeMessage);
+        
+        webSocketHandler.sendToUser(userId, message);
+        
+        // Persist notification
+        persistNotification(
+            Integer.valueOf(userId), 
+            likerUserId,
+            PersistentNotification.NotificationType.REPLY_LIKE, 
+            likeMessage,
+            "REPLY", 
+            replyId, 
+            null, 
+            null
         );
         
-        webSocketHandler.broadcast(message);
-        log.info("Sent reply like notification to user {}: {}", userId, likeMessage);
+        log.info("Sent and persisted reply like notification to user {}: {}", userId, likeMessage);
     }
 
     /**
@@ -223,6 +280,37 @@ public class NotificationService {
         
         webSocketHandler.broadcast(wsMessage);
         log.info("Sent book list notification ({}): {}", notificationType, message);
+    }
+
+    /**
+     * Persist notification to database
+     */
+    private void persistNotification(Integer recipientUserId, Integer triggerUserId, 
+                                   PersistentNotification.NotificationType type, String message,
+                                   String relatedEntityType, Integer relatedEntityId, 
+                                   String bookTitle, String googleBookId) {
+        try {
+            User recipientUser = userRepository.findById(recipientUserId).orElse(null);
+            User triggerUser = triggerUserId != null ? userRepository.findById(triggerUserId).orElse(null) : null;
+            
+            if (recipientUser != null) {
+                PersistentNotification notification = PersistentNotification.builder()
+                    .type(type)
+                    .message(message)
+                    .recipientUser(recipientUser)
+                    .triggerUser(triggerUser)
+                    .relatedEntityType(relatedEntityType)
+                    .relatedEntityId(relatedEntityId)
+                    .bookTitle(bookTitle)
+                    .googleBookId(googleBookId)
+                    .build();
+                
+                persistentNotificationRepository.save(notification);
+                log.info("Persisted notification: {} for user {}", type, recipientUserId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to persist notification: {} for user {}", type, recipientUserId, e);
+        }
     }
 
     /**

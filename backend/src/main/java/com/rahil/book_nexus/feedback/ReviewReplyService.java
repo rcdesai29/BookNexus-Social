@@ -120,7 +120,7 @@ public class ReviewReplyService {
                     : replyAuthor.getFullName();
                 
                 String message = String.format("%s replied to your review of \"%s\"", displayName, bookTitle);
-                notificationService.sendReviewReplyNotificationToUser(originalAuthor.getId(), message);
+                notificationService.sendReviewReplyNotificationToUser(originalAuthor.getId(), message, replyAuthor.getId(), reply.getParentFeedback().getId());
                 log.info("Sent review reply notification to user {}", originalAuthor.getId());
             }
         } catch (Exception e) {

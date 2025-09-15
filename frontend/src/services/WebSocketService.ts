@@ -169,6 +169,28 @@ class WebSocketService {
     }
   }
 
+  /**
+   * Identify the current user to the WebSocket server
+   */
+  identifyUser(userId: string): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      const message: WebSocketMessage = {
+        type: 'IDENTIFY_USER',
+        data: userId,
+        timestamp: Date.now()
+      };
+      
+      try {
+        this.socket.send(JSON.stringify(message));
+        console.log('User identification sent:', userId);
+      } catch (error) {
+        console.error('Failed to send user identification:', error);
+      }
+    } else {
+      console.warn('Cannot identify user: WebSocket not connected');
+    }
+  }
+
   private attemptReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;

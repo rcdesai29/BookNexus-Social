@@ -72,6 +72,12 @@
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/history/BookTransactionHistory.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/history/BookTransactionHistoryRepository.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/migration/GoogleBookFeedbackMigration.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/notification/NotificationController.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/notification/NotificationCountResponse.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/notification/NotificationManagementService.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/notification/NotificationResponse.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/notification/PersistentNotification.java
+/Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/notification/PersistentNotificationRepository.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/role/Role.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/role/RoleRepository.java
 /Users/cluckbucks/projects/booknexus-social/backend/src/main/java/com/rahil/book_nexus/security/JwtFilter.java

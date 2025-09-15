@@ -52,7 +52,7 @@ public class LikeService {
                     ? userProfile.getDisplayName() 
                     : user.getFullName();
                 String message = String.format("%s liked your review", displayName);
-                notificationService.sendReviewLikeNotification(feedback.getUser().getId().toString(), message);
+                notificationService.sendReviewLikeNotification(feedback.getUser().getId().toString(), message, user.getId(), feedbackId, feedback.getBookTitle());
             }
         }
     }
@@ -86,7 +86,7 @@ public class LikeService {
                     ? userProfile.getDisplayName() 
                     : user.getFullName();
                 String message = String.format("%s liked your review of \"%s\"", displayName, googleFeedback.getBookTitle());
-                notificationService.sendReviewLikeNotification(googleFeedback.getUser().getId().toString(), message);
+                notificationService.sendReviewLikeNotification(googleFeedback.getUser().getId().toString(), message, user.getId(), googleFeedbackId, googleFeedback.getBookTitle());
             }
         }
     }
@@ -120,7 +120,7 @@ public class LikeService {
                     ? userProfile.getDisplayName() 
                     : user.getFullName();
                 String message = String.format("%s liked your comment", displayName);
-                notificationService.sendReplyLikeNotification(reply.getUser().getId().toString(), message);
+                notificationService.sendReplyLikeNotification(reply.getUser().getId().toString(), message, user.getId(), replyId);
             }
         }
     }

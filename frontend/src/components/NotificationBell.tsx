@@ -18,6 +18,7 @@ import {
 import webSocketService, { WebSocketMessage } from '../services/WebSocketService';
 import { useAuth } from '../hooks/useAuth';
 import { profileService } from '../services/profileService';
+import { notificationService, NotificationResponse } from '../services/notificationService';
 
 interface Notification {
   id: string;
@@ -25,6 +26,8 @@ interface Notification {
   message: string;
   timestamp: number;
   read: boolean;
+  persistent?: boolean; // Flag to differentiate persistent vs real-time notifications
+  persistentId?: number; // ID in the database
 }
 
 const NotificationBell: React.FC = () => {
@@ -53,10 +56,51 @@ const NotificationBell: React.FC = () => {
     fetchCurrentUserDisplayName();
   }, [user]);
 
+  // Load persistent notifications on component mount and when user changes
+  useEffect(() => {
+    const loadPersistentNotifications = async () => {
+      if (user?.id) {
+        try {
+          const [notificationsData, countsData] = await Promise.all([
+            notificationService.getNotifications(0, 20, false),
+            notificationService.getNotificationCounts()
+          ]);
+
+          // Convert persistent notifications to component format
+          const persistentNotifications: Notification[] = notificationsData.content.map(noti => ({
+            id: `persistent-${noti.id}`,
+            type: noti.type,
+            message: noti.message,
+            timestamp: new Date(noti.createdDate).getTime(),
+            read: noti.isRead,
+            persistent: true,
+            persistentId: noti.id
+          }));
+
+          setNotifications(persistentNotifications);
+          setUnreadCount(countsData.unreadCount);
+        } catch (error) {
+          console.error('Failed to load persistent notifications:', error);
+        }
+      }
+    };
+
+    loadPersistentNotifications();
+  }, [user]);
+
   useEffect(() => {
     // Subscribe to all notifications
     const handleNotification = (wsMessage: WebSocketMessage) => {
       if (wsMessage.type === 'CONNECTION_ESTABLISHED') {
+        // Identify user when connection is established
+        if (user?.id) {
+          webSocketService.identifyUser(user.id.toString());
+        }
+        return;
+      }
+
+      // Ignore user identification confirmation messages
+      if (wsMessage.type === 'USER_IDENTIFIED') {
         return;
       }
 
@@ -84,7 +128,11 @@ const NotificationBell: React.FC = () => {
           match = message.match(/^(.+?)\s+(added|finished|started|wrote|removed|reviewed)/);
           if (match) return match[1].trim();
           
-          // Pattern 3: Just get everything before common action phrases
+          // Pattern 3: Follow patterns (e.g., "John Doe started following", "Jane Smith unfollowed")
+          match = message.match(/^(.+?)\s+(started following|unfollowed|liked your|replied to)/);
+          if (match) return match[1].trim();
+          
+          // Pattern 4: Just get everything before common action phrases
           match = message.match(/^(.+?)\s+(to TBR|reading|to Read)/);
           if (match) return match[1].trim();
           
@@ -119,14 +167,16 @@ const NotificationBell: React.FC = () => {
         }
 
         const notification: Notification = {
-          id: `${Date.now()}-${Math.random()}`,
+          id: `realtime-${Date.now()}-${Math.random()}`,
           type: wsMessage.type,
           message: messageText,
           timestamp: wsMessage.timestamp || Date.now(),
-          read: false
+          read: false,
+          persistent: false
         };
 
-        setNotifications(prev => [notification, ...prev].slice(0, 50)); // Keep last 50 notifications
+        // Add to the top of the list, but don't exceed 50 total notifications
+        setNotifications(prev => [notification, ...prev].slice(0, 50));
         setUnreadCount(prev => prev + 1);
       }
     };
@@ -157,22 +207,61 @@ const NotificationBell: React.FC = () => {
     };
   }, [dropdownOpen]);
 
-  const handleBellClick = () => {
+  const handleBellClick = async () => {
     setDropdownOpen(!dropdownOpen);
     if (!dropdownOpen && unreadCount > 0) {
-      // Mark all as read when opening
-      setTimeout(() => {
+      try {
+        // Mark all persistent notifications as read in backend
+        await notificationService.markAllNotificationsAsRead();
+        
+        // Update local state
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
         setUnreadCount(0);
-      }, 100);
+      } catch (error) {
+        console.error('Failed to mark notifications as read:', error);
+        // Still update local state for better UX
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setUnreadCount(0);
+      }
     }
   };
 
-  const removeNotification = (id: string) => {
+  const removeNotification = async (id: string) => {
+    const notification = notifications.find(n => n.id === id);
+    
+    if (notification?.persistent && notification.persistentId) {
+      try {
+        // Delete persistent notification from backend
+        await notificationService.deleteNotification(notification.persistentId);
+      } catch (error) {
+        console.error('Failed to delete notification:', error);
+        return; // Don't remove from UI if backend deletion failed
+      }
+    }
+    
+    // Remove from local state
     setNotifications(prev => prev.filter(n => n.id !== id));
+    
+    // Update unread count if the notification was unread
+    if (!notification?.read) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
   };
 
-  const clearAllNotifications = () => {
+  const clearAllNotifications = async () => {
+    try {
+      // Delete all persistent notifications from backend
+      const persistentNotifications = notifications.filter(n => n.persistent && n.persistentId);
+      await Promise.all(
+        persistentNotifications.map(n => 
+          n.persistentId ? notificationService.deleteNotification(n.persistentId) : Promise.resolve()
+        )
+      );
+    } catch (error) {
+      console.error('Failed to clear some notifications:', error);
+    }
+    
+    // Clear all from local state (including real-time ones)
     setNotifications([]);
     setUnreadCount(0);
   };

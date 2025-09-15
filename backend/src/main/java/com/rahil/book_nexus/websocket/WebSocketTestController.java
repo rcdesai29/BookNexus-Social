@@ -14,7 +14,7 @@ public class WebSocketTestController {
 
     @PostMapping("/new-follower")
     public ResponseEntity<String> testNewFollower() {
-        notificationService.sendNewFollowerNotification("123", "TestUser");
+        notificationService.sendNewFollowerNotification("123", "TestUser", 456);
         return ResponseEntity.ok("New follower notification sent!");
     }
 
@@ -38,7 +38,7 @@ public class WebSocketTestController {
 
     @PostMapping("/unfollow")
     public ResponseEntity<String> testUnfollow() {
-        notificationService.sendUnfollowNotification("123", "TestUser");
+        notificationService.sendUnfollowNotification("123", "TestUser", 456);
         return ResponseEntity.ok("Unfollow notification sent!");
     }
 

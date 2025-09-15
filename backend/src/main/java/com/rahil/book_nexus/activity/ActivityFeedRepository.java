@@ -34,6 +34,7 @@ public interface ActivityFeedRepository extends JpaRepository<ActivityFeed, Inte
         WHERE a.user.id IN (
             SELECT f.following.id FROM Follow f WHERE f.follower.id = :userId
         )
+        AND a.user.id != :userId
         AND NOT EXISTS (
             SELECT 1 FROM UserActivityHidden uah 
             WHERE uah.user.id = :userId AND uah.activity.id = a.id
