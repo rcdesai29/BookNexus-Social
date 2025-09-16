@@ -51,6 +51,10 @@ const ProfilePage: React.FC = () => {
   const [booksLoading, setBooksLoading] = useState(false);
   const [followersModalOpen, setFollowersModalOpen] = useState(false);
   const [followingModalOpen, setFollowingModalOpen] = useState(false);
+  const [followers, setFollowers] = useState<any[]>([]);
+  const [following, setFollowing] = useState<any[]>([]);
+  const [followersLoading, setFollowersLoading] = useState(false);
+  const [followingLoading, setFollowingLoading] = useState(false);
 
   // Helper function to render interactive stars for editing
   const renderStars = (rating: number, interactive: boolean = false, size: string = '16px') => {
@@ -445,6 +449,34 @@ const ProfilePage: React.FC = () => {
       console.error('Error fetching read books:', error);
     } finally {
       setBooksLoading(false);
+    }
+  };
+
+  const fetchFollowers = async () => {
+    try {
+      setFollowersLoading(true);
+      if (userId) {
+        const response = await UserProfileService.getFollowers(parseInt(userId));
+        setFollowers(response || []);
+      }
+    } catch (error) {
+      console.error('Error fetching followers:', error);
+    } finally {
+      setFollowersLoading(false);
+    }
+  };
+
+  const fetchFollowing = async () => {
+    try {
+      setFollowingLoading(true);
+      if (userId) {
+        const response = await UserProfileService.getFollowing(parseInt(userId));
+        setFollowing(response || []);
+      }
+    } catch (error) {
+      console.error('Error fetching following:', error);
+    } finally {
+      setFollowingLoading(false);
     }
   };
 
@@ -1126,13 +1158,19 @@ const ProfilePage: React.FC = () => {
             </button>
             <button
               style={tabStyle(activeTab === 3)}
-              onClick={() => setActiveTab(3)}
+              onClick={() => {
+                setActiveTab(3);
+                fetchFollowers();
+              }}
             >
               Followers
             </button>
             <button
               style={tabStyle(activeTab === 4)}
-              onClick={() => setActiveTab(4)}
+              onClick={() => {
+                setActiveTab(4);
+                fetchFollowing();
+              }}
             >
               Following
             </button>
@@ -1642,29 +1680,177 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
             {activeTab === 3 && (
-              <div style={{
-                textAlign: 'center',
-                color: '#6A5E4D',
-                fontSize: '16px'
-              }}>
-                Followers: {profile.followersCount || 0} followers
-                <div style={{ marginTop: '16px' }}>
-                  <PeopleIcon style={{ color: '#8B7355', fontSize: '48px' }} />
-                  <p style={{ marginTop: '8px' }}>Follower list will be displayed here</p>
-                </div>
+              <div>
+                <h3 style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  color: '#3C2A1E',
+                  marginBottom: '24px',
+                  fontSize: '20px'
+                }}>
+                  Followers ({followers.length} followers)
+                </h3>
+                {followersLoading ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div>Loading followers...</div>
+                  </div>
+                ) : followers.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    color: '#6A5E4D',
+                    padding: '40px'
+                  }}>
+                    <PeopleIcon style={{ color: '#8B7355', fontSize: '48px', marginBottom: '16px' }} />
+                    <p>No followers yet</p>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {followers.map((follower) => (
+                      <div
+                        key={follower.id}
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: '1px solid #E6D7C3',
+                          backgroundColor: '#FDFCFA',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onClick={() => navigate(`/profile/${follower.id}`)}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = '#F7F1E8';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FDFCFA';
+                        }}
+                      >
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#8B7355',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '16px'
+                        }}>
+                          {follower.fullName?.charAt(0) || '?'}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{
+                            fontWeight: 600,
+                            color: '#3C2A1E',
+                            fontSize: '14px'
+                          }}>
+                            {follower.fullName || 'Unknown User'}
+                          </div>
+                          <div style={{
+                            color: '#8B7355',
+                            fontSize: '12px'
+                          }}>
+                            {follower.email}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 4 && (
-              <div style={{
-                textAlign: 'center',
-                color: '#6A5E4D',
-                fontSize: '16px'
-              }}>
-                Following: {profile.followingCount || 0} users
-                <div style={{ marginTop: '16px' }}>
-                  <PeopleIcon style={{ color: '#8B7355', fontSize: '48px' }} />
-                  <p style={{ marginTop: '8px' }}>Following list will be displayed here</p>
-                </div>
+              <div>
+                <h3 style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  color: '#3C2A1E',
+                  marginBottom: '24px',
+                  fontSize: '20px'
+                }}>
+                  Following ({following.length} users)
+                </h3>
+                {followingLoading ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div>Loading following...</div>
+                  </div>
+                ) : following.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    color: '#6A5E4D',
+                    padding: '40px'
+                  }}>
+                    <PeopleIcon style={{ color: '#8B7355', fontSize: '48px', marginBottom: '16px' }} />
+                    <p>Not following anyone yet</p>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {following.map((user) => (
+                      <div
+                        key={user.id}
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: '1px solid #E6D7C3',
+                          backgroundColor: '#FDFCFA',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onClick={() => navigate(`/profile/${user.id}`)}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = '#F7F1E8';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FDFCFA';
+                        }}
+                      >
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: '#8B7355',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '16px'
+                        }}>
+                          {user.fullName?.charAt(0) || '?'}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{
+                            fontWeight: 600,
+                            color: '#3C2A1E',
+                            fontSize: '14px'
+                          }}>
+                            {user.fullName || 'Unknown User'}
+                          </div>
+                          <div style={{
+                            color: '#8B7355',
+                            fontSize: '12px'
+                          }}>
+                            {user.email}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
