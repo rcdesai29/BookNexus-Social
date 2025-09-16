@@ -2,8 +2,10 @@ package com.rahil.book_nexus.googlebooks;
 
 import com.rahil.book_nexus.book.UserBookList;
 import com.rahil.book_nexus.user.User;
+import com.rahil.book_nexus.user.UserRepository;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.List;
 public class UserBookListController {
     
     private final GoogleBookIntegrationService googleBookIntegrationService;
+    private final UserRepository userRepository;
     
     @PostMapping("/google-books/{googleBookId}/add")
     public ResponseEntity<UserBookList> addGoogleBookToList(
@@ -107,6 +110,37 @@ public class UserBookListController {
         User user = ((User) connectedUser.getPrincipal());
         UserBookList updatedUserBookList = googleBookIntegrationService.updateReadingProgress(googleBookId, user, progress);
         return ResponseEntity.ok(updatedUserBookList);
+    }
+    
+    // Endpoints for viewing other users' book lists (for profile pages)
+    @GetMapping("/user/{userId}/currently-reading")
+    public ResponseEntity<List<UserBookList>> getUserCurrentlyReading(
+            @PathVariable Integer userId,
+            Authentication connectedUser) {
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<UserBookList> currentlyReading = googleBookIntegrationService.getUserBooksByListType(targetUser, UserBookList.ListType.CURRENTLY_READING);
+        return ResponseEntity.ok(currentlyReading);
+    }
+    
+    @GetMapping("/user/{userId}/read")
+    public ResponseEntity<List<UserBookList>> getUserRead(
+            @PathVariable Integer userId,
+            Authentication connectedUser) {
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<UserBookList> read = googleBookIntegrationService.getUserBooksByListType(targetUser, UserBookList.ListType.READ);
+        return ResponseEntity.ok(read);
+    }
+    
+    @GetMapping("/user/{userId}/tbr")
+    public ResponseEntity<List<UserBookList>> getUserTBR(
+            @PathVariable Integer userId,
+            Authentication connectedUser) {
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        List<UserBookList> tbr = googleBookIntegrationService.getUserBooksByListType(targetUser, UserBookList.ListType.TBR);
+        return ResponseEntity.ok(tbr);
     }
     
     @GetMapping("/test")

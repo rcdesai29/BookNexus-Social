@@ -397,7 +397,22 @@ const ProfilePage: React.FC = () => {
   const fetchCurrentlyReadingBooks = async () => {
     try {
       setBooksLoading(true);
-      const response = await UserBookListService.getCurrentlyReading();
+      let response;
+      
+      if (userId && profile?.isOwnProfile === false) {
+        // Viewing another user's profile - call the new endpoint
+        const apiResponse = await fetch(`http://localhost:8088/api/v1/user-book-lists/user/${userId}/currently-reading`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        response = await apiResponse.json();
+      } else {
+        // Viewing own profile - use existing service
+        response = await UserBookListService.getCurrentlyReading();
+      }
+      
       setCurrentlyReadingBooks(response || []);
     } catch (error) {
       console.error('Error fetching currently reading books:', error);
@@ -409,7 +424,22 @@ const ProfilePage: React.FC = () => {
   const fetchReadBooks = async () => {
     try {
       setBooksLoading(true);
-      const response = await UserBookListService.getRead();
+      let response;
+      
+      if (userId && profile?.isOwnProfile === false) {
+        // Viewing another user's profile - call the new endpoint
+        const apiResponse = await fetch(`http://localhost:8088/api/v1/user-book-lists/user/${userId}/read`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        response = await apiResponse.json();
+      } else {
+        // Viewing own profile - use existing service
+        response = await UserBookListService.getRead();
+      }
+      
       setReadBooks(response || []);
     } catch (error) {
       console.error('Error fetching read books:', error);
