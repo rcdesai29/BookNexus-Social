@@ -36,6 +36,21 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
 }) => {
   const [showActions, setShowActions] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
 
   // Determine which book data to use and normalize the structure
   const book = (() => {
@@ -86,7 +101,7 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
             alt={book.title}
             style={{
               width: '100%',
-              height: '200px',
+              height: isMobile ? '140px' : '200px',
               objectFit: 'cover',
               borderRadius: '8px'
             }}
@@ -94,14 +109,14 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
         ) : (
           <div style={{
             width: '100%',
-            height: '200px',
+            height: isMobile ? '140px' : '200px',
             background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '8px'
           }}>
-            <MenuBookIcon style={{ color: '#8B7355', fontSize: '48px' }} />
+            <MenuBookIcon style={{ color: '#8B7355', fontSize: isMobile ? '32px' : '48px' }} />
           </div>
         )}
         
@@ -186,7 +201,7 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
   const cardStyle: React.CSSProperties = {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(10px)',
-    padding: '16px',
+    padding: isMobile ? '12px' : '16px',
     borderRadius: '12px',
     border: '1px solid #E6D7C3',
     boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
@@ -436,7 +451,7 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
       {/* Book Info */}
       <h3 style={{
         fontFamily: 'Playfair Display, serif',
-        fontSize: '16px',
+        fontSize: isMobile ? '14px' : '16px',
         fontWeight: 600,
         color: '#4B3F30',
         marginBottom: '8px',
@@ -452,7 +467,7 @@ const LibraryBookCard: React.FC<LibraryBookCardProps> = ({
       
       <p style={{
         color: '#6A5E4D',
-        fontSize: '14px',
+        fontSize: isMobile ? '12px' : '14px',
         marginBottom: '8px',
         overflow: 'hidden',
         textOverflow: 'ellipsis',

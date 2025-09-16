@@ -19,7 +19,9 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  Divider
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import { UserProfileService, UserProfileRequest } from '../app/services/services/UserProfileService';
@@ -33,6 +35,8 @@ const EditProfilePage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [formData, setFormData] = useState<LocalUserProfileRequest>({
     displayName: '',
@@ -119,8 +123,22 @@ const EditProfilePage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
+      padding: isMobile ? '16px' : '24px'
+    }}>
+      <Container maxWidth="md" sx={{ mt: isMobile ? 2 : 4 }}>
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: isMobile ? 2 : 3,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(230, 215, 195, 0.3)'
+          }}
+        >
         <Typography variant="h4" gutterBottom>
           Edit Profile
         </Typography>
@@ -300,8 +318,9 @@ const EditProfilePage: React.FC = () => {
             </Box>
           </Box>
         </form>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </div>
   );
 };
 

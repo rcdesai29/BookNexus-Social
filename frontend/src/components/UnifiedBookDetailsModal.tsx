@@ -48,6 +48,21 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   const [success, setSuccess] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [existingFeedback, setExistingFeedback] = useState<any>(null);
+  
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
   const [progress, setProgress] = useState<number>(0);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [progressError, setProgressError] = useState<string | null>(null);
@@ -265,16 +280,16 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    padding: '20px'
+    padding: isMobile ? '10px' : '20px'
   };
 
   const modalContentStyle: React.CSSProperties = {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     backdropFilter: 'blur(10px)',
-    borderRadius: '16px',
-    maxWidth: '700px',
+    borderRadius: isMobile ? '12px' : '16px',
+    maxWidth: isMobile ? '100%' : '700px',
     width: '100%',
-    maxHeight: '90vh',
+    maxHeight: isMobile ? '95vh' : '90vh',
     overflow: 'auto',
     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
     border: '1px solid rgba(230, 215, 195, 0.3)',
@@ -284,8 +299,8 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   const headerStyle: React.CSSProperties = {
     background: 'linear-gradient(135deg, #8B4513, #A0522D)',
     color: '#FFF8DC',
-    padding: '24px',
-    borderRadius: '16px 16px 0 0',
+    padding: isMobile ? '16px' : '24px',
+    borderRadius: isMobile ? '12px 12px 0 0' : '16px 16px 0 0',
     position: 'relative'
   };
 
@@ -308,7 +323,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
   };
 
   const bodyStyle: React.CSSProperties = {
-    padding: '24px',
+    padding: isMobile ? '16px' : '24px',
     color: '#4B3F3A'
   };
 
@@ -317,7 +332,7 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
     color: 'white',
     border: 'none',
     borderRadius: '8px',
-    padding: '12px 24px',
+    padding: isMobile ? '10px 16px' : '12px 24px',
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
@@ -338,16 +353,22 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
           >
             <CloseIcon style={{ fontSize: '18px' }} />
           </button>
-          <h2 style={{ margin: '0 40px 8px 0', fontSize: '24px', lineHeight: '1.3' }}>
+          <h2 style={{ margin: isMobile ? '0 32px 6px 0' : '0 40px 8px 0', fontSize: isMobile ? '18px' : '24px', lineHeight: '1.3' }}>
             {book.title}
           </h2>
-          <p style={{ margin: '0', fontSize: '16px', opacity: 0.9 }}>
+          <p style={{ margin: '0', fontSize: isMobile ? '14px' : '16px', opacity: 0.9 }}>
             by {book.authorName}
           </p>
         </div>
         
         <div style={bodyStyle}>
-          <div style={{ display: 'flex', gap: '24px', marginBottom: '24px' }}>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '16px' : '24px', 
+            marginBottom: isMobile ? '16px' : '24px',
+            alignItems: isMobile ? 'center' : 'flex-start'
+          }}>
             {/* Book Cover */}
             <div style={{ flexShrink: 0 }}>
               {book.cover ? (
@@ -355,8 +376,8 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                   src={book.cover}
                   alt={book.title}
                   style={{
-                    width: '120px',
-                    height: '180px',
+                    width: isMobile ? '100px' : '120px',
+                    height: isMobile ? '150px' : '180px',
                     objectFit: 'cover',
                     borderRadius: '8px',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
@@ -364,8 +385,8 @@ const UnifiedBookDetailsModal: React.FC<UnifiedBookDetailsModalProps> = ({
                 />
               ) : (
                 <div style={{
-                  width: '120px',
-                  height: '180px',
+                  width: isMobile ? '100px' : '120px',
+                  height: isMobile ? '150px' : '180px',
                   background: 'linear-gradient(135deg, #F4E3C1, #E6D7C3)',
                   borderRadius: '8px',
                   display: 'flex',

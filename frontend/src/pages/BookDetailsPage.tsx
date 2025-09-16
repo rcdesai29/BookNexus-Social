@@ -22,6 +22,23 @@ const BookDetailsPage: React.FC = () => {
   const { isLoggedIn } = useAuth();
   const { getBookById, loading: bookLoading } = useGoogleBooksAPI();
 
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
+  const isTablet = windowSize.width > 768 && windowSize.width <= 1024;
+  const isDesktop = windowSize.width > 1024;
+
   // State
   const [book, setBook] = useState<GoogleBook | null>(null);
   const [rating, setRating] = useState<number>(0);
@@ -37,6 +54,10 @@ const BookDetailsPage: React.FC = () => {
   const [averageRating, setAverageRating] = useState<number>(0);
   const [ratingCount, setRatingCount] = useState<number>(0);
   const [allReviews, setAllReviews] = useState<any[]>([]);
+  
+  // Refs for auto-scroll and auto-focus
+  const reviewFormRef = React.useRef<HTMLDivElement>(null);
+  const reviewTextareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   // Load book data on mount
   useEffect(() => {
@@ -218,7 +239,7 @@ const BookDetailsPage: React.FC = () => {
         borderBottom: '1px solid #E6D7C3',
         boxShadow: '0 2px 8px rgba(75, 63, 48, 0.1)'
       }}>
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto" style={{ padding: isMobile ? '12px 16px' : '16px 24px' }}>
           <div className="flex items-center justify-between">
             <button 
               onClick={() => navigate(-1)}
@@ -276,17 +297,22 @@ const BookDetailsPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto" style={{ padding: isMobile ? '16px' : isTablet ? '24px 20px' : '32px 24px' }}>
+        <div style={{
+          display: isMobile ? 'flex' : 'grid',
+          flexDirection: isMobile ? 'column' : undefined,
+          gridTemplateColumns: isMobile ? undefined : 'minmax(300px, 1fr) 2fr',
+          gap: isMobile ? '16px' : '32px'
+        }}>
           
           {/* Left Column - Book Cover and Actions */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
+          <div>
+            <div style={{ position: isMobile ? 'static' : 'sticky', top: isMobile ? 'auto' : '8px' }}>
               {/* Book Cover */}
               <div style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.8)',
                 backdropFilter: 'blur(10px)',
-                padding: '24px',
+                padding: isMobile ? '16px' : '24px',
                 borderRadius: '12px',
                 border: '1px solid #E6D7C3',
                 boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
@@ -296,8 +322,8 @@ const BookDetailsPage: React.FC = () => {
                   src={book.cover || '/api/placeholder/400/600'}
                   alt={book.title}
                   style={{
-                    width: '100%',
-                    maxWidth: '300px',
+                    width: isMobile ? '60%' : '100%',
+                    maxWidth: isMobile ? '200px' : '300px',
                     margin: '0 auto',
                     borderRadius: '8px',
                     boxShadow: '0 4px 12px rgba(75, 63, 48, 0.2)',
@@ -311,7 +337,7 @@ const BookDetailsPage: React.FC = () => {
                 <div style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.8)',
                   backdropFilter: 'blur(10px)',
-                  padding: '24px',
+                  padding: isMobile ? '16px' : '24px',
                   borderRadius: '12px',
                   border: '1px solid #E6D7C3',
                   boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
@@ -351,7 +377,24 @@ const BookDetailsPage: React.FC = () => {
                   </div>
 
                   <button
-                    onClick={() => setShowReviewForm(!showReviewForm)}
+                    onClick={() => {
+                      setShowReviewForm(!showReviewForm);
+                      // Auto-scroll and focus after state update
+                      setTimeout(() => {
+                        if (!showReviewForm && reviewFormRef.current) {
+                          reviewFormRef.current.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                          });
+                          // Focus the textarea after scroll
+                          setTimeout(() => {
+                            if (reviewTextareaRef.current) {
+                              reviewTextareaRef.current.focus();
+                            }
+                          }, 500);
+                        }
+                      }, 100);
+                    }}
                     style={{
                       width: '100%',
                       backgroundColor: '#2196F3',
@@ -375,12 +418,12 @@ const BookDetailsPage: React.FC = () => {
           </div>
 
           {/* Right Column - Book Info and Reviews */}
-          <div className="lg:col-span-3">
+          <div>
             {/* Book Header */}
             <div style={{
               backgroundColor: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(10px)',
-              padding: '32px',
+              padding: isMobile ? '16px' : '32px',
               borderRadius: '12px',
               border: '1px solid #E6D7C3',
               boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
@@ -390,7 +433,7 @@ const BookDetailsPage: React.FC = () => {
                 <span style={{ fontSize: '14px', color: '#8B7355' }}>Book #{book.id}</span>
               </div>
               <h1 style={{ 
-                fontSize: '32px', 
+                fontSize: isMobile ? '24px' : '32px', 
                 fontWeight: 'bold', 
                 color: '#4B3F30', 
                 marginBottom: '8px',
@@ -399,7 +442,7 @@ const BookDetailsPage: React.FC = () => {
                 {book.title}
               </h1>
               <p style={{ 
-                fontSize: '20px', 
+                fontSize: isMobile ? '16px' : '20px', 
                 color: '#6A5E4D', 
                 marginBottom: '16px'
               }}>
@@ -409,22 +452,23 @@ const BookDetailsPage: React.FC = () => {
               {/* Rating Display */}
               <div style={{ 
                 display: 'flex', 
-                alignItems: 'center', 
-                gap: '16px', 
+                alignItems: isMobile ? 'flex-start' : 'center',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: isMobile ? '8px' : '16px', 
                 marginBottom: '16px' 
               }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {renderStars(averageRating || 0)}
                   <span style={{ 
                     marginLeft: '8px', 
-                    fontSize: '24px', 
+                    fontSize: isMobile ? '18px' : '24px', 
                     fontWeight: 'bold',
                     color: '#4B3F30'
                   }}>
                     {(averageRating || 0).toFixed(2)}
                   </span>
                 </div>
-                <div style={{ color: '#6A5E4D' }}>
+                <div style={{ color: '#6A5E4D', fontSize: isMobile ? '14px' : '16px' }}>
                   {(ratingCount || 0).toLocaleString()} ratings · {allReviews.length} reviews
                 </div>
               </div>
@@ -448,7 +492,12 @@ const BookDetailsPage: React.FC = () => {
                 paddingTop: '24px',
                 borderTop: '1px solid #E6D7C3'
               }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ fontSize: '14px' }}>
+                <div style={{ 
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                  gap: '16px',
+                  fontSize: isMobile ? '12px' : '14px' 
+                }}>
                   {book.isbn && (
                     <div>
                       <span style={{ fontWeight: 500, color: '#4B3F30' }}>ISBN:</span>{' '}
@@ -465,15 +514,17 @@ const BookDetailsPage: React.FC = () => {
 
             {/* Review Form */}
             {showReviewForm && isLoggedIn && (
-              <div style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                backdropFilter: 'blur(10px)',
-                padding: '24px',
-                borderRadius: '12px',
-                border: '1px solid #E6D7C3',
-                boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
-                marginBottom: '24px'
-              }}>
+              <div 
+                ref={reviewFormRef}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(10px)',
+                  padding: isMobile ? '16px' : '24px',
+                  borderRadius: '12px',
+                  border: '1px solid #E6D7C3',
+                  boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
+                  marginBottom: '24px'
+                }}>
                 <h3 style={{
                   fontSize: '18px',
                   fontWeight: 600,
@@ -517,6 +568,7 @@ const BookDetailsPage: React.FC = () => {
                       Your Review:
                     </label>
                     <textarea
+                      ref={reviewTextareaRef}
                       value={review}
                       onChange={(e) => setReview(e.target.value)}
                       rows={4}
@@ -556,7 +608,7 @@ const BookDetailsPage: React.FC = () => {
                       style={{
                         backgroundColor: '#2196F3',
                         color: 'white',
-                        padding: '8px 24px',
+                        padding: isMobile ? '6px 16px' : '8px 24px',
                         border: 'none',
                         borderRadius: '8px',
                         fontSize: '14px',
@@ -576,7 +628,7 @@ const BookDetailsPage: React.FC = () => {
                       style={{
                         backgroundColor: '#8B7355',
                         color: 'white',
-                        padding: '8px 24px',
+                        padding: isMobile ? '6px 16px' : '8px 24px',
                         border: 'none',
                         borderRadius: '8px',
                         fontSize: '14px',
@@ -661,11 +713,28 @@ const BookDetailsPage: React.FC = () => {
                   </p>
                   {isLoggedIn && (
                     <button
-                      onClick={() => setShowReviewForm(true)}
+                      onClick={() => {
+                        setShowReviewForm(true);
+                        // Auto-scroll and focus after state update
+                        setTimeout(() => {
+                          if (reviewFormRef.current) {
+                            reviewFormRef.current.scrollIntoView({ 
+                              behavior: 'smooth', 
+                              block: 'start' 
+                            });
+                            // Focus the textarea after scroll
+                            setTimeout(() => {
+                              if (reviewTextareaRef.current) {
+                                reviewTextareaRef.current.focus();
+                              }
+                            }, 500);
+                          }
+                        }, 100);
+                      }}
                       style={{
                         backgroundColor: '#2196F3',
                         color: 'white',
-                        padding: '8px 24px',
+                        padding: isMobile ? '6px 16px' : '8px 24px',
                         border: 'none',
                         borderRadius: '8px',
                         fontSize: '14px',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CircularProgress,
@@ -23,6 +23,21 @@ import { useAuth } from '../hooks/useAuth';
 const BookListPage: React.FC = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
   
   const { data: allBooks, loading: allBooksLoading, error: allBooksError, page, setPage, size, setSize } = useBooks();
   
@@ -205,9 +220,9 @@ const BookListPage: React.FC = () => {
         {/* 2-Column Layout for logged-in users, single column for guests */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isLoggedIn ? '1fr 1fr' : '1fr',
-          gap: '32px',
-          marginBottom: '48px'
+          gridTemplateColumns: (isLoggedIn && !isMobile) ? '1fr 1fr' : '1fr',
+          gap: isMobile ? '24px' : '32px',
+          marginBottom: isMobile ? '32px' : '48px'
         }}>
           
           {/* LEFT COLUMN — Currently Reading & To Read (only for logged in users) */}
@@ -298,7 +313,7 @@ const BookListPage: React.FC = () => {
                 <div style={cardStyle}>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                     gap: '12px'
                   }}>
                     {toReadBooks.map((book) => (
@@ -341,7 +356,7 @@ const BookListPage: React.FC = () => {
                 <div style={cardStyle}>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
                     gap: '12px'
                   }}>
                     {favoriteBooks.map((book) => (
@@ -433,8 +448,10 @@ const BookListPage: React.FC = () => {
           ) : discoverBooks && discoverBooks.length > 0 ? (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: '24px'
+              gridTemplateColumns: isMobile 
+                ? 'repeat(auto-fill, minmax(140px, 1fr))' 
+                : 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: isMobile ? '16px' : '24px'
             }}>
               {discoverBooks.map((book: any) => (
                 <div 

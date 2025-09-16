@@ -29,6 +29,21 @@ const SearchPage: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
+  
   // State for results
   const [combinedResults, setCombinedResults] = useState<any[]>([]);
   
@@ -490,8 +505,10 @@ const SearchPage: React.FC = () => {
             {combinedResults.length > 0 ? (
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                gap: '24px'
+                gridTemplateColumns: isMobile 
+                  ? 'repeat(auto-fill, minmax(140px, 1fr))' 
+                  : 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: isMobile ? '16px' : '24px'
               }}>
                 {combinedResults.map(renderBookCard)}
               </div>
@@ -542,7 +559,9 @@ const SearchPage: React.FC = () => {
             </h3>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gridTemplateColumns: isMobile 
+                ? '1fr' 
+                : 'repeat(auto-fit, minmax(250px, 1fr))',
               gap: '16px'
             }}>
               <div>

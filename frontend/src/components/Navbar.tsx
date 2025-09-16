@@ -125,9 +125,10 @@ const Navbar: React.FC = () => {
               }}
               sx={{
                 borderRadius: '12px',
+                backgroundColor: '#FFE8E8',
                 '&:hover': {
-                  backgroundColor: '#F7F1E8',
-                  color: '#B8956A'
+                  backgroundColor: '#FFCCCC',
+                  color: '#D32F2F'
                 }
               }}
             >
@@ -135,51 +136,106 @@ const Navbar: React.FC = () => {
                 primary="Logout"
                 sx={{
                   fontFamily: 'Inter, sans-serif',
-                  color: '#3C2A1E'
+                  color: '#D32F2F',
+                  fontWeight: 600
                 }}
               />
             </ListItemButton>
           </ListItem>
         )}
-      </List>
-      {isLoggedIn && (
-        <>
-          <Divider sx={{ my: 3, borderColor: '#E6D7C3' }} />
-          <Box component="form" onSubmit={handleSearch}>
-            <TextField
-              size="small"
-              variant="outlined"
-              placeholder="Search books..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              fullWidth
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'white',
-                  borderColor: '#E6D7C3',
+        {!isLoggedIn && (
+          <>
+            <Divider sx={{ my: 2, borderColor: '#E6D7C3' }} />
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                component={Link}
+                to="/register"
+                onClick={() => setDrawerOpen(false)}
+                sx={{
                   borderRadius: '12px',
-                  '& fieldset': {
-                    borderColor: '#E6D7C3',
-                  },
-                  '&:hover fieldset': {
+                  backgroundColor: 'rgba(184, 149, 106, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(184, 149, 106, 0.2)',
+                    color: '#B8956A'
+                  }
+                }}
+              >
+                <ListItemText
+                  primary="Create Account"
+                  sx={{
+                    fontFamily: 'Inter, sans-serif',
+                    color: '#B8956A',
+                    fontWeight: 600
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                component={Link}
+                to="/login"
+                onClick={() => setDrawerOpen(false)}
+                sx={{
+                  borderRadius: '12px',
+                  border: '2px solid #E6D7C3',
+                  '&:hover': {
+                    backgroundColor: '#F7F1E8',
                     borderColor: '#B8956A',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#B8956A',
-                  },
-                },
-                '& .MuiInputBase-input': {
-                  fontFamily: 'Inter, sans-serif',
-                  color: '#3C2A1E',
-                }
-              }}
-            />
-          </Box>
-        </>
-      )}
+                    color: '#B8956A'
+                  }
+                }}
+              >
+                <ListItemText
+                  primary="Sign In"
+                  sx={{
+                    fontFamily: 'Inter, sans-serif',
+                    color: '#3C2A1E',
+                    fontWeight: 500
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+      </List>
+      <Divider sx={{ my: 3, borderColor: '#E6D7C3' }} />
+      <Box component="form" onSubmit={handleSearch}>
+        <TextField
+          size="small"
+          variant="outlined"
+          placeholder="Search books..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          fullWidth
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'white',
+              borderColor: '#E6D7C3',
+              borderRadius: '12px',
+              '& fieldset': {
+                borderColor: '#E6D7C3',
+              },
+              '&:hover fieldset': {
+                borderColor: '#B8956A',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#B8956A',
+              },
+            },
+            '& .MuiInputBase-input': {
+              fontFamily: 'Inter, sans-serif',
+              color: '#3C2A1E',
+            }
+          }}
+        />
+      </Box>
       {isLoggedIn && user && (
         <>
           <Divider sx={{ my: 3, borderColor: '#E6D7C3' }} />
+          {/* Notification Bell for Mobile */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <NotificationBell />
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
               sx={{

@@ -9,11 +9,16 @@ import {
   Typography,
   Box,
   Divider,
-  Button
+  Button,
+  useMediaQuery,
+  useTheme,
+  Modal,
+  Fade
 } from '@mui/material';
 import {
   Notifications as NotificationsIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import webSocketService, { WebSocketMessage } from '../services/WebSocketService';
 import { useAuth } from '../hooks/useAuth';
@@ -37,6 +42,8 @@ const NotificationBell: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [currentUserDisplayName, setCurrentUserDisplayName] = useState<string>('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Fetch current user's display name
   useEffect(() => {
@@ -333,7 +340,8 @@ const NotificationBell: React.FC = () => {
         </Badge>
       </IconButton>
 
-      {dropdownOpen && (
+      {/* Desktop Dropdown */}
+      {dropdownOpen && !isMobile && (
         <Paper
           sx={{
             position: 'absolute',
@@ -453,6 +461,202 @@ const NotificationBell: React.FC = () => {
           )}
         </Paper>
       )}
+
+      {/* Mobile Modal */}
+      <Modal
+        open={dropdownOpen && isMobile}
+        onClose={() => setDropdownOpen(false)}
+        closeAfterTransition
+        sx={{
+          zIndex: 1300
+        }}
+      >
+        <Fade in={dropdownOpen && isMobile}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              bgcolor: 'rgba(250, 243, 227, 0.98)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Header */}
+            <Box
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+                borderBottom: '1px solid #E6D7C3',
+                boxShadow: '0 2px 8px rgba(75, 63, 48, 0.1)',
+                p: 2
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <IconButton
+                    onClick={() => setDropdownOpen(false)}
+                    sx={{
+                      color: '#D2691E',
+                      '&:hover': {
+                        backgroundColor: 'rgba(210, 105, 30, 0.1)'
+                      }
+                    }}
+                  >
+                    <ArrowBackIcon />
+                  </IconButton>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontFamily: 'Playfair Display, serif', 
+                      fontWeight: 700, 
+                      color: '#4B3F30' 
+                    }}
+                  >
+                    Notifications
+                  </Typography>
+                </Box>
+                {notifications.length > 0 && (
+                  <Button
+                    onClick={clearAllNotifications}
+                    sx={{
+                      color: '#8B7355',
+                      fontSize: '0.875rem',
+                      textTransform: 'none',
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 500,
+                      '&:hover': {
+                        backgroundColor: '#F7F1E8'
+                      }
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </Box>
+            </Box>
+
+            {/* Content */}
+            <Box sx={{ flex: 1, overflow: 'auto' }}>
+              {notifications.length === 0 ? (
+                <Box 
+                  sx={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    p: 4,
+                    textAlign: 'center'
+                  }}
+                >
+                  <NotificationsIcon 
+                    sx={{ 
+                      fontSize: 64, 
+                      color: '#E6D7C3', 
+                      mb: 2 
+                    }} 
+                  />
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontFamily: 'Playfair Display, serif',
+                      color: '#4B3F30',
+                      mb: 1
+                    }}
+                  >
+                    No notifications yet
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontFamily: 'Inter, sans-serif',
+                      color: '#8B7355'
+                    }}
+                  >
+                    When you have notifications, they'll appear here
+                  </Typography>
+                </Box>
+              ) : (
+                <List sx={{ p: 0 }}>
+                  {notifications.map((notification, index) => (
+                    <React.Fragment key={notification.id}>
+                      <ListItem
+                        sx={{
+                          alignItems: 'flex-start',
+                          backgroundColor: notification.read ? 'transparent' : 'rgba(33, 150, 243, 0.08)',
+                          p: 3,
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)'
+                          }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3, width: '100%' }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              backgroundColor: getNotificationColor(notification.type),
+                              color: 'white',
+                              fontSize: '20px',
+                              flexShrink: 0
+                            }}
+                          >
+                            {getNotificationIcon(notification.type)}
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography
+                              sx={{
+                                fontFamily: 'Inter, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: notification.read ? 400 : 600,
+                                color: '#3C2A1E',
+                                lineHeight: 1.4,
+                                mb: 1
+                              }}
+                            >
+                              {notification.message}
+                            </Typography>
+                            <Typography
+                              sx={{
+                                fontFamily: 'Inter, sans-serif',
+                                fontSize: '14px',
+                                color: '#8B7355'
+                              }}
+                            >
+                              {new Date(notification.timestamp).toLocaleString()}
+                            </Typography>
+                          </Box>
+                          <IconButton
+                            onClick={() => removeNotification(notification.id)}
+                            sx={{
+                              color: '#999',
+                              '&:hover': {
+                                color: '#666',
+                                backgroundColor: 'rgba(0,0,0,0.04)'
+                              }
+                            }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Box>
+                      </ListItem>
+                      {index < notifications.length - 1 && <Divider sx={{ borderColor: '#E6D7C3' }} />}
+                    </React.Fragment>
+                  ))}
+                </List>
+              )}
+            </Box>
+          </Box>
+        </Fade>
+      </Modal>
     </Box>
   );
 };

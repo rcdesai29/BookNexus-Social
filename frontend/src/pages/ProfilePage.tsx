@@ -34,6 +34,23 @@ const ProfilePage: React.FC = () => {
   // Force recompilation to clear TypeScript cache
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
+  const isTablet = windowSize.width > 768 && windowSize.width <= 1024;
+  const isDesktop = windowSize.width > 1024;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -489,22 +506,24 @@ const ProfilePage: React.FC = () => {
   };
 
   const tabStyle = (isActive: boolean): React.CSSProperties => ({
-    padding: '12px 24px',
+    padding: isMobile ? '10px 16px' : '12px 24px',
     backgroundColor: isActive ? '#D2691E' : 'transparent',
     color: isActive ? 'white' : '#4B3F30',
     border: 'none',
     borderRadius: '8px 8px 0 0',
-    fontSize: '16px',
+    fontSize: isMobile ? '14px' : '16px',
     fontWeight: 500,
     cursor: 'pointer',
     transition: 'all 0.2s',
-    borderBottom: isActive ? '3px solid #B85A1A' : '1px solid #E6D7C3'
+    borderBottom: isActive ? '3px solid #B85A1A' : '1px solid #E6D7C3',
+    whiteSpace: 'nowrap',
+    minWidth: 'fit-content'
   });
 
   const statsCardStyle: React.CSSProperties = {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(10px)',
-    padding: '24px',
+    padding: isMobile ? '16px' : isTablet ? '20px' : '24px',
     borderRadius: '12px',
     border: '1px solid #E6D7C3',
     boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
@@ -607,20 +626,20 @@ const ProfilePage: React.FC = () => {
       <div style={{
         background: 'linear-gradient(90deg, #4B3F30, #5D4A33, #4B3F30)',
         color: 'white',
-        padding: '48px 0',
+        padding: isMobile ? '24px 0' : isTablet ? '32px 0' : '48px 0',
         textAlign: 'center'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 24px' }}>
           <h1 style={{
             fontFamily: 'Playfair Display, serif',
-            fontSize: '36px',
+            fontSize: isMobile ? '24px' : isTablet ? '28px' : '36px',
             fontWeight: 700,
             marginBottom: '16px'
           }}>
             Profile
           </h1>
           <p style={{
-            fontSize: '18px',
+            fontSize: isMobile ? '14px' : isTablet ? '16px' : '18px',
             color: 'rgba(255, 255, 255, 0.9)',
             maxWidth: '600px',
             margin: '0 auto'
@@ -630,28 +649,34 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        padding: isMobile ? '24px 16px' : isTablet ? '32px 20px' : '48px 24px' 
+      }}>
         {/* Profile Header Card */}
         <div style={{
           backgroundColor: 'rgba(255, 255, 255, 0.8)',
           backdropFilter: 'blur(10px)',
-          padding: '32px',
+          padding: isMobile ? '20px' : isTablet ? '24px' : '32px',
           borderRadius: '16px',
           border: '1px solid #E6D7C3',
           boxShadow: '0 4px 20px rgba(75, 63, 48, 0.1)',
-          marginBottom: '32px'
+          marginBottom: isMobile ? '20px' : '32px'
         }}>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 2fr',
-            gap: '32px',
-            alignItems: 'start'
+            display: isMobile ? 'flex' : 'grid',
+            flexDirection: isMobile ? 'column' : undefined,
+            gridTemplateColumns: isMobile ? undefined : isTablet ? '1fr 1.5fr' : '1fr 2fr',
+            gap: isMobile ? '20px' : isTablet ? '24px' : '32px',
+            alignItems: isMobile ? 'center' : 'start',
+            textAlign: isMobile ? 'center' : 'left'
           }}>
             {/* Avatar and Basic Info */}
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                width: '120px',
-                height: '120px',
+                width: isMobile ? '80px' : isTablet ? '100px' : '120px',
+                height: isMobile ? '80px' : isTablet ? '100px' : '120px',
                 borderRadius: '50%',
                 backgroundColor: '#E6D7C3',
                 display: 'flex',
@@ -666,7 +691,7 @@ const ProfilePage: React.FC = () => {
               </div>
               <h2 style={{
                 fontFamily: 'Playfair Display, serif',
-                fontSize: '28px',
+                fontSize: isMobile ? '20px' : isTablet ? '24px' : '28px',
                 fontWeight: 600,
                 color: '#4B3F30',
                 marginBottom: '8px'
@@ -675,7 +700,7 @@ const ProfilePage: React.FC = () => {
               </h2>
               <p style={{
                 color: '#6A5E4D',
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
                 marginBottom: '16px'
               }}>
                 @{profile.username}
@@ -689,8 +714,8 @@ const ProfilePage: React.FC = () => {
                     color: profile.isFollowing ? '#D2691E' : 'white',
                     border: `1px solid #D2691E`,
                     borderRadius: '8px',
-                    padding: '12px 24px',
-                    fontSize: '16px',
+                    padding: isMobile ? '10px 16px' : '12px 24px',
+                    fontSize: isMobile ? '14px' : '16px',
                     fontWeight: 500,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
@@ -731,8 +756,8 @@ const ProfilePage: React.FC = () => {
                     color: '#D2691E',
                     border: '1px solid #D2691E',
                     borderRadius: '8px',
-                    padding: '12px 24px',
-                    fontSize: '16px',
+                    padding: isMobile ? '10px 16px' : '12px 24px',
+                    fontSize: isMobile ? '14px' : '16px',
                     fontWeight: 500,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
@@ -761,9 +786,9 @@ const ProfilePage: React.FC = () => {
             <div>
               {profile.bio && (
                 <p style={{
-                  fontSize: '18px',
+                  fontSize: isMobile ? '14px' : isTablet ? '16px' : '18px',
                   color: '#4B3F30',
-                  marginBottom: '24px',
+                  marginBottom: isMobile ? '16px' : '24px',
                   lineHeight: 1.6
                 }}>
                   {profile.bio}
@@ -1013,9 +1038,13 @@ const ProfilePage: React.FC = () => {
         {/* Stats Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px',
-          marginBottom: '32px'
+          gridTemplateColumns: isMobile 
+            ? '1fr 1fr' 
+            : isTablet 
+              ? 'repeat(auto-fit, minmax(180px, 1fr))' 
+              : 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: isMobile ? '12px' : '16px',
+          marginBottom: isMobile ? '24px' : '32px'
         }}>
           <div style={statsCardStyle}>
             <BookIcon style={{ color: '#D2691E', fontSize: '40px', marginBottom: '8px' }} />
@@ -1130,8 +1159,10 @@ const ProfilePage: React.FC = () => {
           <div style={{
             display: 'flex',
             borderBottom: '1px solid #E6D7C3',
-            backgroundColor: 'rgba(255, 255, 255, 0.5)'
-          }}>
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch'
+          } as React.CSSProperties}>
             <button
               style={tabStyle(activeTab === 0)}
               onClick={() => {
@@ -1177,14 +1208,14 @@ const ProfilePage: React.FC = () => {
           </div>
           
           {/* Tab Content */}
-          <div style={{ padding: '32px' }}>
+          <div style={{ padding: isMobile ? '16px' : isTablet ? '24px' : '32px' }}>
             {activeTab === 0 && (
               <div>
                 <h3 style={{
                   fontFamily: 'Playfair Display, serif',
-                  fontSize: '24px',
+                  fontSize: isMobile ? '18px' : isTablet ? '20px' : '24px',
                   color: '#4B3F30',
-                  marginBottom: '24px',
+                  marginBottom: isMobile ? '16px' : '24px',
                   textAlign: 'center'
                 }}>
                   Currently Reading ({currentlyReadingBooks.length} books)
@@ -1206,8 +1237,10 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: '20px'
+                    gridTemplateColumns: isMobile 
+                      ? 'repeat(auto-fill, minmax(100px, 1fr))' 
+                      : 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: isMobile ? '8px' : '20px'
                   }}>
                     {currentlyReadingBooks.map((bookList) => {
                       const book = bookList.book || bookList.googleBook;
@@ -1216,14 +1249,14 @@ const ProfilePage: React.FC = () => {
                         <div key={bookList.id} style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.8)',
                           borderRadius: '12px',
-                          padding: '16px',
+                          padding: isMobile ? '8px' : '16px',
                           border: '1px solid #E6D7C3',
                           boxShadow: '0 2px 8px rgba(75, 63, 48, 0.1)',
                           textAlign: 'center'
                         }}>
                           <div style={{
-                            width: '120px',
-                            height: '180px',
+                            width: isMobile ? '60px' : '120px',
+                            height: isMobile ? '90px' : '180px',
                             backgroundColor: '#f0f0f0',
                             borderRadius: '8px',
                             margin: '0 auto 12px',
@@ -1234,21 +1267,21 @@ const ProfilePage: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            {!coverUrl && <BookIcon style={{ color: '#8B7355', fontSize: '40px' }} />}
+                            {!coverUrl && <BookIcon style={{ color: '#8B7355', fontSize: isMobile ? '20px' : '40px' }} />}
                           </div>
                           <h4 style={{
-                            fontSize: '14px',
+                            fontSize: isMobile ? '12px' : '14px',
                             fontWeight: 600,
                             color: '#4B3F30',
                             marginBottom: '4px',
                             lineHeight: 1.3,
-                            height: '36px',
+                            height: isMobile ? '32px' : '36px',
                             overflow: 'hidden'
                           }}>
                             {book?.title}
                           </h4>
                           <p style={{
-                            fontSize: '12px',
+                            fontSize: isMobile ? '10px' : '12px',
                             color: '#6A5E4D',
                             margin: 0
                           }}>
@@ -1265,9 +1298,9 @@ const ProfilePage: React.FC = () => {
               <div>
                 <h3 style={{
                   fontFamily: 'Playfair Display, serif',
-                  fontSize: '24px',
+                  fontSize: isMobile ? '18px' : isTablet ? '20px' : '24px',
                   color: '#4B3F30',
-                  marginBottom: '24px',
+                  marginBottom: isMobile ? '16px' : '24px',
                   textAlign: 'center'
                 }}>
                   Read Books ({readBooks.length} books)
@@ -1289,8 +1322,10 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: '20px'
+                    gridTemplateColumns: isMobile 
+                      ? 'repeat(auto-fill, minmax(100px, 1fr))' 
+                      : 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: isMobile ? '8px' : '20px'
                   }}>
                     {readBooks.map((bookList) => {
                       const book = bookList.book || bookList.googleBook;
@@ -1299,14 +1334,14 @@ const ProfilePage: React.FC = () => {
                         <div key={bookList.id} style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.8)',
                           borderRadius: '12px',
-                          padding: '16px',
+                          padding: isMobile ? '8px' : '16px',
                           border: '1px solid #E6D7C3',
                           boxShadow: '0 2px 8px rgba(75, 63, 48, 0.1)',
                           textAlign: 'center'
                         }}>
                           <div style={{
-                            width: '120px',
-                            height: '180px',
+                            width: isMobile ? '60px' : '120px',
+                            height: isMobile ? '90px' : '180px',
                             backgroundColor: '#f0f0f0',
                             borderRadius: '8px',
                             margin: '0 auto 12px',
@@ -1317,21 +1352,21 @@ const ProfilePage: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            {!coverUrl && <BookIcon style={{ color: '#8B7355', fontSize: '40px' }} />}
+                            {!coverUrl && <BookIcon style={{ color: '#8B7355', fontSize: isMobile ? '20px' : '40px' }} />}
                           </div>
                           <h4 style={{
-                            fontSize: '14px',
+                            fontSize: isMobile ? '12px' : '14px',
                             fontWeight: 600,
                             color: '#4B3F30',
                             marginBottom: '4px',
                             lineHeight: 1.3,
-                            height: '36px',
+                            height: isMobile ? '32px' : '36px',
                             overflow: 'hidden'
                           }}>
                             {book?.title}
                           </h4>
                           <p style={{
-                            fontSize: '12px',
+                            fontSize: isMobile ? '10px' : '12px',
                             color: '#6A5E4D',
                             margin: 0
                           }}>
@@ -1367,7 +1402,7 @@ const ProfilePage: React.FC = () => {
                   </h3>
                   <span style={{
                     color: '#6A5E4D',
-                    fontSize: '14px'
+                    fontSize: isMobile ? '12px' : '14px'
                   }}>
                     {profile.reviewsCount || 0} total reviews
                   </span>
@@ -1396,7 +1431,7 @@ const ProfilePage: React.FC = () => {
                         style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.6)',
                           borderRadius: '12px',
-                          padding: '20px',
+                          padding: isMobile ? '16px' : '20px',
                           border: '1px solid #E6D7C3',
                           boxShadow: '0 2px 8px rgba(75, 63, 48, 0.05)',
                           position: 'relative'
@@ -1476,36 +1511,40 @@ const ProfilePage: React.FC = () => {
                         
                         <div style={{
                           display: 'flex',
-                          gap: '16px',
-                          marginBottom: '12px'
+                          gap: isMobile ? '12px' : '16px',
+                          marginBottom: '12px',
+                          flexDirection: isMobile ? 'column' : 'row'
                         }}>
                           {review.bookCover && (
                             <img
                               src={review.bookCover}
                               alt={review.bookTitle}
                               style={{
-                                width: '60px',
-                                height: '90px',
+                                width: isMobile ? '40px' : '60px',
+                                height: isMobile ? '60px' : '90px',
                                 objectFit: 'cover',
                                 borderRadius: '6px',
-                                border: '1px solid #E6D7C3'
+                                border: '1px solid #E6D7C3',
+                                alignSelf: isMobile ? 'center' : 'flex-start'
                               }}
                             />
                           )}
                           <div style={{ flex: 1 }}>
                             <h4 style={{
                               fontFamily: 'Playfair Display, serif',
-                              fontSize: '18px',
+                              fontSize: isMobile ? '16px' : '18px',
                               color: '#4B3F30',
                               margin: '0 0 4px 0',
-                              lineHeight: 1.2
+                              lineHeight: 1.2,
+                              textAlign: isMobile ? 'center' : 'left'
                             }}>
                               {review.bookTitle}
                             </h4>
                             <p style={{
                               color: '#6A5E4D',
-                              fontSize: '14px',
-                              margin: '0 0 8px 0'
+                              fontSize: isMobile ? '12px' : '14px',
+                              margin: '0 0 8px 0',
+                              textAlign: isMobile ? 'center' : 'left'
                             }}>
                               by {review.bookAuthor}
                             </p>
@@ -1534,7 +1573,7 @@ const ProfilePage: React.FC = () => {
                               )}
                               <span style={{
                                 color: '#6A5E4D',
-                                fontSize: '12px'
+                                fontSize: isMobile ? '10px' : '12px'
                               }}>
                                 {review.createdDate && new Date(review.createdDate).toLocaleDateString()}
                               </span>
@@ -1608,7 +1647,7 @@ const ProfilePage: React.FC = () => {
                           review.review && (
                             <p style={{
                               color: '#4B3F30',
-                              fontSize: '14px',
+                              fontSize: isMobile ? '12px' : '14px',
                               lineHeight: 1.5,
                               margin: '0',
                               fontStyle: 'italic'
@@ -1685,8 +1724,8 @@ const ProfilePage: React.FC = () => {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   color: '#3C2A1E',
-                  marginBottom: '24px',
-                  fontSize: '20px'
+                  marginBottom: isMobile ? '16px' : '24px',
+                  fontSize: isMobile ? '16px' : isTablet ? '18px' : '20px'
                 }}>
                   Followers ({followers.length} followers)
                 </h3>
@@ -1706,20 +1745,22 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: '16px'
+                    gridTemplateColumns: isMobile 
+                      ? '1fr' 
+                      : 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: isMobile ? '12px' : '16px'
                   }}>
                     {followers.map((follower) => (
                       <div
                         key={follower.id}
                         style={{
-                          padding: '16px',
+                          padding: isMobile ? '8px' : '16px',
                           borderRadius: '12px',
                           border: '1px solid #E6D7C3',
                           backgroundColor: '#FDFCFA',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px',
+                          gap: isMobile ? '8px' : '12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease'
                         }}
@@ -1732,8 +1773,8 @@ const ProfilePage: React.FC = () => {
                         }}
                       >
                         <div style={{
-                          width: '40px',
-                          height: '40px',
+                          width: isMobile ? '32px' : '40px',
+                          height: isMobile ? '32px' : '40px',
                           borderRadius: '50%',
                           backgroundColor: '#8B7355',
                           display: 'flex',
@@ -1741,7 +1782,7 @@ const ProfilePage: React.FC = () => {
                           justifyContent: 'center',
                           color: 'white',
                           fontWeight: 'bold',
-                          fontSize: '16px'
+                          fontSize: isMobile ? '14px' : '16px'
                         }}>
                           {follower.fullName?.charAt(0) || '?'}
                         </div>
@@ -1749,13 +1790,13 @@ const ProfilePage: React.FC = () => {
                           <div style={{
                             fontWeight: 600,
                             color: '#3C2A1E',
-                            fontSize: '14px'
+                            fontSize: isMobile ? '12px' : '14px'
                           }}>
                             {follower.fullName || 'Unknown User'}
                           </div>
                           <div style={{
                             color: '#8B7355',
-                            fontSize: '12px'
+                            fontSize: isMobile ? '10px' : '12px'
                           }}>
                             {follower.email}
                           </div>
@@ -1772,8 +1813,8 @@ const ProfilePage: React.FC = () => {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   color: '#3C2A1E',
-                  marginBottom: '24px',
-                  fontSize: '20px'
+                  marginBottom: isMobile ? '16px' : '24px',
+                  fontSize: isMobile ? '16px' : isTablet ? '18px' : '20px'
                 }}>
                   Following ({following.length} users)
                 </h3>
@@ -1793,20 +1834,22 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: '16px'
+                    gridTemplateColumns: isMobile 
+                      ? '1fr' 
+                      : 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: isMobile ? '12px' : '16px'
                   }}>
                     {following.map((user) => (
                       <div
                         key={user.id}
                         style={{
-                          padding: '16px',
+                          padding: isMobile ? '8px' : '16px',
                           borderRadius: '12px',
                           border: '1px solid #E6D7C3',
                           backgroundColor: '#FDFCFA',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px',
+                          gap: isMobile ? '8px' : '12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease'
                         }}
@@ -1819,8 +1862,8 @@ const ProfilePage: React.FC = () => {
                         }}
                       >
                         <div style={{
-                          width: '40px',
-                          height: '40px',
+                          width: isMobile ? '32px' : '40px',
+                          height: isMobile ? '32px' : '40px',
                           borderRadius: '50%',
                           backgroundColor: '#8B7355',
                           display: 'flex',
@@ -1828,7 +1871,7 @@ const ProfilePage: React.FC = () => {
                           justifyContent: 'center',
                           color: 'white',
                           fontWeight: 'bold',
-                          fontSize: '16px'
+                          fontSize: isMobile ? '14px' : '16px'
                         }}>
                           {user.fullName?.charAt(0) || '?'}
                         </div>
@@ -1836,13 +1879,13 @@ const ProfilePage: React.FC = () => {
                           <div style={{
                             fontWeight: 600,
                             color: '#3C2A1E',
-                            fontSize: '14px'
+                            fontSize: isMobile ? '12px' : '14px'
                           }}>
                             {user.fullName || 'Unknown User'}
                           </div>
                           <div style={{
                             color: '#8B7355',
-                            fontSize: '12px'
+                            fontSize: isMobile ? '10px' : '12px'
                           }}>
                             {user.email}
                           </div>
@@ -1874,8 +1917,8 @@ const ProfilePage: React.FC = () => {
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
-            padding: '32px',
-            maxWidth: '400px',
+            padding: isMobile ? '20px' : '32px',
+            maxWidth: isMobile ? '320px' : '400px',
             width: '90%',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
             border: '2px solid #E6D7C3'
@@ -1884,14 +1927,15 @@ const ProfilePage: React.FC = () => {
               fontFamily: 'Playfair Display, serif',
               color: '#4B3F30',
               margin: '0 0 16px 0',
-              fontSize: '22px'
+              fontSize: isMobile ? '18px' : '22px'
             }}>
               Delete Review
             </h3>
             <p style={{
               color: '#6A5E4D',
               margin: '0 0 24px 0',
-              lineHeight: 1.5
+              lineHeight: 1.5,
+              fontSize: isMobile ? '14px' : '16px'
             }}>
               Are you sure you want to delete your review for "{reviewToDelete?.bookTitle}"? This action cannot be undone.
             </p>

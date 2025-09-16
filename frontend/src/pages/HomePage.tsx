@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CircularProgress,
@@ -9,7 +9,9 @@ import {
 import {
   Coffee,
   AutoStories,
-  MenuBook
+  MenuBook,
+  NavigateNext,
+  NavigateBefore
 } from '@mui/icons-material';
 import { useGoogleBooksSimple } from '../hooks/useGoogleBooksSimple';
 import { useBorrowedBooks } from '../hooks/useBorrowedBooks';
@@ -25,6 +27,23 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
+  const isTablet = windowSize.width > 768 && windowSize.width <= 1024;
+  const isDesktop = windowSize.width > 1024;
+  
   // Only fetch user data if logged in
   const { data: borrowedBooks, loading: borrowedLoading } = useBorrowedBooks();
   const { data: myBooks, loading: myBooksLoading } = useMyBooks(); 
@@ -34,8 +53,12 @@ const HomePage: React.FC = () => {
   const [favoriteBooks, setFavoriteBooks] = useState<any[]>([]);
   const [favoritesLoading, setFavoritesLoading] = useState(false);
   
-  // Always fetch discovery books (works for guests too)
-  const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooksSimple('bestsellers', 20);
+  // Pagination state for discover books
+  const [currentPage, setCurrentPage] = useState(1);
+  const booksPerPage = 20; // Keep original amount
+  
+  // Always fetch discovery books (works for guests too) - get more books for pagination
+  const { data: discoverBooks, loading: discoverBooksLoading, error: discoverBooksError } = useGoogleBooksSimple('bestsellers', booksPerPage * 10); // Get 10 pages worth
   
   // Modal state for book details
   const [selectedBook, setSelectedBook] = useState<any>(null);
@@ -73,6 +96,24 @@ const HomePage: React.FC = () => {
   const getBookRatingCount = (book: any) => {
     const update = bookRatingUpdates[book.googleBookId];
     return update ? update.count : book.ratingsCount;
+  };
+  
+  // Calculate pagination
+  const totalPages = Math.ceil((discoverBooks?.length || 0) / booksPerPage);
+  const startIndex = (currentPage - 1) * booksPerPage;
+  const currentBooks = discoverBooks?.slice(startIndex, startIndex + booksPerPage) || [];
+  
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
 
   // Fetch favorites when user is logged in
@@ -163,19 +204,19 @@ const HomePage: React.FC = () => {
   const cardStyle: React.CSSProperties = {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(10px)',
-    padding: '16px',
+    padding: isMobile ? '12px' : '16px',
     borderRadius: '12px',
     border: '1px solid #E6D7C3',
     boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
-    marginBottom: '24px'
+    marginBottom: isMobile ? '16px' : '24px'
   };
 
   const headingStyle: React.CSSProperties = {
     fontFamily: 'Playfair Display, serif',
-    fontSize: '20px',
+    fontSize: isMobile ? '18px' : isTablet ? '19px' : '20px',
     fontWeight: 600,
     color: '#4B3F30',
-    marginBottom: '24px'
+    marginBottom: isMobile ? '16px' : '24px'
   };
 
   const buttonStyle: React.CSSProperties = {
@@ -196,20 +237,20 @@ const HomePage: React.FC = () => {
       <div style={{
         background: 'linear-gradient(90deg, #4B3F30, #5D4A33, #4B3F30)',
         color: 'white',
-        padding: '64px 0',
+        padding: isMobile ? '32px 0' : isTablet ? '48px 0' : '64px 0',
         textAlign: 'center'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 24px' }}>
           <h1 style={{
             fontFamily: 'Playfair Display, serif',
-            fontSize: '48px',
+            fontSize: isMobile ? '28px' : isTablet ? '36px' : '48px',
             fontWeight: 700,
             marginBottom: '16px'
           }}>
             {isLoggedIn ? 'Welcome Back to Your Literary Haven' : 'Welcome to BookNexus'}
           </h1>
           <p style={{
-            fontSize: '20px',
+            fontSize: isMobile ? '14px' : isTablet ? '16px' : '20px',
             color: 'rgba(255, 255, 255, 0.9)',
             maxWidth: '600px',
             margin: '0 auto 24px'
@@ -220,7 +261,7 @@ const HomePage: React.FC = () => {
             }
           </p>
           {!isLoggedIn && (
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: isMobile ? 1.5 : 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="contained"
                 onClick={() => navigate('/register')}
@@ -229,11 +270,11 @@ const HomePage: React.FC = () => {
                   color: 'white',
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 500,
-                  px: 4,
-                  py: 1.5,
+                  px: isMobile ? 3 : 4,
+                  py: isMobile ? 1.2 : 1.5,
                   borderRadius: '8px',
                   textTransform: 'none',
-                  fontSize: '16px',
+                  fontSize: isMobile ? '14px' : '16px',
                   boxShadow: '0 2px 10px rgba(184, 149, 106, 0.3)',
                   '&:hover': {
                     background: 'linear-gradient(45deg, #9D7F56, #B8956A)',
@@ -251,11 +292,11 @@ const HomePage: React.FC = () => {
                   borderColor: 'rgba(255, 255, 255, 0.5)',
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 500,
-                  px: 4,
-                  py: 1.5,
+                  px: isMobile ? 3 : 4,
+                  py: isMobile ? 1.2 : 1.5,
                   borderRadius: '8px',
                   textTransform: 'none',
-                  fontSize: '16px',
+                  fontSize: isMobile ? '14px' : '16px',
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     borderColor: 'white'
@@ -269,7 +310,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '24px 16px' : isTablet ? '32px 20px' : '48px 24px' }}>
         {/* Favorites Section (only for logged-in users) */}
         {isLoggedIn && (
           <div style={{ marginBottom: '48px' }}>
@@ -282,12 +323,13 @@ const HomePage: React.FC = () => {
               <div style={cardStyle}>
                 <div style={{
                   display: 'flex',
-                  gap: '16px',
+                  gap: isMobile ? '12px' : '16px',
                   overflowX: 'auto',
                   paddingBottom: '4px',
                   scrollbarWidth: 'thin',
-                  scrollbarColor: '#D2691E #F4E3C1'
-                }}>
+                  scrollbarColor: '#D2691E #F4E3C1',
+                  WebkitOverflowScrolling: 'touch'
+                } as React.CSSProperties}>
                   <style>{`
                     div::-webkit-scrollbar {
                       height: 6px;
@@ -314,15 +356,15 @@ const HomePage: React.FC = () => {
                           transition: 'transform 0.2s',
                           position: 'relative',
                           flexShrink: 0,
-                          width: '140px'
+                          width: isMobile ? '100px' : '140px'
                         }}
                         onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
                         onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                         onClick={() => handleBookDetailsClick(book)}
                       >
                         <div style={{
-                          width: '140px',
-                          height: '210px',
+                          width: isMobile ? '100px' : '140px',
+                          height: isMobile ? '150px' : '210px',
                           position: 'relative',
                           borderRadius: '8px',
                           overflow: 'hidden',
@@ -360,32 +402,32 @@ const HomePage: React.FC = () => {
                           {/* Gold star indicator */}
                           <div style={{
                             position: 'absolute',
-                            top: '8px',
-                            left: '8px',
+                            top: '6px',
+                            left: '6px',
                             backgroundColor: '#FFD700',
                             borderRadius: '50%',
-                            width: '28px',
-                            height: '28px',
+                            width: isMobile ? '22px' : '28px',
+                            height: isMobile ? '22px' : '28px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxShadow: '0 2px 6px rgba(255, 215, 0, 0.4)'
                           }}>
-                            <AutoStories style={{ fontSize: '16px', color: '#B8860B' }} />
+                            <AutoStories style={{ fontSize: isMobile ? '12px' : '16px', color: '#B8860B' }} />
                           </div>
                         </div>
                         <div style={{
                           textAlign: 'center',
-                          fontSize: '14px',
+                          fontSize: isMobile ? '12px' : '14px',
                           fontWeight: 500,
                           color: '#4B3F30',
                           lineHeight: 1.3
                         }}>
-                          {book?.title?.length > 30 ? `${book.title.substring(0, 30)}...` : book?.title}
+                          {book?.title?.length > (isMobile ? 20 : 30) ? `${book.title.substring(0, isMobile ? 20 : 30)}...` : book?.title}
                         </div>
                         <div style={{
                           textAlign: 'center',
-                          fontSize: '12px',
+                          fontSize: isMobile ? '10px' : '12px',
                           color: '#6A5E4D',
                           marginTop: '4px'
                         }}>
@@ -427,32 +469,108 @@ const HomePage: React.FC = () => {
               <p style={{ color: '#6A5E4D' }}>Please try again later</p>
             </div>
           ) : discoverBooks && discoverBooks.length > 0 ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: '24px'
-            }}>
-              {discoverBooks.map((book: any) => {
-                // Create book with updated rating data
-                const bookWithUpdatedRating = {
-                  ...book,
-                  averageRating: getBookRating(book),
-                  ratingsCount: getBookRatingCount(book)
-                };
+            <div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile 
+                  ? 'repeat(auto-fill, minmax(140px, 1fr))' 
+                  : 'repeat(auto-fill, minmax(200px, 1fr))', // Back to original responsive grid
+                gap: isMobile ? '16px' : '24px'
+              }}>
+                {currentBooks.map((book: any) => {
+                  // Create book with updated rating data
+                  const bookWithUpdatedRating = {
+                    ...book,
+                    averageRating: getBookRating(book),
+                    ratingsCount: getBookRatingCount(book)
+                  };
 
-                return (
-                  <DiscoveryBookCard
-                    key={book.id}
-                    book={bookWithUpdatedRating}
-                    showRating={true}
-                    onViewDetails={handleBookDetailsClick}
-                    source="google"
-                  />
-                );
-              })}
+                  return (
+                    <DiscoveryBookCard
+                      key={book.id}
+                      book={bookWithUpdatedRating}
+                      showRating={true}
+                      onViewDetails={handleBookDetailsClick}
+                      source="google"
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Simple Pagination Controls */}
+              {totalPages > 1 && (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginTop: '32px'
+                }}>
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 16px',
+                      backgroundColor: currentPage === 1 ? '#E6D7C3' : '#D2691E',
+                      color: currentPage === 1 ? '#8B7355' : 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <NavigateBefore style={{ fontSize: '16px' }} />
+                    Previous
+                  </button>
+                  
+                  <span style={{
+                    color: '#4B3F30',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    padding: '0 16px'
+                  }}>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage >= totalPages}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 16px',
+                      backgroundColor: currentPage >= totalPages ? '#E6D7C3' : '#D2691E',
+                      color: currentPage >= totalPages ? '#8B7355' : 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    Next
+                    <NavigateNext style={{ fontSize: '16px' }} />
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <div style={{ ...cardStyle, textAlign: 'center', padding: '48px' }}>
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(10px)',
+              padding: '48px',
+              borderRadius: '12px',
+              border: '1px solid #E6D7C3',
+              boxShadow: '0 4px 12px rgba(75, 63, 48, 0.1)',
+              textAlign: 'center'
+            }}>
               <MenuBook style={{ color: '#D2691E', fontSize: '48px', marginBottom: '12px' }} />
               <p style={{ color: '#6A5E4D' }}>No books available for discovery</p>
               <p style={{ color: '#8B7355', fontSize: '14px', marginTop: '8px' }}>

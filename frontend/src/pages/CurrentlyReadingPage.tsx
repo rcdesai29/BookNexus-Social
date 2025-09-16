@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookmarkBorder } from '@mui/icons-material';
 import LibraryBookCard from '../components/LibraryBookCard';
@@ -12,6 +12,21 @@ const CurrentlyReadingPage: React.FC = () => {
   const [selectedUserBookListData, setSelectedUserBookListData] = useState<any>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Responsive hook
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Responsive utilities
+  const isMobile = windowSize.width <= 768;
 
   const handleViewDetails = (book: any, userBookListData?: any) => {
     setSelectedBook(book);
@@ -184,8 +199,10 @@ const CurrentlyReadingPage: React.FC = () => {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            gap: '24px'
+            gridTemplateColumns: isMobile 
+              ? 'repeat(auto-fill, minmax(140px, 1fr))' 
+              : 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: isMobile ? '16px' : '24px'
           }}>
             {currentlyReadingBooks.map(bookItem => (
               <LibraryBookCard
