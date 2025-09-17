@@ -1,4 +1,5 @@
 import { tokenService } from './tokenService';
+import { API_CONFIG } from '../config/api';
 
 export interface UserProfile {
   userId: number;
@@ -22,7 +23,7 @@ export interface UserProfile {
   isOwnProfile: boolean;
 }
 
-const BASE_URL = 'http://localhost:8088/api/v1';
+const BASE_URL = API_CONFIG.BASE_URL;
 
 export const profileService = {
   async getCurrentUserProfile(): Promise<UserProfile> {

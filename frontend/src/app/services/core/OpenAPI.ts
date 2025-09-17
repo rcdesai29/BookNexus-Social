@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import { tokenService } from '../../../services/tokenService';
+import { API_CONFIG } from '../../../config/api';
 import type { ApiRequestOptions } from './ApiRequestOptions';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
@@ -21,7 +22,7 @@ export type OpenAPIConfig = {
 };
 
 export const OpenAPI: OpenAPIConfig = {
-    BASE: 'http://localhost:8088/api/v1',
+    BASE: API_CONFIG.BASE_URL,
     VERSION: '1.0',
     WITH_CREDENTIALS: false,
     CREDENTIALS: 'include',

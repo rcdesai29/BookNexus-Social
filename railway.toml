@@ -1,7 +1,9 @@
-[build]
-builder = "dockerfile"
-dockerfilePath = "docker/backend/Dockerfile"
-buildContext = "."
+[environments.production.services.BookNexus-Social]
+build.builder = "dockerfile"
+build.dockerfilePath = "docker/backend/Dockerfile"
+build.buildContext = "."
 
-[deploy]
-startCommand = ""
+[environments.production.services.frontend]
+build.builder = "dockerfile"
+build.dockerfilePath = "docker/frontend/Dockerfile"
+build.buildContext = "."

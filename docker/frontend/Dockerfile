@@ -4,13 +4,17 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm ci --only=production
 
 # Copy source code
-COPY . .
+COPY frontend/ .
+
+# Build arguments for environment variables
+ARG REACT_APP_API_BASE_URL
+ARG REACT_APP_WS_URL
 
 # Build the application
 RUN npm run build
