@@ -12,6 +12,6 @@ FROM amazoncorretto:21
 WORKDIR /app
 COPY --from=build /build/target/book-nexus-*.jar app.jar
 
-EXPOSE 8080
+EXPOSE ${PORT:-8080}
 
 CMD java -Xmx300m -jar -Dspring.profiles.active=${ACTIVE_PROFILE:-prod} app.jar
