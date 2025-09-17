@@ -5,5 +5,3 @@ buildContext = "."
 
 [deploy]
 startCommand = ""
-healthcheckPath = "/api/v1/health"
-healthcheckTimeout = 300
