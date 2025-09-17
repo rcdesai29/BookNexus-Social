@@ -18,9 +18,10 @@ spring:
           starttls:
             enable: true
 
-jwt:
-  secret:
-    key: ${JWT_SECURITY}
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECURITY}
 
 server:
   port: ${PORT:8080}
