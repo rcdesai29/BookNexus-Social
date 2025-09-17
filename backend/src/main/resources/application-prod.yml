@@ -22,6 +22,18 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECURITY}
+      expiration: 86400000
+  mailing:
+    from-email: ${EMAIL_USERNAME:booknexus.bookworms@gmail.com}
+    frontend:
+      activation-url: "https://your-frontend-url.railway.app/activate-account"
+  file:
+    uploads:
+      photos-output-path: "/tmp/uploads"
+  external:
+    googlebooks:
+      enabled: true
+      api-key: ""
 
 server:
   port: ${PORT:8080}
