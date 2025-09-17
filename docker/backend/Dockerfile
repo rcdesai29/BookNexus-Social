@@ -14,4 +14,4 @@ COPY --from=build /build/target/book-nexus-*.jar app.jar
 
 EXPOSE 8080
 
-CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE:-prod} app.jar
+CMD java -Xmx300m -jar -Dspring.profiles.active=${ACTIVE_PROFILE:-prod} app.jar
