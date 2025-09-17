@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: booknexus_social_postgres
+    environment:
+      POSTGRES_DB: booknexus_social
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata_social:/var/lib/postgresql/data
+    networks:
+      - spring-demo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d booknexus_social"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  booknexus_social-api:
+    container_name: booknexus_social-api
+    image: ${DOCKERHUB_USERNAME}/booknexus-social-api:${IMAGE_TAG:-latest}
+    ports:
+      - "8001:8080"
+    networks:
+      - spring-demo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_URL=jdbc:postgresql://booknexus_social_postgres:5432/booknexus_social
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SERVER_PORT=8080
+      - ACTIVE_PROFILE=prod
+      - MAIL_USERNAME=${EMAIL_USERNAME}
+      - MAIL_PASSWORD=${EMAIL_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECURITY}
+
+  booknexus_social-frontend:
+    container_name: booknexus_social-frontend
+    image: ${DOCKERHUB_USERNAME}/booknexus-social-frontend:${IMAGE_TAG:-latest}
+    ports:
+      - "3000:80"
+    networks:
+      - spring-demo
+    depends_on:
+      - booknexus_social-api
+
+volumes:
+  pgdata_social:
+
+networks:
+  spring-demo:

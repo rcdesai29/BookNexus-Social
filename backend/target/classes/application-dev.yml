@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/booknexus_social
-    username: username
-    password: password
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/booknexus_social}
+    username: ${DB_USERNAME:username}
+    password: ${DB_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -54,7 +54,7 @@ application:
       api-key: "" # optional for higher quotas; empty uses unauthenticated
 
 server:
-  port: 8088
+  port: ${SERVER_PORT:8080}
 
 logging:
   level:
