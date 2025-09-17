@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: booknexus-backend
+    env: docker
+    dockerfilePath: ./docker/backend/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: ACTIVE_PROFILE
+        value: prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: booknexus-db
+          property: connectionString
+      - key: JWT_SECURITY
+        generateValue: true
+      - key: EMAIL_USERNAME
+        value: booknexus.bookworms@gmail.com
+      - key: EMAIL_PASSWORD
+        sync: false  # Set manually in Render dashboard
+      - key: FRONTEND_URL
+        value: https://your-firebase-app.web.app
+
+databases:
+  - name: booknexus-db
+    databaseName: booknexus
+    user: booknexus_user

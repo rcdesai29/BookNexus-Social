@@ -1,8 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://mainline.proxy.rlwy.net:29615/railway
-    username: postgres
-    password: MXMFkCxkmEBSsDtxjiqIxLraJnqjzKcH
+    url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -29,7 +27,7 @@ application:
   mailing:
     from-email: ${EMAIL_USERNAME:booknexus.bookworms@gmail.com}
     frontend:
-      activation-url: "https://your-frontend-url.railway.app/activate-account"
+      activation-url: "${FRONTEND_URL}/activate-account"
   file:
     uploads:
       photos-output-path: "/tmp/uploads"
