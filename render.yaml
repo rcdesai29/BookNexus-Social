@@ -1,4 +1,5 @@
 services:
+  # Backend Service
   - type: web
     name: booknexus-backend
     env: docker
@@ -18,7 +19,17 @@ services:
       - key: EMAIL_PASSWORD
         sync: false  # Set manually in Render dashboard
       - key: FRONTEND_URL
-        value: https://your-firebase-app.web.app
+        value: https://booknexus-frontend.onrender.com
+
+  # Frontend Service
+  - type: web
+    name: booknexus-frontend
+    env: docker
+    dockerfilePath: ./docker/frontend/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        value: https://booknexus-backend.onrender.com/api/v1
 
 databases:
   - name: booknexus-db
