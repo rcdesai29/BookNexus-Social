@@ -1,4 +1,6 @@
 // Direct API service to bypass OpenAPI issues
+import { API_CONFIG } from '../config/api';
+
 let cachedBooksData: any = null;
 let cacheTime = 0;
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
@@ -14,11 +16,11 @@ export const directApiService = {
       let endpoint = '';
       
       if (query === 'bestsellers' || query === 'trending') {
-        endpoint = `http://localhost:8088/api/v1/google-books/trending?maxResults=${maxResults}`;
+        endpoint = `${API_CONFIG.BASE_URL}/google-books/trending?maxResults=${maxResults}`;
       } else if (query === 'popular') {
-        endpoint = `http://localhost:8088/api/v1/google-books/popular?category=fiction&maxResults=${maxResults}`;
+        endpoint = `${API_CONFIG.BASE_URL}/google-books/popular?category=fiction&maxResults=${maxResults}`;
       } else {
-        endpoint = `http://localhost:8088/api/v1/google-books/search?q=${encodeURIComponent(query)}&maxResults=${maxResults}&startIndex=0`;
+        endpoint = `${API_CONFIG.BASE_URL}/google-books/search?q=${encodeURIComponent(query)}&maxResults=${maxResults}&startIndex=0`;
       }
       
       console.log('Making direct API call to:', endpoint);
@@ -56,7 +58,7 @@ export const directApiService = {
 
   async getBookById(googleBookId: string): Promise<any> {
     try {
-      const endpoint = `http://localhost:8088/api/v1/google-books/${googleBookId}`;
+      const endpoint = `${API_CONFIG.BASE_URL}/google-books/${googleBookId}`;
       console.log('Making direct API call to get book by ID:', endpoint);
       
       const response = await fetch(endpoint, {
