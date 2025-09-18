@@ -15,6 +15,7 @@ import { UserBookListService } from '../app/services/services/UserBookListServic
 import { useAuth } from '../hooks/useAuth';
 import ReviewThread from '../components/ReviewThread';
 import { useGoogleBooksAPI } from '../hooks/useGoogleBooksAPI';
+import { API_CONFIG } from '../config/api';
 
 const BookDetailsPage: React.FC = () => {
   const { googleBookId } = useParams<{ googleBookId: string }>();
@@ -97,7 +98,7 @@ const BookDetailsPage: React.FC = () => {
   const fetchAllReviews = async () => {
     try {
       if (!googleBookId) return;
-      const response = await fetch(`http://localhost:8088/api/v1/google-books/feedback/${googleBookId}`);
+      const response = await fetch(`${API_CONFIG.BASE_URL}/google-books/feedback/${googleBookId}`);
       const reviews = await response.json();
       setAllReviews(reviews);
     } catch (error) {

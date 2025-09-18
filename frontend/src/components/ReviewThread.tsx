@@ -23,6 +23,7 @@ import {
   ThumbUp as ThumbUpIcon
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
+import { API_CONFIG } from '../config/api';
 
 interface ReviewReply {
   id: number;
@@ -100,9 +101,9 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
     try {
       // Use unified feedback ID - but we'll need to update like endpoints too
       const unifiedFeedbackId = feedbackId || googleFeedbackId;
-      const endpoint = `/api/v1/likes/feedback/${unifiedFeedbackId}`;
-      
-      const response = await fetch(`http://localhost:8088${endpoint}`, {
+      const endpoint = `/likes/feedback/${unifiedFeedbackId}`;
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
@@ -122,9 +123,9 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
     try {
       // Use unified feedback ID
       const unifiedFeedbackId = feedbackId || googleFeedbackId;
-      const endpoint = `/api/v1/review-replies/feedback/${unifiedFeedbackId}`;
-      
-      const response = await fetch(`http://localhost:8088${endpoint}`, {
+      const endpoint = `/review-replies/feedback/${unifiedFeedbackId}`;
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
@@ -138,7 +139,7 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
           const repliesWithLikes = await Promise.all(
             repliesData.map(async (reply: ReviewReply) => {
               try {
-                const likeResponse = await fetch(`http://localhost:8088/api/v1/likes/reply/${reply.id}`, {
+                const likeResponse = await fetch(`${API_CONFIG.BASE_URL}/likes/reply/${reply.id}`, {
                   headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                   }
@@ -155,7 +156,7 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
                   reply.replies = await Promise.all(
                     reply.replies.map(async (nestedReply) => {
                       try {
-                        const nestedLikeResponse = await fetch(`http://localhost:8088/api/v1/likes/reply/${nestedReply.id}`, {
+                        const nestedLikeResponse = await fetch(`${API_CONFIG.BASE_URL}/likes/reply/${nestedReply.id}`, {
                           headers: {
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                           }
@@ -223,7 +224,7 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
       console.log('Submitting reply with data:', requestData);
       console.log('feedbackId:', feedbackId, 'googleFeedbackId:', googleFeedbackId);
 
-      const response = await fetch('http://localhost:8088/api/v1/review-replies', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/review-replies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -252,7 +253,7 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
 
   const deleteReply = async (replyId: number) => {
     try {
-      const response = await fetch(`http://localhost:8088/api/v1/review-replies/${replyId}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/review-replies/${replyId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -279,11 +280,11 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
     
     setLikingReview(true);
     try {
-      const endpoint = feedbackId 
-        ? `/api/v1/likes/feedback/${feedbackId}`
-        : `/api/v1/likes/google-feedback/${googleFeedbackId}`;
-      
-      const response = await fetch(`http://localhost:8088${endpoint}`, {
+      const endpoint = feedbackId
+        ? `/likes/feedback/${feedbackId}`
+        : `/likes/google-feedback/${googleFeedbackId}`;
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -306,7 +307,7 @@ const ReviewThread: React.FC<ReviewThreadProps> = ({
     if (!isLoggedIn) return;
     
     try {
-      const response = await fetch(`http://localhost:8088/api/v1/likes/reply/${replyId}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/likes/reply/${replyId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`

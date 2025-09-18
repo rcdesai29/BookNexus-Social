@@ -1,4 +1,5 @@
 import { tokenService } from './tokenService';
+import { API_CONFIG } from '../config/api';
 
 export interface NotificationResponse {
   id: number;
@@ -31,7 +32,7 @@ export interface PageResponse<T> {
 }
 
 class NotificationService {
-  private baseUrl = 'http://localhost:8088/api/v1/notifications';
+  private baseUrl = `${API_CONFIG.BASE_URL}/notifications`;
 
   private async apiCall(endpoint: string, options: RequestInit = {}): Promise<Response> {
     const token = tokenService.getToken();

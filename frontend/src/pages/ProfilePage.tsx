@@ -27,6 +27,7 @@ import { GoogleBookFeedbackService, GoogleBookFeedbackResponse } from '../app/se
 import { UserBookListService, UserBookList } from '../app/services/services/UserBookListService';
 import StarRating from '../components/StarRating';
 import FollowersFollowingModal from '../components/FollowersFollowingModal';
+import { API_CONFIG } from '../config/api';
 
 type UserProfile = UserProfileResponse;
 
@@ -422,7 +423,7 @@ const ProfilePage: React.FC = () => {
       
       if (userId && profile?.isOwnProfile === false) {
         // Viewing another user's profile - call the new endpoint
-        const apiResponse = await fetch(`http://localhost:8088/api/v1/user-book-lists/user/${userId}/currently-reading`, {
+        const apiResponse = await fetch(`${API_CONFIG.BASE_URL}/user-book-lists/user/${userId}/currently-reading`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
             'Content-Type': 'application/json'
@@ -449,7 +450,7 @@ const ProfilePage: React.FC = () => {
       
       if (userId && profile?.isOwnProfile === false) {
         // Viewing another user's profile - call the new endpoint
-        const apiResponse = await fetch(`http://localhost:8088/api/v1/user-book-lists/user/${userId}/read`, {
+        const apiResponse = await fetch(`${API_CONFIG.BASE_URL}/user-book-lists/user/${userId}/read`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
             'Content-Type': 'application/json'

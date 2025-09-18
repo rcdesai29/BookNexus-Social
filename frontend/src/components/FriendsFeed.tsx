@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { webSocketService } from '../services/WebSocketService';
 import { useAuth } from '../hooks/useAuth';
+import { API_CONFIG } from '../config/api';
 
 interface ActivityFeedItem {
   id: string;
@@ -62,7 +63,7 @@ const FriendsFeed: React.FC = () => {
     try {
       setLoading(true);
       const size = loadAll ? 50 : 10; // Load more if showing all activities
-      const response = await fetch(`http://localhost:8088/api/v1/activity/friends?page=0&size=${size}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/activity/friends?page=0&size=${size}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -270,7 +271,7 @@ const FriendsFeed: React.FC = () => {
     setClearing(true);
     try {
       console.log('🔥 Making API call to clear feed...');
-      const response = await fetch('http://localhost:8088/api/v1/activity/clear-friends-feed', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/activity/clear-friends-feed`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,

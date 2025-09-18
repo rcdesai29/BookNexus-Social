@@ -1,4 +1,5 @@
 import SockJS from 'sockjs-client';
+import { API_CONFIG } from '../config/api';
 
 export interface WebSocketMessage {
   type: string;
@@ -34,12 +35,12 @@ class WebSocketService {
     }
 
     this.isConnecting = true;
-    console.log('Starting WebSocket connection to: http://localhost:8088/api/v1/ws/notifications');
+    console.log('Starting WebSocket connection to: ' + API_CONFIG.WS_URL);
 
     return new Promise((resolve, reject) => {
       try {
         // Use SockJS for better browser compatibility
-        const sockJS = new SockJS('http://localhost:8088/api/v1/ws/notifications');
+        const sockJS = new SockJS(API_CONFIG.WS_URL);
         console.log('SockJS instance created:', sockJS);
         this.socket = sockJS as any; // Cast to WebSocket interface
 

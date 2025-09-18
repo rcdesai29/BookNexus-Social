@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Check, X } from '@mui/icons-material';
 import { profileService } from '../services/profileService';
+import { API_CONFIG } from '../config/api';
 
 const DisplayNameSetupPage: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
@@ -57,7 +58,7 @@ const DisplayNameSetupPage: React.FC = () => {
     setLoading(true);
     try {
       // Call backend to complete account setup with displayName
-      const response = await fetch(`http://localhost:8088/api/v1/auth/complete-setup?token=${encodeURIComponent(token)}&displayName=${encodeURIComponent(displayName)}`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/auth/complete-setup?token=${encodeURIComponent(token)}&displayName=${encodeURIComponent(displayName)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
