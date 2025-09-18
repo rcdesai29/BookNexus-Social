@@ -1,6 +1,6 @@
 export const API_CONFIG = {
   BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://booknexus-social-backend.onrender.com/api/v1',
-  WS_URL: process.env.REACT_APP_WS_URL || 'wss://booknexus-social-backend.onrender.com/api/v1/ws',
+  WS_URL: process.env.REACT_APP_WS_URL || 'https://booknexus-social-backend.onrender.com/api/v1/ws',
 };
 
 export const getApiUrl = (endpoint: string): string => {
