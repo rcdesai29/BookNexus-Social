@@ -17,7 +17,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(notificationWebSocketHandler, "/ws/notifications")
+        registry.addHandler(notificationWebSocketHandler, "/ws")
                 .setAllowedOrigins(
                     "http://localhost:3000",
                     "https://booknexus-social-c8e19.web.app",
