@@ -77,3 +77,6 @@ logs/
 # Application specific
 uploads/
 BookNexus/
+
+# Firebase
+.firebase/
