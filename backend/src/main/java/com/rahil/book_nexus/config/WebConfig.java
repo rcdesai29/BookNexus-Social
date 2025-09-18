@@ -15,8 +15,9 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                             "http://localhost:3000",
-                            "https://*.railway.app",
-                            "https://*.up.railway.app"
+                            "https://booknexus-social-c8e19.web.app",
+                            "https://*.firebaseapp.com",
+                            "https://*.web.app"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*")
